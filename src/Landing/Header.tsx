@@ -20,7 +20,7 @@ const Header = () => {
                 <div className="flex items-center space-x-2">
                     <button
                         onClick={handleLogin}
-                        className="px-6 py-1 rounded-3xl bg-primary text-whiteColor cursor-pointer">
+                        className="px-6 py-1 rounded-lg bg-primary text-whiteColor cursor-pointer">
                         Login
                     </button>                    
                 </div>

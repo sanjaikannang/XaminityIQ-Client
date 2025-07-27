@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
-import Login from "../../assets/Images/Login.png"
+import ResetPassword from "../../assets/Images/Reset Password.png"
 
-const LoginLayout = () => {
+const ResetPasswordLayout = () => {
     const [showPassword, setShowPassword] = useState(false);
 
     return (
@@ -14,7 +14,7 @@ const LoginLayout = () => {
                     <div className="flex flex-col justify-center items-center text-whiteColor w-full">
                         <div className="w-full h-full flex items-center justify-center">
                             <div className="text-center p-20">
-                                <img src={Login} alt="Login" />
+                                <img src={ResetPassword} alt="ResetPassword" />
                             </div>
                         </div>
                     </div>
@@ -27,7 +27,7 @@ const LoginLayout = () => {
                     <div className="w-full max-w-lg">
                         {/* Login Form */}
                         <div className="mb-8 text-center">
-                            <h2 className="text-3xl font-semibold text-gray-900 mb-2">Login</h2>
+                            <h2 className="text-3xl font-semibold text-gray-900 mb-2">Reset Password</h2>
                         </div>
 
                         <div className="space-y-4">
@@ -51,10 +51,10 @@ const LoginLayout = () => {
                                 </div>
                             </div>
 
-                            {/* Password Field */}
+                            {/* Temporary Password Field */}
                             <div>
                                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Password
+                                    Temporary Password
                                 </label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -66,7 +66,69 @@ const LoginLayout = () => {
                                         type={showPassword ? 'text' : 'password'}
                                         required
                                         className="block w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
-                                        placeholder="Enter your password"
+                                        placeholder="Enter Temporary Password"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-gray-600 transition duration-200"
+                                    >
+                                        {showPassword ? (
+                                            <EyeOff className="h-5 w-5 text-gray-400" />
+                                        ) : (
+                                            <Eye className="h-5 w-5 text-gray-400" />
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* New Password Field */}
+                            <div>
+                                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                                    New Password
+                                </label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <Lock className="h-5 w-5 text-gray-400" />
+                                    </div>
+                                    <input
+                                        id="password"
+                                        name="password"
+                                        type={showPassword ? 'text' : 'password'}
+                                        required
+                                        className="block w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                        placeholder="Enter New Password"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-gray-600 transition duration-200"
+                                    >
+                                        {showPassword ? (
+                                            <EyeOff className="h-5 w-5 text-gray-400" />
+                                        ) : (
+                                            <Eye className="h-5 w-5 text-gray-400" />
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Confirm Password Field */}
+                            <div>
+                                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Confirm Password
+                                </label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <Lock className="h-5 w-5 text-gray-400" />
+                                    </div>
+                                    <input
+                                        id="password"
+                                        name="password"
+                                        type={showPassword ? 'text' : 'password'}
+                                        required
+                                        className="block w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                        placeholder="Enter Password"
                                     />
                                     <button
                                         type="button"
@@ -87,19 +149,9 @@ const LoginLayout = () => {
                                 <button
                                     className="w-full bg-primary text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none flex items-center justify-center cursor-pointer shadow-lg"
                                 >
-                                    Log In
+                                    Reset Password
                                 </button>
                             </div>
-                        </div>
-
-                        {/* Footer Links */}
-                        <div className="mt-6 text-center">
-                            <p className="text-sm text-gray-600">
-                                Don't have an account?{' '}
-                                <button className="text-primary font-medium transition-colors duration-200">
-                                    Contact Admin
-                                </button>
-                            </p>
                         </div>
 
                         {/* Additional Info */}
@@ -116,4 +168,4 @@ const LoginLayout = () => {
     );
 };
 
-export default LoginLayout;
+export default ResetPasswordLayout;

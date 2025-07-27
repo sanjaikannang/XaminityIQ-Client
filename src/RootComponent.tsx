@@ -1,6 +1,7 @@
 import { Route, Routes, BrowserRouter as Router, Navigate } from "react-router-dom"
 import LandingPage from "./Landing/LandingPage"
 import LoginLayout from "./Auth/Layout/LoginLayout"
+import ResetPasswordLayout from "./Auth/Layout/ResetPassword"
 
 
 const RootComponent = () => {
@@ -12,6 +13,7 @@ const RootComponent = () => {
                     {/* Public Routes */}
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/login" element={<LoginLayout />} />
+                    <Route path="/change-password" element={<ResetPasswordLayout />} />
 
                     {/* Protected Routes */}
 
