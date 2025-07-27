@@ -7,6 +7,7 @@ import { Formik, Form, Field, FormikHelpers } from 'formik';
 import { login } from '../../Services/Auth/authAPI';
 import { tokenManager } from '../../Api/axios';
 import { loginValidationSchema } from '../FormikSchema/login.schema';
+import Spinner from '../../Common/UI/Spinner';
 
 interface LoginFormValues {
     email: string;
@@ -74,7 +75,7 @@ const LoginLayout: React.FC = () => {
         <>
             <div className="h-screen bg-gradient-to-br from-sky-50 via-white to-sky-50 flex items-center justify-center p-4">
                 {/* Main Card */}
-                <div className="w-full max-w-7xl h-full max-h-[600px] bg-whiteColor rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row">
+                <div className="w-full max-w-7xl h-full max-h-[550px] bg-whiteColor rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row">
                     {/* Left Column - Image */}
                     <div className="hidden lg:flex lg:w-1/2 relative">
                         <div className="flex flex-col justify-center items-center text-whiteColor w-full">
@@ -168,7 +169,7 @@ const LoginLayout: React.FC = () => {
                                                 >
                                                     {isSubmitting ? (
                                                         <>
-                                                            Logging in...
+                                                            <Spinner />
                                                         </>
                                                     ) : (
                                                         'Login'
