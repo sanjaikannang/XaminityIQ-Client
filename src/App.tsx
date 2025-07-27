@@ -1,12 +1,14 @@
-
+import { Provider } from "react-redux"
+import RootComponent from "./RootComponent"
+import { store } from "./State/store"
 
 function App() {
 
   return (
     <>
-      <h1 className="text-3xl font-bold underline">
-        Hello world!
-      </h1>
+      <Provider store={store}>
+        <RootComponent />
+      </Provider>
     </>
   )
 }
