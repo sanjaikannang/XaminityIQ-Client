@@ -1,104 +1,73 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import Login from "../../assets/Images/Login.png"
-import { useAppDispatch, useAppSelector } from '../../State/hooks';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { clearError, loginUser } from '../../State/Slices/authSlice';
+import { useAppDispatch } from '../../State/hooks';
+import { useNavigate } from 'react-router-dom';
+import { Formik, Form, Field, FormikHelpers } from 'formik';
+import { login } from '../../Services/Auth/authAPI';
+import { tokenManager } from '../../Api/axios';
+import { loginValidationSchema } from '../FormikSchema/login.schema';
+
+interface LoginFormValues {
+    email: string;
+    password: string;
+}
 
 const LoginLayout: React.FC = () => {
 
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const location = useLocation()
-
-    const { isLoading, error, isAuthenticated, isFirstLogin } = useAppSelector(
-        (state) => state.auth
-    );
-
-    const [formData, setFormData] = useState({
-        email: '',
-        password: '',
-    });
-
-    const [formErrors, setFormErrors] = useState({
-        email: '',
-        password: '',
-    });
 
     const [showPassword, setShowPassword] = useState(false);
 
-    // Clear error when component mounts
-    useEffect(() => {
-        dispatch(clearError());
-    }, [dispatch]);
+    const initialLoginValues: LoginFormValues = {
+        email: '',
+        password: ''
+    };
 
-    // Redirect after successful login
-    useEffect(() => {
-        if (isAuthenticated) {
-            if (isFirstLogin) {
-                navigate('/change-password');
+    const handleLogin = async (
+        values: LoginFormValues,
+        { setSubmitting }: FormikHelpers<LoginFormValues>
+    ) => {
+
+        try {
+            // Call login API
+            const response = await login(values);
+
+            if (response.success) {
+                // Store tokens and user data
+                tokenManager.setTokens(
+                    response.data.tokens.accessToken,
+                    response.data.tokens.refreshToken,
+                    response.data.sessionId
+                );
+                tokenManager.setUser(
+                    response.data.user
+                );
+
+                // Update Redux state
+                dispatch({
+                    type: 'auth/loginSuccess',
+                    payload: {
+                        user: response.data.user,
+                        isFirstLogin: response.data.user.isFirstLogin
+                    }
+                });
+
+                // Navigate based on first login status
+                if (response.data.user.isFirstLogin) {
+                    navigate('/change-password');
+                } else {
+                    navigate('/dashboard');
+                }
             } else {
-                const from = location.state?.from?.pathname || '/dashboard';
-                navigate(from, { replace: true });
+                throw new Error(response.message || 'Login failed');
             }
+        } catch (err: any) {
+            console.error('Login error:', err);
+        } finally {
+            setSubmitting(false);
         }
-    }, [isAuthenticated, isFirstLogin, navigate, location.state]);
-
-    const validateForm = () => {
-        const errors = { email: '', password: '' };
-        let isValid = true;
-
-        // Email validation
-        if (!formData.email) {
-            errors.email = 'Email is required';
-            isValid = false;
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            errors.email = 'Please enter a valid email';
-            isValid = false;
-        }
-
-        // Password validation
-        if (!formData.password) {
-            errors.password = 'Password is required';
-            isValid = false;
-        } else if (formData.password.length < 6) {
-            errors.password = 'Password must be at least 6 characters';
-            isValid = false;
-        }
-
-        setFormErrors(errors);
-        return isValid;
-    };
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-
-        // Clear field error when user starts typing
-        if (formErrors[name as keyof typeof formErrors]) {
-            setFormErrors(prev => ({
-                ...prev,
-                [name]: ''
-            }));
-        }
-
-        // Clear global error
-        if (error) {
-            dispatch(clearError());
-        }
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (!validateForm()) {
-            return;
-        }
-
-        dispatch(loginUser(formData));
     };
 
     return (
@@ -127,83 +96,89 @@ const LoginLayout: React.FC = () => {
                                 <h2 className="text-3xl font-semibold text-gray-900 mb-2">Login</h2>
                             </div>
 
-                            <form onSubmit={handleSubmit}>
-                                <div className="space-y-4">
-                                    {/* Email Field */}
-                                    <div>
-                                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                                            Email
-                                        </label>
-                                        <div className="relative">
-                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <Mail className="h-5 w-5 text-gray-400" />
-                                            </div>
-                                            <input
-                                                id="email"
-                                                name="email"
-                                                type="email"
-                                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
-                                                placeholder="Enter your email"
-                                                value={formData.email}
-                                                onChange={handleChange}
-                                                disabled={isLoading}
-                                            />
-                                            {formErrors.email && (
-                                                <p className="mt-1 text-sm text-red-600">{formErrors.email}</p>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Password Field */}
-                                    <div>
-                                        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                                            Password
-                                        </label>
-                                        <div className="relative">
-                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <Lock className="h-5 w-5 text-gray-400" />
-                                            </div>
-                                            <input
-                                                id="password"
-                                                name="password"
-                                                type={showPassword ? 'text' : 'password'}
-                                                required
-                                                className="block w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
-                                                placeholder="Enter your password"
-                                                value={formData.password}
-                                                onChange={handleChange}
-                                                disabled={isLoading}
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowPassword(!showPassword)}
-                                                className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-gray-600 transition duration-200"
-                                            >
-                                                {showPassword ? (
-                                                    <EyeOff className="h-5 w-5 text-gray-400" />
-                                                ) : (
-                                                    <Eye className="h-5 w-5 text-gray-400" />
+                            <Formik
+                                initialValues={initialLoginValues}
+                                validationSchema={loginValidationSchema}
+                                onSubmit={handleLogin}
+                            >
+                                {({ isSubmitting, errors, touched }) => (
+                                    <Form>
+                                        <div className="space-y-4">
+                                            {/* Email Field */}
+                                            <div>
+                                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Email
+                                                </label>
+                                                <div className="relative">
+                                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                        <Mail className="h-5 w-5 text-gray-400" />
+                                                    </div>
+                                                    <Field
+                                                        id="email"
+                                                        name="email"
+                                                        type="email"
+                                                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                                        placeholder="Enter your email"
+                                                    />
+                                                </div>
+                                                {errors.email && touched.email && (
+                                                    <p className="text-xs text-red-600">{errors.email}</p>
                                                 )}
-                                            </button>
-                                            {formErrors.password && (
-                                                <p className="mt-1 text-sm text-red-600">{formErrors.password}</p>
-                                            )}
-                                        </div>
-                                    </div>
+                                            </div>
 
-                                    {/* Login Button */}
-                                    <div className="mt-10">
-                                        <button
-                                            className="w-full bg-primary text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none flex items-center justify-center cursor-pointer shadow-lg"
-                                        >
-                                            {isLoading ? (
-                                                "Logging In..."
-                                            ) : ("Login")
-                                            }
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
+                                            {/* Password Field */}
+                                            <div>
+                                                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Password
+                                                </label>
+                                                <div className="relative">
+                                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                        <Lock className="h-5 w-5 text-gray-400" />
+                                                    </div>
+                                                    <Field
+                                                        id="password"
+                                                        name="password"
+                                                        type={showPassword ? 'text' : 'password'}
+                                                        className="block w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                                        placeholder="Enter your password"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowPassword(!showPassword)}
+                                                        className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-gray-600 transition duration-200"
+                                                    >
+                                                        {showPassword ? (
+                                                            <EyeOff className="h-5 w-5 text-gray-400" />
+                                                        ) : (
+                                                            <Eye className="h-5 w-5 text-gray-400" />
+                                                        )}
+                                                    </button>
+                                                </div>
+                                                {errors.password && touched.password && (
+                                                    <p className="text-xs text-red-600">{errors.password}</p>
+                                                )}
+                                            </div>
+
+                                            {/* Login Button */}
+                                            <div className="mt-10">
+                                                <button
+                                                    type="submit"
+                                                    disabled={isSubmitting}
+                                                    className="w-full bg-primary text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none flex items-center justify-center cursor-pointer shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    {isSubmitting ? (
+                                                        <>
+                                                            Logging in...
+                                                        </>
+                                                    ) : (
+                                                        'Login'
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </Form>
+                                )}
+                            </Formik>
 
                             {/* Footer Links */}
                             <div className="mt-6 text-center">
