@@ -1,14 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-    --color-whiteColor: #ffffff;
-    --color-blackColor: #000000;
-    --color-greenColor: #00c951;
-    --color-lightgreenColor: #F3F4F3;
-    --color-darkgreenColor: #2D9971;
+    --color-primary: #0ea5e9;
+    --color-scecondary: #bae6fd;
+    --color-tertiary: #e0f2fe;
+
     --color-redColor: #fb2c36;
-    --color-darkredColor: #dc201a;
-    --color-lightredColor: #fff;
+    --color-whiteColor: #FFFFFF
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */

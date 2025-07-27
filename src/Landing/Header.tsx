@@ -8,32 +8,21 @@ const Header = () => {
         navigate('/login');
     }
 
-
-    const handleRegister = () => {
-        navigate('/register');
-    }
-
     return (
         <>
-            <header className="bg-whiteColor shadow-xs border-gray-500 h-16 flex items-center justify-between px-6">
+            <header className="bg-whiteColor shadow-md h-16 flex items-center justify-between px-6">
                 {/* Left side */}
-                <div className="flex items-center space-x-4">
-                    <h1>Harvest Hub</h1>
+                <div className="flex font-semibold items-center space-x-2">
+                    <h1>XaminityIQ</h1>
                 </div>
 
                 {/* Right side */}
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
                     <button
                         onClick={handleLogin}
-                        className="px-6 py-1.5 rounded-md bg-greenColor text-whiteColor cursor-pointer">
+                        className="px-6 py-1 rounded-3xl bg-primary text-whiteColor cursor-pointer">
                         Login
-                    </button>
-
-                    <button
-                        onClick={handleRegister}
-                        className="px-6 py-1.5 rounded-md bg-greenColor text-whiteColor cursor-pointer">
-                        Register
-                    </button>
+                    </button>                    
                 </div>
             </header>
         </>
