@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import Logo from "../assets/Images/logo.png"
 
 const Header = () => {
 
@@ -10,10 +11,10 @@ const Header = () => {
 
     return (
         <>
-            <header className="bg-whiteColor shadow-md h-16 flex items-center justify-between px-6">
+            <header className="bg-whiteColor shadow-md h-18 flex items-center justify-between px-6">
                 {/* Left side */}
                 <div className="flex font-semibold items-center space-x-2">
-                    <h1>XaminityIQ</h1>
+                    <img src={Logo} alt="Logo" className="h-16" />
                 </div>
 
                 {/* Right side */}
