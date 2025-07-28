@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import Login from "../../assets/Images/Login.png"
-import { useAppDispatch } from '../../State/hooks';
 import { useNavigate } from 'react-router-dom';
 import { Formik, Form, Field, FormikHelpers } from 'formik';
 import { login } from '../../Services/Auth/authAPI';
 import { tokenManager } from '../../Api/axios';
 import { loginValidationSchema } from '../FormikSchema/login.schema';
 import Spinner from '../../Common/UI/Spinner';
+import toast from 'react-hot-toast';
 
 interface LoginFormValues {
     email: string;
@@ -16,14 +16,35 @@ interface LoginFormValues {
 
 const LoginLayout: React.FC = () => {
 
-    const dispatch = useAppDispatch();
-    const navigate = useNavigate();
-
     const [showPassword, setShowPassword] = useState(false);
+    const navigate = useNavigate();
 
     const initialLoginValues: LoginFormValues = {
         email: '',
         password: ''
+    };
+
+    // Function to navigate based on user role and first login status
+    const navigateByRole = (role: string, isFirstLogin: boolean) => {
+        if (isFirstLogin) {
+            navigate('/change-password');
+            return; // Ensure it doesn't continue to role-based navigation
+        }
+
+        switch (role.toLowerCase()) {
+            case 'admin':
+                navigate('/admin');
+                break;
+            case 'faculty':
+                navigate('/faculty');
+                break;
+            case 'student':
+                navigate('/student');
+                break;
+            default:
+                navigate('/'); // Default to landing page if role is not recognized
+                break;
+        }
     };
 
     const handleLogin = async (
@@ -46,26 +67,19 @@ const LoginLayout: React.FC = () => {
                     response.data.user
                 );
 
-                // Update Redux state
-                dispatch({
-                    type: 'auth/loginSuccess',
-                    payload: {
-                        user: response.data.user,
-                        isFirstLogin: response.data.user.isFirstLogin
-                    }
-                });
+                const { role, isFirstLogin } = response.data.user;
 
-                // Navigate based on first login status
-                if (response.data.user.isFirstLogin) {
-                    navigate('/change-password');
-                } else {
-                    navigate('/dashboard');
-                }
+                toast.success(response.message);
+
+                navigateByRole(role, isFirstLogin);
+
             } else {
+                toast.error(response.message)
                 throw new Error(response.message || 'Login failed');
             }
-        } catch (err: any) {
-            console.error('Login error:', err);
+        } catch (error: any) {
+            console.error('Login error:', error);
+            toast.error(error);
         } finally {
             setSubmitting(false);
         }
@@ -74,7 +88,6 @@ const LoginLayout: React.FC = () => {
     return (
         <>
             <div className="h-screen bg-gradient-to-br from-sky-50 via-white to-sky-50 flex items-center justify-center p-4">
-                {/* Main Card */}
                 <div className="w-full max-w-7xl h-full max-h-[550px] bg-whiteColor rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row">
                     {/* Left Column - Image */}
                     <div className="hidden lg:flex lg:w-1/2 relative">
@@ -92,7 +105,6 @@ const LoginLayout: React.FC = () => {
                     {/* Right Column - Login Form */}
                     <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
                         <div className="w-full max-w-lg">
-                            {/* Login Form */}
                             <div className="mb-8 text-center">
                                 <h2 className="text-3xl font-semibold text-gray-900 mb-2">Login</h2>
                             </div>
