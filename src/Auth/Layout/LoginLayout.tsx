@@ -9,7 +9,7 @@ import { loginValidationSchema } from '../FormikSchema/login.schema';
 import Spinner from '../../Common/UI/Spinner';
 import toast from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
-import { loginSuccess } from '../../State/Slices/authSlice';
+import { loginFailure, loginSuccess } from '../../State/Slices/authSlice';
 
 interface LoginFormValues {
     email: string;
@@ -90,7 +90,12 @@ const LoginLayout: React.FC = () => {
             }
         } catch (error: any) {
             console.error('Login error:', error);
-            toast.error(error);
+            const errorMessage = error?.response?.data?.message ||
+                error?.message ||
+                'An unexpected error occurred';
+
+            toast.error(errorMessage);
+            dispatch(loginFailure(errorMessage));
         } finally {
             setSubmitting(false);
         }
