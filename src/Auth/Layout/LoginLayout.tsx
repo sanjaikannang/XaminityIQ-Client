@@ -8,6 +8,8 @@ import { tokenManager } from '../../Api/axios';
 import { loginValidationSchema } from '../FormikSchema/login.schema';
 import Spinner from '../../Common/UI/Spinner';
 import toast from 'react-hot-toast';
+import { useDispatch } from 'react-redux';
+import { loginFailure, loginSuccess } from '../../State/Slices/authSlice';
 
 interface LoginFormValues {
     email: string;
@@ -18,6 +20,7 @@ const LoginLayout: React.FC = () => {
 
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const initialLoginValues: LoginFormValues = {
         email: '',
@@ -67,11 +70,19 @@ const LoginLayout: React.FC = () => {
                     response.data.user
                 );
 
+                dispatch(loginSuccess({
+                    user: response.data.user,
+                    isFirstLogin: response.data.user.isFirstLogin
+                }));
+
                 const { role, isFirstLogin } = response.data.user;
 
                 toast.success(response.message);
 
-                navigateByRole(role, isFirstLogin);
+                // Add a small delay to ensure state updates are processed
+                setTimeout(() => {
+                    navigateByRole(role, isFirstLogin);
+                }, 100);
 
             } else {
                 toast.error(response.message)
@@ -79,7 +90,12 @@ const LoginLayout: React.FC = () => {
             }
         } catch (error: any) {
             console.error('Login error:', error);
-            toast.error(error);
+            const errorMessage = error?.response?.data?.message ||
+                error?.message ||
+                'An unexpected error occurred';
+
+            toast.error(errorMessage);
+            dispatch(loginFailure(errorMessage));
         } finally {
             setSubmitting(false);
         }
