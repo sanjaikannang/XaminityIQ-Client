@@ -14,7 +14,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     redirectTo = '/login'
 }: ProtectedRouteProps) => {
 
-    const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+    const { isAuthenticated, user, isLoading } = useAppSelector((state) => state.auth);
+
+    // Show loading state while auth is being processed
+    if (isLoading) {
+        return (
+            <>
+                <div>Loading...</div>
+            </>
+        )
+    }
 
     // Check if user is authenticated
     if (!isAuthenticated || !user) {
