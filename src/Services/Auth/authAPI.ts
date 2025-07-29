@@ -31,6 +31,6 @@ export async function changePassword(data: ChangePasswordRequest): Promise<Chang
 
 
 // Logout
-export async function logout() {
+export async function logoutAPI() {
     await api.post('/auth/logout');
 }
