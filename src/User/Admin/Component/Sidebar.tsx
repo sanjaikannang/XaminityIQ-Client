@@ -1,9 +1,12 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import React from "react";
 import {
     LayoutDashboard,
     LogOut
 } from 'lucide-react';
+import { useDispatch } from "react-redux";
+import { logoutAPI } from "../../../Services/Auth/authAPI";
+import { logout } from "../../../State/Slices/authSlice";
 
 interface SidebarProps {
     isSidebarOpen: boolean;
@@ -19,6 +22,8 @@ interface NavigationItem {
 const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) => {
 
     const location = useLocation();
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const navigation: NavigationItem[] = [
         { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -28,6 +33,25 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) =>
         if (path === '/admin' && location.pathname === '/admin') return true;
         if (path !== '/admin' && location.pathname.startsWith(path)) return true;
         return false;
+    };
+
+    const handleLogout = async () => {
+        try {
+            // Call the logout API
+            await logoutAPI();
+
+            // Dispatch logout action to clear Redux state and localStorage
+            dispatch(logout());
+
+            // Navigate to login page
+            navigate('/login');
+        } catch (error) {
+            console.error('Logout failed:', error);
+
+            // Even if API fails, clear local state and redirect
+            dispatch(logout());
+            navigate('/login');
+        }
     };
 
     return (
@@ -67,6 +91,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) =>
                     {/* Logout Button at Bottom */}
                     <div className="flex-shrink-0 p-2 h-16 hover:bg-red-50 border-gray-200">
                         <button
+                            onClick={handleLogout}
                             className="group flex items-center w-full px-3 py-3 text-sm font-medium text-red-500 transition-colors cursor-pointer"
                         >
                             <LogOut className="mr-3 h-5 w-5" />
