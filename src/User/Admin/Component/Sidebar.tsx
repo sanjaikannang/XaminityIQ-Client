@@ -1,8 +1,11 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 import {
+    FileText,
+    GraduationCap,
     LayoutDashboard,
-    LogOut
+    LogOut,
+    Users
 } from 'lucide-react';
 import { useDispatch } from "react-redux";
 import { logoutAPI } from "../../../Services/Auth/authAPI";
@@ -30,6 +33,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) =>
 
     const navigation: NavigationItem[] = [
         { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+        { name: 'Student', href: '/admin/student', icon: GraduationCap },
+        { name: 'Faculty', href: '/admin/faculty', icon: Users },
+        { name: 'Exam', href: '/admin/exam', icon: FileText },
     ];
 
     const isActive = (path: string) => {
