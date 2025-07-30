@@ -604,7 +604,7 @@ const FacultyDashboard = () => {
                 <div className="flex justify-end gap-4">
                   <button
                     type="submit"
-                    className="bg-primary text-whiteColor px-6 py-2 rounded-md focus:outline-none font-medium"
+                    className="bg-primary text-whiteColor px-6 py-1.5 rounded-md focus:outline-none font-medium"
                   >
                     Create Student
                   </button>
