@@ -6,6 +6,7 @@ import AdminLayout from "./User/Admin/AdminLayout"
 import FacultyLayout from "./User/Faculty/FacultyLayout"
 import StudentLayout from "./User/Student/StudentLayout"
 import ProtectedRoute from "./Route/ProtectedRoute"
+import Documentation from "./Landing/Documentation/Documentation"
 
 
 const RootComponent = () => {
@@ -16,6 +17,7 @@ const RootComponent = () => {
                 <Routes>
                     {/* Public Routes */}
                     <Route path="/" element={<LandingPage />} />
+                    <Route path="/documentation" element={<Documentation />} />
                     <Route path="/login" element={<LoginLayout />} />
                     <Route path="/change-password" element={<ResetPasswordLayout />} />
 

@@ -9,6 +9,10 @@ const Header = () => {
         navigate('/login');
     }
 
+    const handleDocumentation = () => {
+        navigate('/documentation')
+    }
+
     return (
         <>
             <header className="bg-whiteColor shadow-md h-18 flex items-center justify-between px-6">
@@ -19,6 +23,11 @@ const Header = () => {
 
                 {/* Right side */}
                 <div className="flex items-center space-x-2">
+                      <button
+                        onClick={handleDocumentation}
+                        className="px-6 py-1 rounded-lg bg-primary text-whiteColor cursor-pointer">
+                        Documentation
+                    </button>     
                     <button
                         onClick={handleLogin}
                         className="px-6 py-1 rounded-lg bg-primary text-whiteColor cursor-pointer">
