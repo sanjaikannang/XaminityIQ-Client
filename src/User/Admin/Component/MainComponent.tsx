@@ -5,6 +5,7 @@ import FacultyDashboard from '../Dashboard/FacultyDashboard';
 import ExamDashboard from '../Dashboard/ExamDashboard';
 import CreateStudent from './CreateStudent';
 import CreateFaculty from './CreateFaculty';
+import CreateExam from './CreateExam';
 
 const MainComponent = () => {
 
@@ -25,7 +26,7 @@ const MainComponent = () => {
 
                         {/* Exam Screens */}
                         <Route path="exam" element={<ExamDashboard />} />
-                        <Route path="exam/create-exam" element={<FacultyDashboard />} />
+                        <Route path="exam/create-exam" element={<CreateExam />} />
 
                     </Routes>
                 </div>
