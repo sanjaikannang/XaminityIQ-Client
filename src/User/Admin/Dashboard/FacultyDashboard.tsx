@@ -1,9 +1,12 @@
 import { Plus } from "lucide-react"
+import { useNavigate } from "react-router-dom";
 
 const FacultyDashboard = () => {
 
+  const navigate = useNavigate()
+
   const handleCreateFaculty = () => {
-    console.log("create faculty button clicked")
+    navigate("create-faculty");
   }
 
   return (

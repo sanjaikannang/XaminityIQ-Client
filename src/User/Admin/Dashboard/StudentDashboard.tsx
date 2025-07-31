@@ -1,9 +1,12 @@
 import { Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const StudentDashboard = () => {
 
-  const handleCreateStudent = () => {
-    console.log("create student button clicked")
+  const navigate = useNavigate()
+
+ const handleCreateStudent = () => {
+    navigate("create-student");
   }
 
   return (
