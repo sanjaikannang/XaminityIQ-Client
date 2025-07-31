@@ -2,8 +2,8 @@ import { Plus } from 'lucide-react';
 
 const StudentDashboard = () => {
 
-  const handleCreateUser = () => {
-    console.log("create user button clicked")
+  const handleCreateStudent = () => {
+    console.log("create student button clicked")
   }
 
   return (
@@ -12,11 +12,11 @@ const StudentDashboard = () => {
         {/* Header */}
         <div className="flex justify-between mb-2 mt-2">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">All Users</h1>
+            <h1 className="text-2xl font-semibold text-gray-900">All Students</h1>
           </div>
           <div>
             <button
-              onClick={handleCreateUser}
+              onClick={handleCreateStudent}
               className="bg-primary text-whiteColor px-4 py-1 rounded-md cursor-pointer flex items-center gap-2"
             >
               <Plus size={18} />
