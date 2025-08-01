@@ -43,7 +43,7 @@ interface CreateStudentFormValues {
 
     // Guardian Information (optional)
     guardianName: string;
-    guardianOccupation: string;
+    guardianRelationship: string;
     guardianPhone: string;
     guardianEmail: string;
 
@@ -100,7 +100,7 @@ const CreateStudent = () => {
 
         // Guardian Information
         guardianName: '',
-        guardianOccupation: '',
+        guardianRelationship: '',
         guardianPhone: '',
         guardianEmail: '',
 
@@ -113,7 +113,7 @@ const CreateStudent = () => {
         admissionYear: '',
         expectedGraduationYear: ''
     };
-    
+
     const handleCreateStudent = async () => {
     }
 
@@ -142,6 +142,7 @@ const CreateStudent = () => {
                                             <div className="border border-gray-200 rounded-lg p-4 space-y-3">
                                                 <div className="mb-6">
                                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
                                                         <div>
                                                             <label className="block text-sm font-medium text-gray-700 mb-1">Email<span className="text-red-500">*</span></label>
                                                             <div className="relative">
@@ -175,7 +176,11 @@ const CreateStudent = () => {
                                                                     placeholder="Enter your Roll Number"
                                                                 />
                                                             </div>
+                                                            {errors.rollNumber && touched.rollNumber && (
+                                                                <p className="text-xs text-red-600">{errors.rollNumber}</p>
+                                                            )}
                                                         </div>
+
                                                     </div>
                                                 </div>
 
@@ -199,6 +204,9 @@ const CreateStudent = () => {
                                                                     placeholder="Enter your First Name"
                                                                 />
                                                             </div>
+                                                            {errors.firstName && touched.firstName && (
+                                                                <p className="text-xs text-red-600">{errors.firstName}</p>
+                                                            )}
                                                         </div>
 
                                                         <div>
@@ -215,6 +223,9 @@ const CreateStudent = () => {
                                                                     placeholder="Enter your Last Name"
                                                                 />
                                                             </div>
+                                                            {errors.lastName && touched.lastName && (
+                                                                <p className="text-xs text-red-600">{errors.lastName}</p>
+                                                            )}
                                                         </div>
 
                                                         <div>
@@ -230,6 +241,9 @@ const CreateStudent = () => {
                                                                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                 />
                                                             </div>
+                                                            {errors.dateOfBirth && touched.dateOfBirth && (
+                                                                <p className="text-xs text-red-600">{errors.dateOfBirth}</p>
+                                                            )}
                                                         </div>
 
                                                         <div>
@@ -247,6 +261,9 @@ const CreateStudent = () => {
                                                                     <option value="OTHER">Other</option>
                                                                 </select>
                                                             </div>
+                                                            {errors.gender && touched.gender && (
+                                                                <p className="text-xs text-red-600">{errors.gender}</p>
+                                                            )}
                                                         </div>
 
                                                         <div>
@@ -263,6 +280,9 @@ const CreateStudent = () => {
                                                                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                 />
                                                             </div>
+                                                            {errors.nationality && touched.nationality && (
+                                                                <p className="text-xs text-red-600">{errors.nationality}</p>
+                                                            )}
                                                         </div>
 
                                                         <div>
@@ -279,6 +299,9 @@ const CreateStudent = () => {
                                                                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                 />
                                                             </div>
+                                                            {errors.religion && touched.religion && (
+                                                                <p className="text-xs text-red-600">{errors.religion}</p>
+                                                            )}
                                                         </div>
                                                     </div>
 
@@ -289,6 +312,9 @@ const CreateStudent = () => {
                                                             className="w-full py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                                         />
                                                     </div>
+                                                    {errors.photo && touched.photo && (
+                                                        <p className="text-xs text-red-600">{errors.photo}</p>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -313,6 +339,9 @@ const CreateStudent = () => {
                                                                 placeholder="Enter Your Phone Number"
                                                             />
                                                         </div>
+                                                        {errors.phoneNumber && touched.phoneNumber && (
+                                                            <p className="text-xs text-red-600">{errors.phoneNumber}</p>
+                                                        )}
                                                     </div>
                                                 </div>
 
@@ -329,13 +358,16 @@ const CreateStudent = () => {
                                                                         <Home className="h-5 w-5 text-gray-400" />
                                                                     </div>
                                                                     <input
-                                                                        id="street"
-                                                                        name="street"
+                                                                        id="currentStreet"
+                                                                        name="currentStreet"
                                                                         type="text"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your Street"
                                                                     />
                                                                 </div>
+                                                                {errors.currentStreet && touched.currentStreet && (
+                                                                    <p className="text-xs text-red-600">{errors.currentStreet}</p>
+                                                                )}
                                                             </div>
                                                             <div>
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">City<span className="text-red-500">*</span></label>
@@ -344,13 +376,16 @@ const CreateStudent = () => {
                                                                         <MapPin className="h-5 w-5 text-gray-400" />
                                                                     </div>
                                                                     <input
-                                                                        id="city"
-                                                                        name="city"
+                                                                        id="currentCity"
+                                                                        name="currentCity"
                                                                         type="text"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your City"
                                                                     />
                                                                 </div>
+                                                                {errors.currentCity && touched.currentCity && (
+                                                                    <p className="text-xs text-red-600">{errors.currentCity}</p>
+                                                                )}
                                                             </div>
                                                             <div>
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">State<span className="text-red-500">*</span></label>
@@ -359,13 +394,16 @@ const CreateStudent = () => {
                                                                         <Map className="h-5 w-5 text-gray-400" />
                                                                     </div>
                                                                     <input
-                                                                        id="state"
-                                                                        name="state"
+                                                                        id="currentState"
+                                                                        name="currentState"
                                                                         type="text"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your State"
                                                                     />
                                                                 </div>
+                                                                {errors.currentState && touched.currentState && (
+                                                                    <p className="text-xs text-red-600">{errors.currentState}</p>
+                                                                )}
                                                             </div>
                                                             <div>
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Zip Code<span className="text-red-500">*</span></label>
@@ -374,13 +412,16 @@ const CreateStudent = () => {
                                                                         <Package className="h-5 w-5 text-gray-400" />
                                                                     </div>
                                                                     <input
-                                                                        id="zipCode"
-                                                                        name="zipCode"
+                                                                        id="currentZipCode"
+                                                                        name="currentZipCode"
                                                                         type="number"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your Zip Code"
                                                                     />
                                                                 </div>
+                                                                {errors.currentZipCode && touched.currentZipCode && (
+                                                                    <p className="text-xs text-red-600">{errors.currentZipCode}</p>
+                                                                )}
                                                             </div>
                                                             <div>
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Country<span className="text-red-500">*</span></label>
@@ -389,13 +430,16 @@ const CreateStudent = () => {
                                                                         <Flag className="h-5 w-5 text-gray-400" />
                                                                     </div>
                                                                     <input
-                                                                        id="country"
-                                                                        name="country"
+                                                                        id="currentCountry"
+                                                                        name="currentCountry"
                                                                         type="text"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your Country"
                                                                     />
                                                                 </div>
+                                                                {errors.currentCountry && touched.currentCountry && (
+                                                                    <p className="text-xs text-red-600">{errors.currentCountry}</p>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -421,13 +465,16 @@ const CreateStudent = () => {
                                                                         <Home className="h-5 w-5 text-gray-400" />
                                                                     </div>
                                                                     <input
-                                                                        id="street"
-                                                                        name="street"
+                                                                        id="permanentStreet"
+                                                                        name="permanentStreet"
                                                                         type="text"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your Street"
                                                                     />
                                                                 </div>
+                                                                {errors.permanentStreet && touched.permanentStreet && (
+                                                                    <p className="text-xs text-red-600">{errors.permanentStreet}</p>
+                                                                )}
                                                             </div>
                                                             <div>
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">City<span className="text-red-500">*</span></label>
@@ -436,13 +483,16 @@ const CreateStudent = () => {
                                                                         <MapPin className="h-5 w-5 text-gray-400" />
                                                                     </div>
                                                                     <input
-                                                                        id="city"
-                                                                        name="city"
+                                                                        id="permanentCity"
+                                                                        name="permanentCity"
                                                                         type="text"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your City"
                                                                     />
                                                                 </div>
+                                                                {errors.permanentCity && touched.permanentCity && (
+                                                                    <p className="text-xs text-red-600">{errors.permanentCity}</p>
+                                                                )}
                                                             </div>
                                                             <div>
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">State<span className="text-red-500">*</span></label>
@@ -451,13 +501,16 @@ const CreateStudent = () => {
                                                                         <Map className="h-5 w-5 text-gray-400" />
                                                                     </div>
                                                                     <input
-                                                                        id="state"
-                                                                        name="state"
+                                                                        id="permanentState"
+                                                                        name="permanentState"
                                                                         type="text"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your State"
                                                                     />
                                                                 </div>
+                                                                {errors.permanentState && touched.permanentState && (
+                                                                    <p className="text-xs text-red-600">{errors.permanentState}</p>
+                                                                )}
                                                             </div>
                                                             <div>
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Zip Code<span className="text-red-500">*</span></label>
@@ -466,13 +519,16 @@ const CreateStudent = () => {
                                                                         <Package className="h-5 w-5 text-gray-400" />
                                                                     </div>
                                                                     <input
-                                                                        id="zipCode"
-                                                                        name="zipCode"
+                                                                        id="permanentZipCode"
+                                                                        name="permanentZipCode"
                                                                         type="number"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your Zip Code"
                                                                     />
                                                                 </div>
+                                                                {errors.permanentZipCode && touched.permanentZipCode && (
+                                                                    <p className="text-xs text-red-600">{errors.permanentZipCode}</p>
+                                                                )}
                                                             </div>
                                                             <div>
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Country<span className="text-red-500">*</span></label>
@@ -481,13 +537,16 @@ const CreateStudent = () => {
                                                                         <Flag className="h-5 w-5 text-gray-400" />
                                                                     </div>
                                                                     <input
-                                                                        id="country"
-                                                                        name="country"
+                                                                        id="permanentCountry"
+                                                                        name="permanentCountry"
                                                                         type="text"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your Country"
                                                                     />
                                                                 </div>
+                                                                {errors.permanentCountry && touched.permanentCountry && (
+                                                                    <p className="text-xs text-red-600">{errors.permanentCountry}</p>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -514,12 +573,15 @@ const CreateStudent = () => {
                                                                     </div>
                                                                     <input
                                                                         id="fatherName"
-                                                                        name="name"
+                                                                        name="fatherName"
                                                                         type="text"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your Name"
                                                                     />
                                                                 </div>
+                                                                {errors.fatherName && touched.fatherName && (
+                                                                    <p className="text-xs text-red-600">{errors.fatherName}</p>
+                                                                )}
                                                             </div>
                                                             <div>
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Occupation<span className="text-red-500">*</span></label>
@@ -528,13 +590,16 @@ const CreateStudent = () => {
                                                                         <Briefcase className="h-5 w-5 text-gray-400" />
                                                                     </div>
                                                                     <input
-                                                                        id="occupation"
-                                                                        name="occupation"
+                                                                        id="fatherOccupation"
+                                                                        name="fatherOccupation"
                                                                         type="text"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your Occupation"
                                                                     />
                                                                 </div>
+                                                                {errors.fatherOccupation && touched.fatherOccupation && (
+                                                                    <p className="text-xs text-red-600">{errors.fatherOccupation}</p>
+                                                                )}
                                                             </div>
                                                             <div>
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Phone<span className="text-red-500">*</span></label>
@@ -543,13 +608,16 @@ const CreateStudent = () => {
                                                                         <Phone className="h-5 w-5 text-gray-400" />
                                                                     </div>
                                                                     <input
-                                                                        id="phone"
-                                                                        name="phone"
+                                                                        id="fatherPhone"
+                                                                        name="fatherPhone"
                                                                         type="text"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your Phone"
                                                                     />
                                                                 </div>
+                                                                {errors.fatherPhone && touched.fatherPhone && (
+                                                                    <p className="text-xs text-red-600">{errors.fatherPhone}</p>
+                                                                )}
                                                             </div>
                                                             <div>
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Email<span className="text-red-500">*</span></label>
@@ -558,13 +626,16 @@ const CreateStudent = () => {
                                                                         <Mail className="h-5 w-5 text-gray-400" />
                                                                     </div>
                                                                     <input
-                                                                        id="email"
-                                                                        name="email"
+                                                                        id="fatherEmail"
+                                                                        name="fatherEmail"
                                                                         type="email"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your Email"
                                                                     />
                                                                 </div>
+                                                                {errors.fatherEmail && touched.fatherEmail && (
+                                                                    <p className="text-xs text-red-600">{errors.fatherEmail}</p>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -585,13 +656,16 @@ const CreateStudent = () => {
                                                                         <UserCheck className="h-5 w-5 text-gray-400" />
                                                                     </div>
                                                                     <input
-                                                                        id="name"
-                                                                        name="name"
+                                                                        id="motherName"
+                                                                        name="motherName"
                                                                         type="text"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your Name"
                                                                     />
                                                                 </div>
+                                                                {errors.motherName && touched.motherName && (
+                                                                    <p className="text-xs text-red-600">{errors.motherName}</p>
+                                                                )}
                                                             </div>
 
                                                             <div>
@@ -601,13 +675,16 @@ const CreateStudent = () => {
                                                                         <Briefcase className="h-5 w-5 text-gray-400" />
                                                                     </div>
                                                                     <input
-                                                                        id="occupation"
-                                                                        name="occupation"
+                                                                        id="motherOccupation"
+                                                                        name="motherOccupation"
                                                                         type="text"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your Occupation"
                                                                     />
                                                                 </div>
+                                                                {errors.motherOccupation && touched.motherOccupation && (
+                                                                    <p className="text-xs text-red-600">{errors.motherOccupation}</p>
+                                                                )}
                                                             </div>
 
                                                             <div>
@@ -617,13 +694,16 @@ const CreateStudent = () => {
                                                                         <Phone className="h-5 w-5 text-gray-400" />
                                                                     </div>
                                                                     <input
-                                                                        id="phone"
-                                                                        name="phone"
+                                                                        id="motherPhone"
+                                                                        name="motherPhone"
                                                                         type="text"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your Phone"
                                                                     />
                                                                 </div>
+                                                                {errors.motherPhone && touched.motherPhone && (
+                                                                    <p className="text-xs text-red-600">{errors.motherPhone}</p>
+                                                                )}
                                                             </div>
 
                                                             <div>
@@ -633,13 +713,16 @@ const CreateStudent = () => {
                                                                         <Mail className="h-5 w-5 text-gray-400" />
                                                                     </div>
                                                                     <input
-                                                                        id="email"
-                                                                        name="email"
+                                                                        id="motherEmail"
+                                                                        name="motherEmail"
                                                                         type="email"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your Email"
                                                                     />
                                                                 </div>
+                                                                {errors.motherEmail && touched.motherEmail && (
+                                                                    <p className="text-xs text-red-600">{errors.motherEmail}</p>
+                                                                )}
                                                             </div>
 
                                                         </div>
@@ -660,13 +743,16 @@ const CreateStudent = () => {
                                                                         <UserCheck className="h-5 w-5 text-gray-400" />
                                                                     </div>
                                                                     <input
-                                                                        id="name"
-                                                                        name="name"
+                                                                        id="guardianName"
+                                                                        name="guardianName"
                                                                         type="text"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your Name"
                                                                     />
                                                                 </div>
+                                                                {errors.guardianName && touched.guardianName && (
+                                                                    <p className="text-xs text-red-600">{errors.guardianName}</p>
+                                                                )}
                                                             </div>
                                                             <div>
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Relationship<span className="text-red-500">*</span></label>
@@ -675,13 +761,16 @@ const CreateStudent = () => {
                                                                         <Users className="h-5 w-5 text-gray-400" />
                                                                     </div>
                                                                     <input
-                                                                        id="relationship"
-                                                                        name="relationship"
+                                                                        id="guardianRelationship"
+                                                                        name="guardianRelationship"
                                                                         type="text"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your Relationship"
                                                                     />
                                                                 </div>
+                                                                {errors.guardianRelationship && touched.guardianRelationship && (
+                                                                    <p className="text-xs text-red-600">{errors.guardianRelationship}</p>
+                                                                )}
                                                             </div>
                                                             <div>
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Phone<span className="text-red-500">*</span></label>
@@ -690,13 +779,16 @@ const CreateStudent = () => {
                                                                         <Phone className="h-5 w-5 text-gray-400" />
                                                                     </div>
                                                                     <input
-                                                                        id="phone"
-                                                                        name="phone"
+                                                                        id="guardianPhone"
+                                                                        name="guardianPhone"
                                                                         type="text"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your Phone"
                                                                     />
                                                                 </div>
+                                                                {errors.guardianPhone && touched.guardianPhone && (
+                                                                    <p className="text-xs text-red-600">{errors.guardianPhone}</p>
+                                                                )}
                                                             </div>
                                                             <div>
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Email<span className="text-red-500">*</span></label>
@@ -705,13 +797,16 @@ const CreateStudent = () => {
                                                                         <Mail className="h-5 w-5 text-gray-400" />
                                                                     </div>
                                                                     <input
-                                                                        id="email"
-                                                                        name="email"
+                                                                        id="guardianEmail"
+                                                                        name="guardianEmail"
                                                                         type="email"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your Email"
                                                                     />
                                                                 </div>
+                                                                {errors.guardianEmail && touched.guardianEmail && (
+                                                                    <p className="text-xs text-red-600">{errors.guardianEmail}</p>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -739,6 +834,9 @@ const CreateStudent = () => {
                                                                     placeholder="Enter Your Course"
                                                                 />
                                                             </div>
+                                                            {errors.course && touched.course && (
+                                                                <p className="text-xs text-red-600">{errors.course}</p>
+                                                            )}
                                                         </div>
                                                         <div>
                                                             <label className="block text-sm font-medium text-gray-700 mb-1">Branch<span className="text-red-500">*</span></label>
@@ -754,6 +852,9 @@ const CreateStudent = () => {
                                                                     placeholder="Enter Your Branch"
                                                                 />
                                                             </div>
+                                                            {errors.branch && touched.branch && (
+                                                                <p className="text-xs text-red-600">{errors.branch}</p>
+                                                            )}
                                                         </div>
                                                         <div>
                                                             <label className="block text-sm font-medium text-gray-700 mb-1">Semester<span className="text-red-500">*</span></label>
@@ -769,6 +870,9 @@ const CreateStudent = () => {
                                                                     placeholder="Enter Your Semester"
                                                                 />
                                                             </div>
+                                                            {errors.semester && touched.semester && (
+                                                                <p className="text-xs text-red-600">{errors.semester}</p>
+                                                            )}
                                                         </div>
                                                         <div>
                                                             <label className="block text-sm font-medium text-gray-700 mb-1">Section<span className="text-red-500">*</span></label>
@@ -784,6 +888,9 @@ const CreateStudent = () => {
                                                                     placeholder="Enter Your Section"
                                                                 />
                                                             </div>
+                                                            {errors.section && touched.section && (
+                                                                <p className="text-xs text-red-600">{errors.section}</p>
+                                                            )}
                                                         </div>
                                                         <div>
                                                             <label className="block text-sm font-medium text-gray-700 mb-1">Batch<span className="text-red-500">*</span></label>
@@ -799,6 +906,9 @@ const CreateStudent = () => {
                                                                     placeholder="Enter Your Batch"
                                                                 />
                                                             </div>
+                                                            {errors.batch && touched.batch && (
+                                                                <p className="text-xs text-red-600">{errors.batch}</p>
+                                                            )}
                                                         </div>
 
                                                         <div>
@@ -815,6 +925,9 @@ const CreateStudent = () => {
                                                                     placeholder="Enter Your Admission Year"
                                                                 />
                                                             </div>
+                                                            {errors.admissionYear && touched.admissionYear && (
+                                                                <p className="text-xs text-red-600">{errors.admissionYear}</p>
+                                                            )}
                                                         </div>
 
                                                         <div>
@@ -831,6 +944,9 @@ const CreateStudent = () => {
                                                                     placeholder="Enter Your Expected Graduation Year"
                                                                 />
                                                             </div>
+                                                            {errors.expectedGraduationYear && touched.expectedGraduationYear && (
+                                                                <p className="text-xs text-red-600">{errors.expectedGraduationYear}</p>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>

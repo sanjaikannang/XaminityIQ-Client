@@ -89,8 +89,8 @@ export const createStudentValidationSchema = Yup.object({
     guardianName: Yup.string()
         .optional()
         .min(2, 'Guardian\'s name must be at least 2 characters'),
-    guardianOccupation: Yup.string()
-        .required('Guardian\'s occupation is required'),
+    guardianRelationship: Yup.string()
+        .required('Guardian\'s Relationship is required'),
     guardianPhone: Yup.string()
         .required('Guardian\'s phone number is required')
         .matches(/^[+]?[\d\s\-\(\)]{10,15}$/, 'Please enter a valid phone number'),
