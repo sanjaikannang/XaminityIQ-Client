@@ -1,6 +1,7 @@
 import { Form, Formik } from "formik"
 import { BookOpen, Briefcase, Calendar, CalendarCheck, CalendarClock, CalendarRange, Flag, Globe, Hash, Home, Landmark, Layers, LayoutGrid, ListOrdered, Mail, Map, MapPin, Package, Phone, User, UserCheck, Users, VenusAndMars } from "lucide-react"
 import { createStudentValidationSchema } from "../FormikSchema/create-student.schema";
+import { Gender } from "../../../Utils/enum";
 
 interface CreateStudentFormValues {
     // Personal Information
@@ -9,7 +10,7 @@ interface CreateStudentFormValues {
     firstName: string;
     lastName: string;
     dateOfBirth: string; // ISO date string format (YYYY-MM-DD)
-    gender: 'Male' | 'Female' | 'Other' | '';
+    gender: Gender;
     nationality: string;
     religion: string;
     photo: string;
@@ -66,7 +67,7 @@ const CreateStudent = () => {
         firstName: '',
         lastName: '',
         dateOfBirth: '',
-        gender: '',
+        gender: Gender.MALE,
         nationality: '',
         religion: '',
         photo: '',
