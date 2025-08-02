@@ -3,7 +3,7 @@ import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import ResetPassword from "../../assets/Images/Reset Password.png"
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { Form, Formik, FormikHelpers } from 'formik';
+import { Field, Form, Formik, FormikHelpers } from 'formik';
 import { resetPasswordValidationSchema } from '../FormikSchema/reset-password.schema';
 import Spinner from '../../Common/UI/Spinner';
 import { changePassword } from '../../Services/Auth/authAPI';
@@ -112,7 +112,7 @@ const ResetPasswordLayout: React.FC = () => {
                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                         <Mail className="h-5 w-5 text-gray-400" />
                                                     </div>
-                                                    <input
+                                                    <Field
                                                         id="email"
                                                         name="email"
                                                         type="email"
@@ -134,7 +134,7 @@ const ResetPasswordLayout: React.FC = () => {
                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                         <Lock className="h-5 w-5 text-gray-400" />
                                                     </div>
-                                                    <input
+                                                    <Field
                                                         id="temporaryPassword"
                                                         name="temporaryPassword"
                                                         type={showTempPassword ? 'text' : 'password'}
@@ -167,7 +167,7 @@ const ResetPasswordLayout: React.FC = () => {
                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                         <Lock className="h-5 w-5 text-gray-400" />
                                                     </div>
-                                                    <input
+                                                    <Field
                                                         id="newPassword"
                                                         name="newPassword"
                                                         type={showNewPassword ? 'text' : 'password'}
@@ -200,7 +200,7 @@ const ResetPasswordLayout: React.FC = () => {
                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                         <Lock className="h-5 w-5 text-gray-400" />
                                                     </div>
-                                                    <input
+                                                    <Field
                                                         id="confirmPassword"
                                                         name="confirmPassword"
                                                         type={showConfirmPassword ? 'text' : 'password'}

@@ -20,8 +20,7 @@ export const createStudentValidationSchema = Yup.object({
         .required('Date of birth is required')
         .max(new Date(), 'Date of birth cannot be in the future'),
     gender: Yup.string()
-        .required('Gender is required')
-        .oneOf(['Male', 'Female', 'Other'], 'Please select a valid gender'),
+        .required('Gender is required'),
     nationality: Yup.string()
         .required('Nationality is required'),
     religion: Yup.string()
@@ -45,7 +44,7 @@ export const createStudentValidationSchema = Yup.object({
         .matches(/^[\d\-\s]{3,10}$/, 'Please enter a valid zip code'),
     currentCountry: Yup.string()
         .required('Current country is required'),
-    
+
     // Permanent Address (assuming the duplicate was meant for permanent address)
     permanentStreet: Yup.string()
         .required('Permanent street address is required'),
@@ -87,7 +86,7 @@ export const createStudentValidationSchema = Yup.object({
 
     // Guardian Information (optional if parents are available)
     guardianName: Yup.string()
-        .optional()
+        .required('Guardian\'s name is required')
         .min(2, 'Guardian\'s name must be at least 2 characters'),
     guardianRelationship: Yup.string()
         .required('Guardian\'s Relationship is required'),
@@ -110,21 +109,15 @@ export const createStudentValidationSchema = Yup.object({
         .integer('Semester must be a whole number'),
     section: Yup.string()
         .required('Section is required'),
-    batch: Yup.string()
-        .required('Batch is required'),
-    admissionYear: Yup.number()
-        .required('Admission year is required')
-        .min(2000, 'Admission year must be 2000 or later')
-        .max(new Date().getFullYear(), 'Admission year cannot be in the future')
-        .integer('Admission year must be a valid year'),
-    expectedGraduationYear: Yup.number()
+    batchStartYear: Yup.string()
+        .required('Batch start year is required'),
+    batchEndYear: Yup.string()
+        .required('Batch end year is required')
+        .test('end-after-start', 'End year must be after start year', function (value) {
+            return value > this.parent.batchStartYear;
+        }),
+    admissionYear: Yup.string()
+        .required('Admission year is required'),
+    expectedGraduationYear: Yup.string()
         .required('Expected graduation year is required')
-        .min(2000, 'Expected graduation year must be 2000 or later')
-        .max(2050, 'Expected graduation year cannot exceed 2050')
-        .integer('Expected graduation year must be a valid year')
-        .test('graduation-after-admission', 'Graduation year must be after admission year', 
-            function(value) {
-                const admissionYear = this.parent.admissionYear;
-                return !admissionYear || !value || value > admissionYear;
-            })
 });

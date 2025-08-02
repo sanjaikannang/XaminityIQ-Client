@@ -11,11 +11,11 @@ export const resetPasswordValidationSchema = Yup.object({
 
     newPassword: Yup.string()
         .required('New password is required')
-        .min(8, 'Password must be at least 8 characters long')
-        .matches(
-            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-            'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
-        ),
+        .min(8, 'Password must be at least 8 characters long'),
+        // .matches(
+        //     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+        //     'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+        // ),
 
     confirmPassword: Yup.string()
         .required('Please confirm your password')
