@@ -279,3 +279,28 @@ export interface DeleteStudentResponse {
     success: boolean;
     message: string;
 }
+
+export interface AdminState {
+    // Faculty state
+    faculty: FacultyResponse[];
+    facultyPagination: PaginationInfo | null;
+    selectedFaculty: FacultyResponse | null;
+
+    // Student state
+    students: StudentResponse[];
+    studentPagination: PaginationInfo | null;
+    selectedStudent: StudentResponse | null;
+
+    // Loading states
+    isLoading: boolean;
+    isFacultyLoading: boolean;
+    isStudentLoading: boolean;
+
+    // Error states
+    error: string | null;
+    facultyError: string | null;
+    studentError: string | null;
+
+    // Success messages
+    successMessage: string | null;
+}
