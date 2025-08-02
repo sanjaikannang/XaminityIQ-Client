@@ -1,7 +1,13 @@
-import { Form, Formik } from "formik"
+import { Field, Form, Formik, FormikHelpers } from "formik"
 import { BookOpen, Briefcase, Calendar, CalendarCheck, CalendarClock, CalendarRange, Flag, Globe, Hash, Home, Landmark, Layers, LayoutGrid, ListOrdered, Mail, Map, MapPin, Package, Phone, User, UserCheck, Users, VenusAndMars } from "lucide-react"
 import { createStudentValidationSchema } from "../FormikSchema/create-student.schema";
 import { Gender } from "../../../Utils/enum";
+import { useDispatch } from "react-redux";
+import { CreateStudentRequest } from "../../../Types/admin.types";
+import toast from "react-hot-toast";
+import { clearError, setError, setLoading } from "../../../State/Slices/adminSlice";
+import { createStudent } from "../../../Services/Admin/adminAPI";
+import Spinner from "../../../Common/UI/Spinner";
 
 interface CreateStudentFormValues {
     // Personal Information
@@ -53,12 +59,15 @@ interface CreateStudentFormValues {
     branch: string;
     semester: number | '';
     section: string;
-    batch: string;
-    admissionYear: number | '';
-    expectedGraduationYear: number | '';
+    batchStartYear: string;
+    batchEndYear: string;
+    admissionYear: string;
+    expectedGraduationYear: string;
 }
 
 const CreateStudent = () => {
+
+    const dispatch = useDispatch();
 
     const initialCreateStudentValues: CreateStudentFormValues = {
         // Personal Information
@@ -110,12 +119,115 @@ const CreateStudent = () => {
         branch: '',
         semester: '',
         section: '',
-        batch: '',
+        batchStartYear: '',
+        batchEndYear: '',
         admissionYear: '',
         expectedGraduationYear: ''
     };
 
-    const handleCreateStudent = async () => {
+    const handleCreateStudent = async (
+        values: CreateStudentFormValues,
+        { setSubmitting, resetForm }: FormikHelpers<CreateStudentFormValues>
+    ) => {
+        try {
+            // Clear any previous errors
+            dispatch(clearError());
+
+            // Set loading state
+            dispatch(setLoading(true));
+
+            // Transform form values to API request format
+            const studentData: CreateStudentRequest = {
+                email: values.email,
+                rollNumber: values.rollNumber,
+                personalInfo: {
+                    photo: values.photo,
+                    firstName: values.firstName,
+                    lastName: values.lastName,
+                    dateOfBirth: new Date(values.dateOfBirth),
+                    gender: values.gender,
+                    nationality: values.nationality,
+                    religion: values.religion,
+                },
+                contactInfo: {
+                    phone: values.phoneNumber,
+                    permanentAddress: {
+                        street: values.permanentStreet,
+                        city: values.permanentCity,
+                        state: values.permanentState,
+                        zipCode: values.permanentZipCode,
+                        country: values.permanentCountry,
+                    },
+                    currentAddress: {
+                        street: values.currentStreet,
+                        city: values.currentCity,
+                        state: values.currentState,
+                        zipCode: values.currentZipCode,
+                        country: values.currentCountry,
+                    }
+                },
+                familyInfo: {
+                    father: {
+                        name: values.fatherName,
+                        occupation: values.fatherOccupation,
+                        phone: values.fatherPhone,
+                        email: values.fatherEmail,
+                    },
+                    mother: {
+                        name: values.motherName,
+                        occupation: values.motherOccupation,
+                        phone: values.motherPhone,
+                        email: values.motherEmail,
+                    },
+                    guardian: {
+                        name: values.guardianName,
+                        relationship: values.guardianRelationship,
+                        phone: values.guardianPhone,
+                        email: values.guardianEmail,
+                    }
+                },
+                academicInfo: {
+                    course: values.course,
+                    branch: values.branch,
+                    semester: typeof values.semester === 'number' ? values.semester : parseInt(values.semester as string),
+                    section: values.section,
+                    batch: `${values.batchStartYear ? values.batchStartYear.split('-')[0] : ''}-${values.batchEndYear ? values.batchEndYear.split('-')[0] : ''}`,
+                    admissionYear: values.admissionYear ? parseInt(values.admissionYear.split('-')[0]) : 0,
+                    expectedGraduationYear: values.expectedGraduationYear ? parseInt(values.expectedGraduationYear.split('-')[0]) : 0
+                }
+            };
+
+            console.log("studentData...", studentData);
+
+            // Call the API
+            const response = await createStudent(studentData);
+
+            console.log("response....", response);
+
+            if (response.success) {
+                // Show success toast with default password
+                toast.success(`${response.message} Default password: ${response.data?.defaultPassword}`);
+
+                // Reset form after successful creation
+                resetForm();
+
+            } else {
+                toast.error(response.message || 'Failed to create student');
+                throw new Error(response.message || 'Student creation failed');
+            }
+        } catch (error: any) {
+            console.error('Create student error:', error);
+            const errorMessage = error?.response?.data?.message ||
+                error?.message ||
+                'An unexpected error occurred';
+
+            toast.error(errorMessage);
+            dispatch(setError(errorMessage));
+        }
+        finally {
+            setSubmitting(false);
+            dispatch(setLoading(false));
+        }
     }
 
     return (
@@ -135,7 +247,7 @@ const CreateStudent = () => {
                                 validationSchema={createStudentValidationSchema}
                                 onSubmit={handleCreateStudent}
                             >
-                                {({ errors, touched }) => (
+                                {({ isSubmitting, errors, touched }) => (
                                     <Form>
                                         {/* Personal Info */}
                                         <div className="space-y-4 mb-5">
@@ -150,7 +262,7 @@ const CreateStudent = () => {
                                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                     <Mail className="h-5 w-5 text-gray-400" />
                                                                 </div>
-                                                                <input
+                                                                <Field
                                                                     id="email"
                                                                     name="email"
                                                                     type="email"
@@ -169,7 +281,7 @@ const CreateStudent = () => {
                                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                     <Hash className="h-5 w-5 text-gray-400" />
                                                                 </div>
-                                                                <input
+                                                                <Field
                                                                     id="rollNumber"
                                                                     name="rollNumber"
                                                                     type="text"
@@ -197,7 +309,7 @@ const CreateStudent = () => {
                                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                     <User className="h-5 w-5 text-gray-400" />
                                                                 </div>
-                                                                <input
+                                                                <Field
                                                                     id="firstName"
                                                                     name="firstName"
                                                                     type="text"
@@ -216,7 +328,7 @@ const CreateStudent = () => {
                                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                     <User className="h-5 w-5 text-gray-400" />
                                                                 </div>
-                                                                <input
+                                                                <Field
                                                                     id="lastName"
                                                                     name="lastName"
                                                                     type="text"
@@ -235,7 +347,7 @@ const CreateStudent = () => {
                                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                     <Calendar className="h-5 w-5 text-gray-400" />
                                                                 </div>
-                                                                <input
+                                                                <Field
                                                                     id="dateOfBirth"
                                                                     name="dateOfBirth"
                                                                     type="date"
@@ -253,14 +365,16 @@ const CreateStudent = () => {
                                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                     <VenusAndMars className="h-5 w-5 text-gray-400" />
                                                                 </div>
-                                                                <select
+                                                                <Field
+                                                                    as="select"
+                                                                    name="gender"
                                                                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none"
                                                                 >
                                                                     <option value="">Select Gender</option>
                                                                     <option value="MALE">Male</option>
                                                                     <option value="FEMALE">Female</option>
                                                                     <option value="OTHER">Other</option>
-                                                                </select>
+                                                                </Field>
                                                             </div>
                                                             {errors.gender && touched.gender && (
                                                                 <p className="text-xs text-red-600">{errors.gender}</p>
@@ -273,7 +387,7 @@ const CreateStudent = () => {
                                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                     <Globe className="h-5 w-5 text-gray-400" />
                                                                 </div>
-                                                                <input
+                                                                <Field
                                                                     id="nationality"
                                                                     name="nationality"
                                                                     type="text"
@@ -292,7 +406,7 @@ const CreateStudent = () => {
                                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                     <Landmark className="h-5 w-5 text-gray-400" />
                                                                 </div>
-                                                                <input
+                                                                <Field
                                                                     id="religion"
                                                                     name="religion"
                                                                     type="text"
@@ -308,14 +422,17 @@ const CreateStudent = () => {
 
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">Photo URL<span className="text-red-500">*</span></label>
-                                                        <input
-                                                            type="url"
-                                                            className="w-full py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                        <Field
+                                                            id="photo"
+                                                            name="photo"
+                                                            type="text"
+                                                            placeholder="Photo Link"
+                                                            className="w-full py-2 border border-gray-300 rounded-md focus:outline-none"
                                                         />
+                                                        {errors.photo && touched.photo && (
+                                                            <p className="text-xs text-red-600">{errors.photo}</p>
+                                                        )}
                                                     </div>
-                                                    {errors.photo && touched.photo && (
-                                                        <p className="text-xs text-red-600">{errors.photo}</p>
-                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -332,10 +449,10 @@ const CreateStudent = () => {
                                                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                 <Phone className="h-5 w-5 text-gray-400" />
                                                             </div>
-                                                            <input
+                                                            <Field
                                                                 id="phoneNumber"
                                                                 name="phoneNumber"
-                                                                type="number"
+                                                                type="text"
                                                                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                 placeholder="Enter Your Phone Number"
                                                             />
@@ -358,7 +475,7 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <Home className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="currentStreet"
                                                                         name="currentStreet"
                                                                         type="text"
@@ -376,7 +493,7 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <MapPin className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="currentCity"
                                                                         name="currentCity"
                                                                         type="text"
@@ -394,7 +511,7 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <Map className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="currentState"
                                                                         name="currentState"
                                                                         type="text"
@@ -412,10 +529,10 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <Package className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="currentZipCode"
                                                                         name="currentZipCode"
-                                                                        type="number"
+                                                                        type="text"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your Zip Code"
                                                                     />
@@ -430,7 +547,7 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <Flag className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="currentCountry"
                                                                         name="currentCountry"
                                                                         type="text"
@@ -465,7 +582,7 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <Home className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="permanentStreet"
                                                                         name="permanentStreet"
                                                                         type="text"
@@ -483,7 +600,7 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <MapPin className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="permanentCity"
                                                                         name="permanentCity"
                                                                         type="text"
@@ -501,7 +618,7 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <Map className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="permanentState"
                                                                         name="permanentState"
                                                                         type="text"
@@ -519,10 +636,10 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <Package className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="permanentZipCode"
                                                                         name="permanentZipCode"
-                                                                        type="number"
+                                                                        type="text"
                                                                         className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                         placeholder="Enter Your Zip Code"
                                                                     />
@@ -537,7 +654,7 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <Flag className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="permanentCountry"
                                                                         name="permanentCountry"
                                                                         type="text"
@@ -572,7 +689,7 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <UserCheck className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="fatherName"
                                                                         name="fatherName"
                                                                         type="text"
@@ -590,7 +707,7 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <Briefcase className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="fatherOccupation"
                                                                         name="fatherOccupation"
                                                                         type="text"
@@ -608,7 +725,7 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <Phone className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="fatherPhone"
                                                                         name="fatherPhone"
                                                                         type="text"
@@ -626,7 +743,7 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <Mail className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="fatherEmail"
                                                                         name="fatherEmail"
                                                                         type="email"
@@ -656,7 +773,7 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <UserCheck className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="motherName"
                                                                         name="motherName"
                                                                         type="text"
@@ -675,7 +792,7 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <Briefcase className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="motherOccupation"
                                                                         name="motherOccupation"
                                                                         type="text"
@@ -694,7 +811,7 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <Phone className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="motherPhone"
                                                                         name="motherPhone"
                                                                         type="text"
@@ -713,7 +830,7 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <Mail className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="motherEmail"
                                                                         name="motherEmail"
                                                                         type="email"
@@ -743,7 +860,7 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <UserCheck className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="guardianName"
                                                                         name="guardianName"
                                                                         type="text"
@@ -761,7 +878,7 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <Users className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="guardianRelationship"
                                                                         name="guardianRelationship"
                                                                         type="text"
@@ -779,7 +896,7 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <Phone className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="guardianPhone"
                                                                         name="guardianPhone"
                                                                         type="text"
@@ -797,7 +914,7 @@ const CreateStudent = () => {
                                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                         <Mail className="h-5 w-5 text-gray-400" />
                                                                     </div>
-                                                                    <input
+                                                                    <Field
                                                                         id="guardianEmail"
                                                                         name="guardianEmail"
                                                                         type="email"
@@ -827,7 +944,7 @@ const CreateStudent = () => {
                                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                     <BookOpen className="h-5 w-5 text-gray-400" />
                                                                 </div>
-                                                                <input
+                                                                <Field
                                                                     id="course"
                                                                     name="course"
                                                                     type="text"
@@ -845,7 +962,7 @@ const CreateStudent = () => {
                                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                     <Layers className="h-5 w-5 text-gray-400" />
                                                                 </div>
-                                                                <input
+                                                                <Field
                                                                     id="branch"
                                                                     name="branch"
                                                                     type="text"
@@ -863,7 +980,7 @@ const CreateStudent = () => {
                                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                     <ListOrdered className="h-5 w-5 text-gray-400" />
                                                                 </div>
-                                                                <input
+                                                                <Field
                                                                     id="semester"
                                                                     name="semester"
                                                                     type="number"
@@ -881,7 +998,7 @@ const CreateStudent = () => {
                                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                     <LayoutGrid className="h-5 w-5 text-gray-400" />
                                                                 </div>
-                                                                <input
+                                                                <Field
                                                                     id="section"
                                                                     name="section"
                                                                     type="text"
@@ -893,22 +1010,44 @@ const CreateStudent = () => {
                                                                 <p className="text-xs text-red-600">{errors.section}</p>
                                                             )}
                                                         </div>
+
+                                                        {/* Batch Start Year */}
                                                         <div>
-                                                            <label className="block text-sm font-medium text-gray-700 mb-1">Batch<span className="text-red-500">*</span></label>
+                                                            <label className="block text-sm font-medium text-gray-700 mb-1">Batch Start Year<span className="text-red-500">*</span></label>
                                                             <div className="relative">
                                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                     <CalendarRange className="h-5 w-5 text-gray-400" />
                                                                 </div>
-                                                                <input
-                                                                    id="batch"
-                                                                    name="batch"
-                                                                    type="date"
+                                                                <Field
+                                                                    id="batchStartYear"
+                                                                    name="batchStartYear"
+                                                                    type="month"
                                                                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
-                                                                    placeholder="Enter Your Batch"
+                                                                    placeholder="Enter Batch Start Year (e.g., 2024)"
                                                                 />
                                                             </div>
-                                                            {errors.batch && touched.batch && (
-                                                                <p className="text-xs text-red-600">{errors.batch}</p>
+                                                            {errors.batchStartYear && touched.batchStartYear && (
+                                                                <p className="text-xs text-red-600">{errors.batchStartYear}</p>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Batch End Year */}
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-gray-700 mb-1">Batch End Year<span className="text-red-500">*</span></label>
+                                                            <div className="relative">
+                                                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                                    <CalendarRange className="h-5 w-5 text-gray-400" />
+                                                                </div>
+                                                                <Field
+                                                                    id="batchEndYear"
+                                                                    name="batchEndYear"
+                                                                    type="month"
+                                                                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                                                    placeholder="Enter Batch End Year (e.g., 2028)"
+                                                                />
+                                                            </div>
+                                                            {errors.batchEndYear && touched.batchEndYear && (
+                                                                <p className="text-xs text-red-600">{errors.batchEndYear}</p>
                                                             )}
                                                         </div>
 
@@ -918,10 +1057,10 @@ const CreateStudent = () => {
                                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                     <CalendarCheck className="h-5 w-5 text-gray-400" />
                                                                 </div>
-                                                                <input
+                                                                <Field
                                                                     id="admissionYear"
                                                                     name="admissionYear"
-                                                                    type="date"
+                                                                    type="month"
                                                                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                     placeholder="Enter Your Admission Year"
                                                                 />
@@ -937,10 +1076,10 @@ const CreateStudent = () => {
                                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                     <CalendarClock className="h-5 w-5 text-gray-400" />
                                                                 </div>
-                                                                <input
+                                                                <Field
                                                                     id="expectedGraduationYear"
                                                                     name="expectedGraduationYear"
-                                                                    type="date"
+                                                                    type="month"
                                                                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                     placeholder="Enter Your Expected Graduation Year"
                                                                 />
@@ -949,6 +1088,7 @@ const CreateStudent = () => {
                                                                 <p className="text-xs text-red-600">{errors.expectedGraduationYear}</p>
                                                             )}
                                                         </div>
+
                                                     </div>
                                                 </div>
                                             </div>
@@ -958,9 +1098,16 @@ const CreateStudent = () => {
                                         <div className="flex justify-end gap-4">
                                             <button
                                                 type="submit"
+                                                disabled={isSubmitting}
                                                 className="bg-primary text-whiteColor px-6 py-1.5 rounded-md focus:outline-none font-medium cursor-pointer"
                                             >
-                                                Create Faculty
+                                                {isSubmitting ? (
+                                                    <>
+                                                        <Spinner />
+                                                    </>
+                                                ) : (
+                                                    'Create Student'
+                                                )}
                                             </button>
                                         </div>
                                     </Form>
