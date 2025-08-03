@@ -120,6 +120,7 @@ export interface GuardianInfo {
     relationship?: string;
     phone?: string;
     email?: string;
+    occupation?: string;
 }
 
 export interface FamilyInfo {
