@@ -191,6 +191,7 @@ const StudentDashboard = () => {
     batch: student.academicInfo.batch,
     status: student.status,
     actions: student._id,
+    _fullName: `${student.personalInfo.firstName} ${student.personalInfo.lastName}`,
   }));
 
   // Custom cell renderer for specific columns

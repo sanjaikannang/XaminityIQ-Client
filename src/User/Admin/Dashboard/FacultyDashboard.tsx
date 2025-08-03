@@ -7,6 +7,7 @@ import { removeFaculty, setAllFaculty, setFacultyError, setFacultyLoading } from
 import { deleteFaculty, getAllFaculty } from "../../../Services/Admin/adminAPI";
 import Table, { TableColumn, TableRow } from "../../../Common/UI/Table";
 import { FacultyResponse } from "../../../Types/admin.types";
+import Modal from "../../../Common/UI/Modal";
 
 const FacultyDashboard = () => {
 
@@ -24,6 +25,14 @@ const FacultyDashboard = () => {
   // Local state for pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+
+  // Modal state
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    facultyId: '',
+    facultyName: '',
+    isDeleting: false
+  });
 
   // Fetch faculty data
   const fetchFaculty = async (page: number = 1) => {
@@ -47,23 +56,48 @@ const FacultyDashboard = () => {
     }
   };
 
-  // Handle delete faculty
-  const handleDeleteFaculty = async (facultyId: string) => {
-    if (window.confirm('Are you sure you want to delete this faculty member?')) {
-      try {
-        dispatch(setFacultyLoading(true));
-        const response = await deleteFaculty(facultyId);
+  // Open delete confirmation modal
+  const openDeleteModal = (facultyId: string, facultyName: string) => {
+    setDeleteModal({
+      isOpen: true,
+      facultyId,
+      facultyName,
+      isDeleting: false
+    });
+  };
 
-        if (response.success) {
-          dispatch(removeFaculty(facultyId));
-          // Refetch current page to update pagination
-          fetchFaculty(currentPage);
-        } else {
-          dispatch(setFacultyError('Failed to delete faculty'));
-        }
-      } catch (error: any) {
-        dispatch(setFacultyError(error?.message || 'Failed to delete faculty'));
+  // Close delete modal
+  const closeDeleteModal = () => {
+    setDeleteModal({
+      isOpen: false,
+      facultyId: '',
+      facultyName: '',
+      isDeleting: false
+    });
+  };
+
+  // Handle delete faculty
+  const handleDeleteFaculty = async () => {
+    try {
+      setDeleteModal(prev => ({ ...prev, isDeleting: true }));
+
+      const response = await deleteFaculty(deleteModal.facultyId);
+
+      if (response.success) {
+        dispatch(removeFaculty(deleteModal.facultyId));
+        // Refetch current page to update pagination
+        fetchFaculty(currentPage);
+        closeDeleteModal();
+
+        // Optional: Show success message
+        // You can use a toast notification here if you have one
+      } else {
+        dispatch(setFacultyError('Failed to delete faculty member'));
+        setDeleteModal(prev => ({ ...prev, isDeleting: false }));
       }
+    } catch (error: any) {
+      dispatch(setFacultyError(error?.message || 'Failed to delete faculty member'));
+      setDeleteModal(prev => ({ ...prev, isDeleting: false }));
     }
   };
 
@@ -156,6 +190,7 @@ const FacultyDashboard = () => {
     joiningDate: new Date(facultyMember.joiningDate).toLocaleDateString(),
     status: facultyMember.status,
     actions: facultyMember._id,
+    _fullName: `${facultyMember.personalInfo.firstName} ${facultyMember.personalInfo.lastName}`,
   }));
 
   // Custom cell renderer for specific columns
@@ -193,7 +228,7 @@ const FacultyDashboard = () => {
               <Eye size={16} />
             </button>
             <button
-              onClick={() => handleDeleteFaculty(value)}
+              onClick={() => openDeleteModal(value, _row._fullName)}
               className="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded cursor-pointer"
               title="Delete"
             >
@@ -266,6 +301,40 @@ const FacultyDashboard = () => {
           />
         </div>
 
+        {/* Delete Confirmation Modal */}
+        <Modal
+          isOpen={deleteModal.isOpen}
+          onClose={closeDeleteModal}
+          title="Delete Faculty Member"
+          size="sm"
+        >
+          <div className="text-center">
+            <p className="text-sm text-gray-500 mb-6">
+              You are about to delete <span className="font-semibold">{deleteModal.facultyName}</span>.
+              This action cannot be undone and will permanently remove all associated data including courses, schedules, and student assignments.
+            </p>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={handleDeleteFaculty}
+                disabled={deleteModal.isDeleting}
+                className="px-4 py-1.5 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {deleteModal.isDeleting ? (
+                  <>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={16} />
+                    Delete
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </Modal>
       </main>
     </>
   )
