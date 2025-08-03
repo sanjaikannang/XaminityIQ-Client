@@ -7,6 +7,7 @@ import CreateStudent from './CreateStudent';
 import CreateFaculty from './CreateFaculty';
 import CreateExam from './CreateExam';
 import StudentDetail from './StudentDetail';
+import FacultyDetail from './FacultyDetail';
 
 const MainComponent = () => {
 
@@ -20,11 +21,12 @@ const MainComponent = () => {
                         {/* Students Screens */}
                         <Route path="student" element={<StudentDashboard />} />
                         <Route path="student/create-student" element={<CreateStudent />} />
-                        <Route path="student/:id" element={<StudentDetail />} />                        
+                        <Route path="student/:id" element={<StudentDetail />} />
 
                         {/* Faculty Screens */}
                         <Route path="faculty" element={<FacultyDashboard />} />
                         <Route path="faculty/create-faculty" element={<CreateFaculty />} />
+                        <Route path="faculty/:id" element={<FacultyDetail />} />
 
                         {/* Exam Screens */}
                         <Route path="exam" element={<ExamDashboard />} />
