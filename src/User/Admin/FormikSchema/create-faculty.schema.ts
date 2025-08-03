@@ -65,17 +65,17 @@ export const createFacultyValidationSchema = Yup.object({
         .required('Department is required'),
     designation: Yup.string()
         .required('Designation is required'),
-
     degree: Yup.string()
         .required('Degree is required'),
     institution: Yup.string()
         .required('Institution is required'),
-    year: Yup.string()
+    year: Yup.number()
         .required('Year is required'),
-    percentage: Yup.string()
+    percentage: Yup.number()
         .required('Percentage is required'),
 
-    totalYears: Yup.string()
+    // Previous Experience
+    totalYears: Yup.number()
         .required('TotalYears is required'),
     institutionName: Yup.string()
         .required('InstitutionName is required'),
@@ -83,8 +83,8 @@ export const createFacultyValidationSchema = Yup.object({
         .required('Designation is required'),
     duration: Yup.string()
         .required('Duration is required'),
-    from: Yup.string()
+    from: Yup.date()
         .required('From is required'),
-    to: Yup.string()
+    to: Yup.date()
         .required('To is required'),
 });

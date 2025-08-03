@@ -1,21 +1,203 @@
-import { Field, Form, Formik } from "formik";
+import { Field, Form, Formik, FormikHelpers } from "formik";
 import { BadgeInfo, Briefcase, Building2, Calendar, CalendarCheck2, CalendarDays, Flag, Globe, GraduationCap, HeartHandshake, Home, Hourglass, Landmark, Mail, Map, MapPin, Package, Percent, Phone, School, School2, Timer, User, UserCheck, VenusAndMars } from "lucide-react"
 import { createFacultyValidationSchema } from "../FormikSchema/create-faculty.schema";
+import { Gender, MaritalStatus } from "../../../Utils/enum";
+import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { clearError, setError, setLoading } from "../../../State/Slices/adminSlice";
+import { CreateFacultyRequest } from "../../../Types/admin.types";
+import { createFaculty } from "../../../Services/Admin/adminAPI";
+import Spinner from "../../../Common/UI/Spinner";
 
 interface CreateFacultyFormValues {
+    // Personal Information
+    email: string;
+    firstName: string;
+    lastName: string;
+    dateOfBirth: string;
+    gender: Gender;
+    nationality: string;
+    religion: string;
+    photo: string;
+    maritalStatus: MaritalStatus;
+    phoneNumber: string;
+
+    // Current Address
+    currentStreet: string;
+    currentCity: string;
+    currentState: string;
+    currentZipCode: string;
+    currentCountry: string;
+
+    // Permanent Address (assuming the duplicate was meant for permanent address)
+    permanentStreet: string;
+    permanentCity: string;
+    permanentState: string;
+    permanentZipCode: string;
+    permanentCountry: string;
+
+    // Professional Information
+    employeeId: string;
+    department: string;
+    designation: string;
+    degree: string;
+    institution: string;
+    year: number | '';
+    percentage: number | '';
+
+    // Previous Experience
+    totalYears: number | '';
+    institutionName: string;
+    previousDesignation: string;
+    duration: string;
+    from: string;
+    to: string;
 }
 
 const CreateFaculty = () => {
 
+    const dispatch = useDispatch()
+
     const initialCreateFacultyValues: CreateFacultyFormValues = {
+        // Personal Information
+        email: '',
+        firstName: '',
+        lastName: '',
+        dateOfBirth: '',
+        gender: Gender.MALE,
+        nationality: '',
+        religion: '',
+        photo: '',
+        maritalStatus: MaritalStatus.SINGLE,
+        phoneNumber: '',
+
+        // Current Address
+        currentStreet: '',
+        currentCity: '',
+        currentState: '',
+        currentZipCode: '',
+        currentCountry: '',
+
+        // Permanent Address
+        permanentStreet: '',
+        permanentCity: '',
+        permanentState: '',
+        permanentZipCode: '',
+        permanentCountry: '',
+
+        // Professional Information
+        employeeId: '',
+        department: '',
+        designation: '',
+        degree: '',
+        institution: '',
+        year: '',
+        percentage: '',
+
+        // Previous Experience
+        totalYears: '',
+        institutionName: '',
+        previousDesignation: '',
+        duration: '',
+        from: '',
+        to: '',
     };
 
-    const handleCreateFaculty = async () => {
+    const handleCreateFaculty = async (
+        values: CreateFacultyFormValues,
+        { setSubmitting, resetForm }: FormikHelpers<CreateFacultyFormValues>
+    ) => {
         try {
+            // Clear any previous errors
+            dispatch(clearError());
+
+            // Set loading state
+            dispatch(setLoading(true));
+
+            // Transform form values to API request format
+            const facultyData: CreateFacultyRequest = {
+                email: values.email,
+                personalInfo: {
+                    photo: values.photo,
+                    firstName: values.firstName,
+                    lastName: values.lastName,
+                    dateOfBirth: new Date(values.dateOfBirth),
+                    gender: values.gender,
+                    nationality: values.nationality,
+                    religion: values.nationality,
+                    maritalStatus: values.maritalStatus,
+                },
+                contactInfo: {
+                    phone: String(values.phoneNumber),
+                    permanentAddress: {
+                        street: values.permanentStreet,
+                        city: values.permanentCity,
+                        state: values.permanentState,
+                        zipCode: values.permanentZipCode,
+                        country: values.permanentCountry
+                    },
+                    currentAddress: {
+                        street: values.currentStreet,
+                        city: values.currentCity,
+                        state: values.currentState,
+                        zipCode: values.currentZipCode,
+                        country: values.currentCountry
+                    }
+                },
+                professionalInfo: {
+                    employeeId: values.employeeId,
+                    department: values.department,
+                    designation: values.designation,
+                    qualification: [
+                        {
+                            degree: values.degree,
+                            institution: values.institution,
+                            year: typeof values.year === 'number' ? values.year : parseInt(values.year as string),
+                            percentage: typeof values.percentage === 'number' ? values.percentage : parseInt(values.percentage as string)
+                        },
+                    ],
+                    experience: {
+                        totalYears: typeof values.totalYears === 'number' ? values.totalYears : parseInt(values.totalYears as string),
+                        previousInstitutions: [
+                            {
+                                institutionName: values.institutionName,
+                                designation: values.previousDesignation,
+                                duration: String(values.duration),
+                                from: new Date(values.from),
+                                to: new Date(values.to)
+                            },
+                        ]
+                    }
+                }
+            }
+
+            // Call the API
+            const response = await createFaculty(facultyData);
+
+            if (response.success) {
+                // Show success toast with default password
+                toast.success(`${response.message} Default password: ${response.data?.defaultPassword}`);
+
+                // Reset form after successful creation
+                resetForm();
+
+            } else {
+                toast.error(response.message || 'Failed to create faculty');
+                throw new Error(response.message || 'Faculty creation failed');
+            }
 
         } catch (error: any) {
+            console.error('Create faculty error:', error);
+            const errorMessage = error?.response?.data?.message ||
+                error?.message ||
+                'An unexpected error occurred';
+
+            toast.error(errorMessage);
+            dispatch(setError(errorMessage));
         }
         finally {
+            setSubmitting(false);
+            dispatch(setLoading(false));
         }
     }
 
@@ -36,7 +218,7 @@ const CreateFaculty = () => {
                                 validationSchema={createFacultyValidationSchema}
                                 onSubmit={handleCreateFaculty}
                             >
-                                {() => (
+                                {({ isSubmitting, errors, touched }) => (
                                     <Form>
                                         {/* Personal Info */}
                                         <div className="space-y-4 mb-5">
@@ -58,6 +240,9 @@ const CreateFaculty = () => {
                                                                 placeholder="Enter your email"
                                                             />
                                                         </div>
+                                                        {errors.email && touched.email && (
+                                                            <p className="text-xs text-red-600">{errors.email}</p>
+                                                        )}
                                                     </div>
 
                                                     <div>
@@ -74,6 +259,9 @@ const CreateFaculty = () => {
                                                                 placeholder="Enter your First Name"
                                                             />
                                                         </div>
+                                                        {errors.firstName && touched.firstName && (
+                                                            <p className="text-xs text-red-600">{errors.firstName}</p>
+                                                        )}
                                                     </div>
 
                                                     <div>
@@ -90,6 +278,9 @@ const CreateFaculty = () => {
                                                                 placeholder="Enter your Last Name"
                                                             />
                                                         </div>
+                                                        {errors.lastName && touched.lastName && (
+                                                            <p className="text-xs text-red-600">{errors.lastName}</p>
+                                                        )}
                                                     </div>
 
                                                     <div>
@@ -105,6 +296,9 @@ const CreateFaculty = () => {
                                                                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                             />
                                                         </div>
+                                                        {errors.dateOfBirth && touched.dateOfBirth && (
+                                                            <p className="text-xs text-red-600">{errors.dateOfBirth}</p>
+                                                        )}
                                                     </div>
 
                                                     <div>
@@ -124,6 +318,9 @@ const CreateFaculty = () => {
                                                                 <option value="OTHER">Other</option>
                                                             </Field>
                                                         </div>
+                                                        {errors.gender && touched.gender && (
+                                                            <p className="text-xs text-red-600">{errors.gender}</p>
+                                                        )}
                                                     </div>
 
                                                     <div>
@@ -140,6 +337,9 @@ const CreateFaculty = () => {
                                                                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                             />
                                                         </div>
+                                                        {errors.nationality && touched.nationality && (
+                                                            <p className="text-xs text-red-600">{errors.nationality}</p>
+                                                        )}
                                                     </div>
 
                                                     <div>
@@ -156,6 +356,9 @@ const CreateFaculty = () => {
                                                                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                             />
                                                         </div>
+                                                        {errors.religion && touched.religion && (
+                                                            <p className="text-xs text-red-600">{errors.religion}</p>
+                                                        )}
                                                     </div>
 
                                                     <div>
@@ -164,7 +367,9 @@ const CreateFaculty = () => {
                                                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                                 <HeartHandshake className="h-5 w-5 text-gray-400" />
                                                             </div>
-                                                            <select
+                                                            <Field
+                                                                as="select"
+                                                                name="maritalStatus"
                                                                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none"
                                                             >
                                                                 <option value="">Select Status</option>
@@ -172,8 +377,11 @@ const CreateFaculty = () => {
                                                                 <option value="Married">Married</option>
                                                                 <option value="Divorced">Divorced</option>
                                                                 <option value="Widowed">Widowed</option>
-                                                            </select>
+                                                            </Field>
                                                         </div>
+                                                        {errors.maritalStatus && touched.maritalStatus && (
+                                                            <p className="text-xs text-red-600">{errors.maritalStatus}</p>
+                                                        )}
                                                     </div>
                                                 </div>
 
@@ -186,6 +394,9 @@ const CreateFaculty = () => {
                                                         placeholder="Photo Link"
                                                         className="w-full py-2 border border-gray-300 rounded-md focus:outline-none"
                                                     />
+                                                    {errors.photo && touched.photo && (
+                                                        <p className="text-xs text-red-600">{errors.photo}</p>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -210,6 +421,9 @@ const CreateFaculty = () => {
                                                                 placeholder="Enter Your Phone Number"
                                                             />
                                                         </div>
+                                                        {errors.phoneNumber && touched.phoneNumber && (
+                                                            <p className="text-xs text-red-600">{errors.phoneNumber}</p>
+                                                        )}
                                                     </div>
                                                 </div>
 
@@ -233,6 +447,9 @@ const CreateFaculty = () => {
                                                                         placeholder="Enter Your Street"
                                                                     />
                                                                 </div>
+                                                                {errors.currentStreet && touched.currentStreet && (
+                                                                    <p className="text-xs text-red-600">{errors.currentStreet}</p>
+                                                                )}
                                                             </div>
                                                             <div>
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">City<span className="text-red-500">*</span></label>
@@ -248,6 +465,9 @@ const CreateFaculty = () => {
                                                                         placeholder="Enter Your City"
                                                                     />
                                                                 </div>
+                                                                {errors.currentCity && touched.currentCity && (
+                                                                    <p className="text-xs text-red-600">{errors.currentCity}</p>
+                                                                )}
                                                             </div>
                                                             <div>
                                                                 <label className="block text-sm font-medium text-gray-700 mb-1">State<span className="text-red-500">*</span></label>
@@ -263,6 +483,9 @@ const CreateFaculty = () => {
                                                                         placeholder="Enter Your State"
                                                                     />
                                                                 </div>
+                                                                {errors.currentState && touched.currentState && (
+                                                                    <p className="text-xs text-red-600">{errors.currentState}</p>
+                                                                )}
                                                             </div>
 
                                                             <div>
@@ -279,6 +502,9 @@ const CreateFaculty = () => {
                                                                         placeholder="Enter Your Zip Code"
                                                                     />
                                                                 </div>
+                                                                {errors.currentZipCode && touched.currentZipCode && (
+                                                                    <p className="text-xs text-red-600">{errors.currentZipCode}</p>
+                                                                )}
                                                             </div>
 
                                                             <div>
@@ -295,6 +521,9 @@ const CreateFaculty = () => {
                                                                         placeholder="Enter Your Country"
                                                                     />
                                                                 </div>
+                                                                {errors.currentCountry && touched.currentCountry && (
+                                                                    <p className="text-xs text-red-600">{errors.currentCountry}</p>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -328,6 +557,9 @@ const CreateFaculty = () => {
                                                                     placeholder="Enter Your Street"
                                                                 />
                                                             </div>
+                                                            {errors.permanentStreet && touched.permanentStreet && (
+                                                                <p className="text-xs text-red-600">{errors.permanentStreet}</p>
+                                                            )}
                                                         </div>
                                                         <div>
                                                             <label className="block text-sm font-medium text-gray-700 mb-1">City<span className="text-red-500">*</span></label>
@@ -343,6 +575,9 @@ const CreateFaculty = () => {
                                                                     placeholder="Enter Your City"
                                                                 />
                                                             </div>
+                                                            {errors.permanentCity && touched.permanentCity && (
+                                                                <p className="text-xs text-red-600">{errors.permanentCity}</p>
+                                                            )}
                                                         </div>
                                                         <div>
                                                             <label className="block text-sm font-medium text-gray-700 mb-1">State<span className="text-red-500">*</span></label>
@@ -358,6 +593,9 @@ const CreateFaculty = () => {
                                                                     placeholder="Enter Your State"
                                                                 />
                                                             </div>
+                                                            {errors.permanentState && touched.permanentState && (
+                                                                <p className="text-xs text-red-600">{errors.permanentState}</p>
+                                                            )}
                                                         </div>
                                                         <div>
                                                             <label className="block text-sm font-medium text-gray-700 mb-1">Zip Code<span className="text-red-500">*</span></label>
@@ -373,6 +611,9 @@ const CreateFaculty = () => {
                                                                     placeholder="Enter Your Zip Code"
                                                                 />
                                                             </div>
+                                                            {errors.permanentZipCode && touched.permanentZipCode && (
+                                                                <p className="text-xs text-red-600">{errors.permanentZipCode}</p>
+                                                            )}
                                                         </div>
                                                         <div>
                                                             <label className="block text-sm font-medium text-gray-700 mb-1">Country<span className="text-red-500">*</span></label>
@@ -388,6 +629,9 @@ const CreateFaculty = () => {
                                                                     placeholder="Enter Your Country"
                                                                 />
                                                             </div>
+                                                            {errors.permanentCountry && touched.permanentCountry && (
+                                                                <p className="text-xs text-red-600">{errors.permanentCountry}</p>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -407,13 +651,16 @@ const CreateFaculty = () => {
                                                                 <BadgeInfo className="h-5 w-5 text-gray-400" />
                                                             </div>
                                                             <Field
-                                                                id="employeeID"
-                                                                name="employeeID"
+                                                                id="employeeId"
+                                                                name="employeeId"
                                                                 type="text"
                                                                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                 placeholder="Enter your Employee ID"
                                                             />
                                                         </div>
+                                                        {errors.employeeId && touched.employeeId && (
+                                                            <p className="text-xs text-red-600">{errors.employeeId}</p>
+                                                        )}
                                                     </div>
 
                                                     <div>
@@ -430,6 +677,9 @@ const CreateFaculty = () => {
                                                                 placeholder="Enter your Department"
                                                             />
                                                         </div>
+                                                        {errors.department && touched.department && (
+                                                            <p className="text-xs text-red-600">{errors.department}</p>
+                                                        )}
                                                     </div>
 
                                                     <div>
@@ -446,6 +696,9 @@ const CreateFaculty = () => {
                                                                 placeholder="Enter your Designation"
                                                             />
                                                         </div>
+                                                        {errors.designation && touched.designation && (
+                                                            <p className="text-xs text-red-600">{errors.designation}</p>
+                                                        )}
                                                     </div>
 
                                                 </div>
@@ -478,6 +731,9 @@ const CreateFaculty = () => {
                                                                 placeholder="Enter your Degree"
                                                             />
                                                         </div>
+                                                        {errors.degree && touched.degree && (
+                                                            <p className="text-xs text-red-600">{errors.degree}</p>
+                                                        )}
                                                     </div>
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">Institution<span className="text-red-500">*</span></label>
@@ -493,6 +749,9 @@ const CreateFaculty = () => {
                                                                 placeholder="Enter your Institution"
                                                             />
                                                         </div>
+                                                        {errors.institution && touched.institution && (
+                                                            <p className="text-xs text-red-600">{errors.institution}</p>
+                                                        )}
                                                     </div>
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">Year<span className="text-red-500">*</span></label>
@@ -508,6 +767,9 @@ const CreateFaculty = () => {
                                                                 placeholder="Enter your Year"
                                                             />
                                                         </div>
+                                                        {errors.year && touched.year && (
+                                                            <p className="text-xs text-red-600">{errors.year}</p>
+                                                        )}
                                                     </div>
                                                     <div>
                                                         <label className="block text-sm font-medium text-gray-700 mb-1">Percentage<span className="text-red-500">*</span></label>
@@ -517,12 +779,15 @@ const CreateFaculty = () => {
                                                             </div>
                                                             <Field
                                                                 id="percentage"
-                                                                name="ercentage"
-                                                                type="number"
+                                                                name="percentage"
+                                                                type="text"
                                                                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                 placeholder="Enter your Percentage"
                                                             />
                                                         </div>
+                                                        {errors.percentage && touched.percentage && (
+                                                            <p className="text-xs text-red-600">{errors.percentage}</p>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
@@ -545,13 +810,16 @@ const CreateFaculty = () => {
                                                                 <Hourglass className="h-5 w-5 text-gray-400" />
                                                             </div>
                                                             <Field
-                                                                id="years"
-                                                                name="years"
+                                                                id="totalYears"
+                                                                name="totalYears"
                                                                 type="number"
                                                                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                 placeholder="Enter your Years"
                                                             />
                                                         </div>
+                                                        {errors.totalYears && touched.totalYears && (
+                                                            <p className="text-xs text-red-600">{errors.totalYears}</p>
+                                                        )}
                                                     </div>
                                                 </div>
 
@@ -580,6 +848,9 @@ const CreateFaculty = () => {
                                                                     placeholder="Enter your Institution Name"
                                                                 />
                                                             </div>
+                                                            {errors.institutionName && touched.institutionName && (
+                                                                <p className="text-xs text-red-600">{errors.institutionName}</p>
+                                                            )}
                                                         </div>
                                                         <div>
                                                             <label className="block text-sm font-medium text-gray-700 mb-1">Designation<span className="text-red-500">*</span></label>
@@ -588,13 +859,16 @@ const CreateFaculty = () => {
                                                                     <Briefcase className="h-5 w-5 text-gray-400" />
                                                                 </div>
                                                                 <Field
-                                                                    id="designation"
-                                                                    name="designation"
+                                                                    id="previousDesignation"
+                                                                    name="previousDesignation"
                                                                     type="text"
                                                                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                     placeholder="Enter your Institution Designation"
                                                                 />
                                                             </div>
+                                                            {errors.previousDesignation && touched.previousDesignation && (
+                                                                <p className="text-xs text-red-600">{errors.previousDesignation}</p>
+                                                            )}
                                                         </div>
                                                         <div>
                                                             <label className="block text-sm font-medium text-gray-700 mb-1">Duration<span className="text-red-500">*</span></label>
@@ -610,6 +884,9 @@ const CreateFaculty = () => {
                                                                     placeholder="Enter your Institution Duration"
                                                                 />
                                                             </div>
+                                                            {errors.duration && touched.duration && (
+                                                                <p className="text-xs text-red-600">{errors.duration}</p>
+                                                            )}
                                                         </div>
                                                         <div>
                                                             <label className="block text-sm font-medium text-gray-700 mb-1">From Date<span className="text-red-500">*</span></label>
@@ -618,12 +895,15 @@ const CreateFaculty = () => {
                                                                     <CalendarDays className="h-5 w-5 text-gray-400" />
                                                                 </div>
                                                                 <Field
-                                                                    id="fromDate"
-                                                                    name="fromDate"
+                                                                    id="from"
+                                                                    name="from"
                                                                     type="date"
                                                                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                 />
                                                             </div>
+                                                            {errors.from && touched.from && (
+                                                                <p className="text-xs text-red-600">{errors.from}</p>
+                                                            )}
                                                         </div>
                                                         <div>
                                                             <label className="block text-sm font-medium text-gray-700 mb-1">To Date<span className="text-red-500">*</span></label>
@@ -632,12 +912,15 @@ const CreateFaculty = () => {
                                                                     <CalendarCheck2 className="h-5 w-5 text-gray-400" />
                                                                 </div>
                                                                 <Field
-                                                                    id="toDate"
-                                                                    name="toDate"
+                                                                    id="to"
+                                                                    name="to"
                                                                     type="date"
                                                                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                                 />
                                                             </div>
+                                                            {errors.to && touched.to && (
+                                                                <p className="text-xs text-red-600">{errors.to}</p>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -648,9 +931,16 @@ const CreateFaculty = () => {
                                         <div className="flex justify-end gap-4">
                                             <button
                                                 type="submit"
-                                                className="bg-primary text-whiteColor px-6 py-1.5 rounded-md focus:outline-none font-medium"
+                                                disabled={isSubmitting}
+                                                className="bg-primary text-whiteColor px-6 py-1.5 rounded-md focus:outline-none font-medium cursor-pointer"
                                             >
-                                                Create Faculty
+                                                {isSubmitting ? (
+                                                    <>
+                                                        <Spinner />
+                                                    </>
+                                                ) : (
+                                                    'Create Faculty'
+                                                )}
                                             </button>
                                         </div>
                                     </Form>
