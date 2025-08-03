@@ -6,6 +6,7 @@ import ExamDashboard from '../Dashboard/ExamDashboard';
 import CreateStudent from './CreateStudent';
 import CreateFaculty from './CreateFaculty';
 import CreateExam from './CreateExam';
+import StudentDetail from './StudentDetail';
 
 const MainComponent = () => {
 
@@ -19,6 +20,7 @@ const MainComponent = () => {
                         {/* Students Screens */}
                         <Route path="student" element={<StudentDashboard />} />
                         <Route path="student/create-student" element={<CreateStudent />} />
+                        <Route path="student/:id" element={<StudentDetail />} />                        
 
                         {/* Faculty Screens */}
                         <Route path="faculty" element={<FacultyDashboard />} />
