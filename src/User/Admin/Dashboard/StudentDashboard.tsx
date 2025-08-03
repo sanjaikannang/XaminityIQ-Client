@@ -112,7 +112,7 @@ const StudentDashboard = () => {
   }
 
   const handleViewStudent = (studentId: string) => {
-    navigate(`student/${studentId}`);
+    navigate(`/admin/student/${studentId}`);
   };
 
   // Load students on component mount

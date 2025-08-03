@@ -112,7 +112,7 @@ const FacultyDashboard = () => {
   }
 
   const handleViewFaculty = (facultyId: string) => {
-    navigate(`faculty/${facultyId}`);
+    navigate(`/admin/faculty/${facultyId}`);
   };
 
   // Load faculty on component mount
