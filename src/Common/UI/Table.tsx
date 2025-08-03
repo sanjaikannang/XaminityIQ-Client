@@ -112,7 +112,7 @@ const Table: React.FC<TableProps> = ({
 
     return (
         <>
-            <div className={`bg-white rounded-md border border-gray-300 ${className}`}>
+            <div className={`bg-white rounded-md border border-gray-300 overflow-hidden ${className}`}>
                 {/* Table Container with Horizontal Scroll */}
                 <div className="overflow-auto no-scrollbar">
                     <table
@@ -123,7 +123,7 @@ const Table: React.FC<TableProps> = ({
                         }}
                     >
                         {/* Table Header */}
-                        <thead className={`bg-gray-50 border-b border-gray-200 ${headerClassName}`}>
+                        <thead className={`bg-gray-50 rounded-t-md border-b border-gray-200 ${headerClassName}`}>
                             <tr>
                                 {columns.map((column) => (
                                     <th
@@ -207,7 +207,7 @@ const Table: React.FC<TableProps> = ({
                                         onClick={() => onPageChange?.(pagination.currentPage - 1)}
                                         disabled={!pagination.hasPrevPage}
                                         className={`flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${pagination.hasPrevPage
-                                            ? 'bg-green-500 text-white hover:bg-green-600 cursor-pointer'
+                                            ? 'bg-primary text-white cursor-pointer'
                                             : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                             }`}
                                     >
@@ -224,7 +224,7 @@ const Table: React.FC<TableProps> = ({
                                         onClick={() => onPageChange?.(pagination.currentPage + 1)}
                                         disabled={!pagination.hasNextPage}
                                         className={`flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${pagination.hasNextPage
-                                            ? 'bg-green-500 text-white hover:bg-green-600 cursor-pointer'
+                                            ? 'bg-primary text-white cursor-pointer'
                                             : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                             }`}
                                     >

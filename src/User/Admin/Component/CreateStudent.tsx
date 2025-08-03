@@ -197,12 +197,8 @@ const CreateStudent = () => {
                 }
             };
 
-            console.log("studentData...", studentData);
-
             // Call the API
             const response = await createStudent(studentData);
-
-            console.log("response....", response);
 
             if (response.success) {
                 // Show success toast with default password
