@@ -112,7 +112,7 @@ const Table: React.FC<TableProps> = ({
 
     return (
         <>
-            <div className={`bg-white rounded-md border border-gray-300 ${className}`}>
+            <div className={`bg-white rounded-md border border-gray-300 overflow-hidden ${className}`}>
                 {/* Table Container with Horizontal Scroll */}
                 <div className="overflow-auto no-scrollbar">
                     <table
@@ -123,7 +123,7 @@ const Table: React.FC<TableProps> = ({
                         }}
                     >
                         {/* Table Header */}
-                        <thead className={`bg-gray-50 border-b border-gray-200 ${headerClassName}`}>
+                        <thead className={`bg-gray-50 rounded-t-md border-b border-gray-200 ${headerClassName}`}>
                             <tr>
                                 {columns.map((column) => (
                                     <th

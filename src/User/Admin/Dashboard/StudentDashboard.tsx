@@ -7,6 +7,7 @@ import { removeStudent, setAllStudents, setStudentError, setStudentLoading } fro
 import { deleteStudent, getAllStudent } from '../../../Services/Admin/adminAPI';
 import Table, { TableColumn, TableRow } from '../../../Common/UI/Table';
 import { StudentResponse } from '../../../Types/admin.types';
+import Modal from '../../../Common/UI/Modal';
 
 const StudentDashboard = () => {
 
@@ -24,6 +25,14 @@ const StudentDashboard = () => {
   // Local state for pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+
+  // Modal state
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    studentId: '',
+    studentName: '',
+    isDeleting: false
+  });
 
   // Fetch students data
   const fetchStudents = async (page: number = 1) => {
@@ -47,23 +56,48 @@ const StudentDashboard = () => {
     }
   };
 
-  // Handle delete student
-  const handleDeleteStudent = async (studentId: string) => {
-    if (window.confirm('Are you sure you want to delete this student?')) {
-      try {
-        dispatch(setStudentLoading(true));
-        const response = await deleteStudent(studentId);
+  // Open delete confirmation modal
+  const openDeleteModal = (studentId: string, studentName: string) => {
+    setDeleteModal({
+      isOpen: true,
+      studentId,
+      studentName,
+      isDeleting: false
+    });
+  };
 
-        if (response.success) {
-          dispatch(removeStudent(studentId));
-          // Refetch current page to update pagination
-          fetchStudents(currentPage);
-        } else {
-          dispatch(setStudentError('Failed to delete student'));
-        }
-      } catch (error: any) {
-        dispatch(setStudentError(error?.message || 'Failed to delete student'));
+  // Close delete modal
+  const closeDeleteModal = () => {
+    setDeleteModal({
+      isOpen: false,
+      studentId: '',
+      studentName: '',
+      isDeleting: false
+    });
+  };
+
+  // Handle delete student
+  const handleDeleteStudent = async () => {
+    try {
+      setDeleteModal(prev => ({ ...prev, isDeleting: true }));
+
+      const response = await deleteStudent(deleteModal.studentId);
+
+      if (response.success) {
+        dispatch(removeStudent(deleteModal.studentId));
+        // Refetch current page to update pagination
+        fetchStudents(currentPage);
+        closeDeleteModal();
+
+        // Optional: Show success message
+        // You can use a toast notification here if you have one
+      } else {
+        dispatch(setStudentError('Failed to delete student'));
+        setDeleteModal(prev => ({ ...prev, isDeleting: false }));
       }
+    } catch (error: any) {
+      dispatch(setStudentError(error?.message || 'Failed to delete student'));
+      setDeleteModal(prev => ({ ...prev, isDeleting: false }));
     }
   };
 
@@ -185,9 +219,9 @@ const StudentDashboard = () => {
               title="View"
             >
               <Eye size={16} />
-            </button>            
+            </button>
             <button
-              onClick={() => handleDeleteStudent(value)}
+              onClick={() => openDeleteModal(value, _row._fullName)}
               className="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded cursor-pointer"
               title="Delete"
             >
@@ -259,6 +293,42 @@ const StudentDashboard = () => {
             className="shadow-sm"
           />
         </div>
+
+        {/* Delete Confirmation Modal */}
+        <Modal
+          isOpen={deleteModal.isOpen}
+          onClose={closeDeleteModal}
+          title="Delete Student"
+          size="sm"
+        >
+          <div className="text-center">            
+            <p className="text-sm text-gray-500 mb-6">
+              You are about to delete <span className="font-semibold">{deleteModal.studentName}</span>.
+              This action cannot be undone and will permanently remove all associated data.
+            </p>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end">
+              <button
+                onClick={handleDeleteStudent}
+                disabled={deleteModal.isDeleting}
+                className="px-4 py-1.5 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
+              >
+                {deleteModal.isDeleting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={16} />
+                    Delete
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </Modal>
 
       </main>
     </>
