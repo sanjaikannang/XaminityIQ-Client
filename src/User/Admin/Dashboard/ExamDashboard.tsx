@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Exam from "../Component/Exam/Exam";
 
 const ExamDashboard = () => {
 
@@ -30,7 +31,7 @@ const ExamDashboard = () => {
 
         {/* Exam Table */}
         <div>
-
+          <Exam />
         </div>
       </main>
     </>
