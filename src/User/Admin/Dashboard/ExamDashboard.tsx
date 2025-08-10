@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import Exam from "../Component/Exam/Exam";
+import AllExam from "../Component/AllExam";
 
 const ExamDashboard = () => {
 
@@ -29,9 +29,9 @@ const ExamDashboard = () => {
           </div>
         </div>
 
-        {/* Exam Table */}
+        {/* All Exam */}
         <div>
-          <Exam />
+          <AllExam />
         </div>
       </main>
     </>
