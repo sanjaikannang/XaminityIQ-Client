@@ -9,6 +9,7 @@ import CreateExam from './CreateExam';
 import StudentDetail from './StudentDetail';
 import FacultyDetail from './FacultyDetail';
 import BulkUploadStudent from './BulkUploadStudent';
+import AllExam from './AllExam';
 
 const MainComponent = () => {
 
@@ -22,7 +23,7 @@ const MainComponent = () => {
                         {/* Students Screens */}
                         <Route path="student" element={<StudentDashboard />} />
                         <Route path="student/create-student" element={<CreateStudent />} />
-                        <Route path="student/create-bulk-student" element={<BulkUploadStudent />} />                        
+                        <Route path="student/create-bulk-student" element={<BulkUploadStudent />} />
                         <Route path="student/:id" element={<StudentDetail />} />
 
                         {/* Faculty Screens */}
@@ -32,6 +33,7 @@ const MainComponent = () => {
 
                         {/* Exam Screens */}
                         <Route path="exam" element={<ExamDashboard />} />
+                        <Route path="exam/all-exam" element={<AllExam />} />
                         <Route path="exam/create-exam" element={<CreateExam />} />
 
                     </Routes>
