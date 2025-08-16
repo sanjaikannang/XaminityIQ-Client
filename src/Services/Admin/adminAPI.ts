@@ -1,5 +1,5 @@
 import api from "../../Api/axios";
-import { CreateFacultyRequest, CreateFacultyResponse, CreateStudentRequest, CreateStudentResponse, DeleteFacultyResponse, DeleteStudentResponse, GetAllFacultyRequest, GetAllFacultyResponse, GetAllStudentRequest, GetAllStudentResponse, GetFacultyResponse, GetStudentResponse } from "../../Types/admin.types";
+import { CreateFacultyRequest, CreateFacultyResponse, CreateStudentRequest, CreateStudentResponse, DeleteFacultyResponse, DeleteStudentResponse, GetAllExamRequest, GetAllExamResponse, GetAllFacultyRequest, GetAllFacultyResponse, GetAllStudentRequest, GetAllStudentResponse, GetFacultyResponse, GetStudentResponse } from "../../Types/admin.types";
 
 // Create Student
 export async function createStudent(data: CreateStudentRequest): Promise<CreateStudentResponse> {
@@ -72,5 +72,22 @@ export async function getFaculty(id: string): Promise<GetFacultyResponse> {
 // Get Student
 export async function getStudent(id: string): Promise<GetStudentResponse> {
     const response = await api.get<GetStudentResponse>(`/admin/get-student/${id}`);
+    return response.data;
+}
+
+
+// Get All Exams - Add this function
+export async function getAllExam(params?: GetAllExamRequest): Promise<GetAllExamResponse> {
+    const queryParams = new URLSearchParams();
+
+    if (params?.page) {
+        queryParams.append('page', params.page.toString());
+    }
+    if (params?.limit) {
+        queryParams.append('limit', params.limit.toString());
+    }
+
+    const url = `/admin/get-all-exam${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const response = await api.get<GetAllExamResponse>(url);
     return response.data;
 }
