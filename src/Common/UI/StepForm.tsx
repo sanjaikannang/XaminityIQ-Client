@@ -135,7 +135,7 @@ const StepForm: React.FC<StepFormProps> = ({
                             {/* Main Content Area */}
                             <div className="flex-1 flex flex-col">
                                 {/* Step Content */}
-                                <div className="flex-1 p-4">
+                                <div className="flex-1">
                                     {children}
                                 </div>
 

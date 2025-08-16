@@ -1,5 +1,5 @@
 import api from "../../Api/axios";
-import { CreateFacultyRequest, CreateFacultyResponse, CreateStudentRequest, CreateStudentResponse, DeleteFacultyResponse, DeleteStudentResponse, GetAllExamRequest, GetAllExamResponse, GetAllFacultyRequest, GetAllFacultyResponse, GetAllStudentRequest, GetAllStudentResponse, GetFacultyResponse, GetStudentResponse } from "../../Types/admin.types";
+import { CreateExamRequest, CreateExamResponse, CreateFacultyRequest, CreateFacultyResponse, CreateStudentRequest, CreateStudentResponse, DeleteFacultyResponse, DeleteStudentResponse, GetAllExamRequest, GetAllExamResponse, GetAllFacultyRequest, GetAllFacultyResponse, GetAllStudentRequest, GetAllStudentResponse, GetFacultyResponse, GetStudentResponse } from "../../Types/admin.types";
 
 // Create Student
 export async function createStudent(data: CreateStudentRequest): Promise<CreateStudentResponse> {
@@ -76,7 +76,14 @@ export async function getStudent(id: string): Promise<GetStudentResponse> {
 }
 
 
-// Get All Exams - Add this function
+// Create Exam
+export async function createExam(data: CreateExamRequest): Promise<CreateExamResponse> {
+    const response = await api.post<CreateExamResponse>('/admin/create-exam', data);
+    return response.data;
+}
+
+
+// Get All Exams
 export async function getAllExam(params?: GetAllExamRequest): Promise<GetAllExamResponse> {
     const queryParams = new URLSearchParams();
 
