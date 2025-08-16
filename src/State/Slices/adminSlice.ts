@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AdminState, FacultyResponse, PaginationInfo, StudentResponse } from '../../Types/admin.types';
+import { AdminState, ExamResponse, FacultyResponse, PaginationInfo, StudentResponse } from '../../Types/admin.types';
 
 const initialState: AdminState = {
     faculty: [],
@@ -10,13 +10,19 @@ const initialState: AdminState = {
     studentPagination: null,
     selectedStudent: null,
 
+    exams: [],
+    examPagination: null,
+    selectedExam: null,
+
     isLoading: false,
     isFacultyLoading: false,
     isStudentLoading: false,
+    isExamLoading: false,
 
     error: null,
     facultyError: null,
     studentError: null,
+    examError: null,
 
     successMessage: null,
 };
@@ -36,6 +42,7 @@ const adminSlice = createSlice({
             state.error = null;
             state.facultyError = null;
             state.studentError = null;
+            state.examError = null;
         },
         setSuccessMessage: (state, action: PayloadAction<string>) => {
             state.successMessage = action.payload;
@@ -116,6 +123,42 @@ const adminSlice = createSlice({
             state.selectedStudent = null;
         },
 
+        // Exam actions - Add these
+        setExamLoading: (state, action: PayloadAction<boolean>) => {
+            state.isExamLoading = action.payload;
+        },
+        setExamError: (state, action: PayloadAction<string>) => {
+            state.examError = action.payload;
+            state.isExamLoading = false;
+        },
+        setAllExams: (state, action: PayloadAction<{ exams: ExamResponse[], pagination: PaginationInfo }>) => {
+            state.exams = action.payload.exams;
+            state.examPagination = action.payload.pagination;
+            state.isExamLoading = false;
+            state.examError = null;
+        },
+        setSelectedExam: (state, action: PayloadAction<ExamResponse>) => {
+            state.selectedExam = action.payload;
+            state.isExamLoading = false;
+            state.examError = null;
+        },
+        addExam: (state, action: PayloadAction<ExamResponse>) => {
+            state.exams.unshift(action.payload);
+            state.isLoading = false;
+            state.error = null;
+        },
+        removeExam: (state, action: PayloadAction<string>) => {
+            state.exams = state.exams.filter(exam => exam.examId !== action.payload);
+            if (state.selectedExam?.examId === action.payload) {
+                state.selectedExam = null;
+            }
+            state.isLoading = false;
+            state.error = null;
+        },
+        clearSelectedExam: (state) => {
+            state.selectedExam = null;
+        },
+
         // Reset actions
         resetAdminState: () => {
             return initialState;
@@ -145,6 +188,14 @@ export const {
     addStudent,
     removeStudent,
     clearSelectedStudent,
+
+    setExamLoading,
+    setExamError,
+    setAllExams,
+    setSelectedExam,
+    addExam,
+    removeExam,
+    clearSelectedExam,
 
     resetAdminState,
 } = adminSlice.actions;

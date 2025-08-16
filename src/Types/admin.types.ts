@@ -305,3 +305,87 @@ export interface AdminState {
     // Success messages
     successMessage: string | null;
 }
+
+// Exam related types
+export interface ExamResponse {
+    examId: string;
+    examTitle: string;
+    examDescription?: string;
+    subject: string;
+    totalMarks: number;
+    passingMarks: number;
+    duration: number;
+    examMode: string;
+    generalInstructions: string[];
+    examStatus: string;
+
+    // Target Audience
+    batchId: string;
+    courseId: string;
+    branchId: string;
+    sectionIds: string[];
+
+    // Schedule Details
+    scheduleDetails: {
+        examDate?: Date;
+        startTime?: string;
+        endTime?: string;
+        startDate?: Date;
+        endDate?: Date;
+        bufferTime: {
+            beforeExam: number;
+            afterExam: number;
+        };
+    };
+
+    // Faculty Assignment
+    assignedFacultyIds: string[];
+    createdBy: string;
+    status: string;
+}
+
+export interface GetAllExamRequest {
+    page?: number;
+    limit?: number;
+}
+
+export interface GetAllExamResponse {
+    success: boolean;
+    message: string;
+    data: {
+        pagination: PaginationInfo;
+        exams: ExamResponse[];
+    };
+}
+
+// Update your existing AdminState interface to include exam-related state
+export interface AdminState {
+    // Existing faculty state
+    faculty: FacultyResponse[];
+    facultyPagination: PaginationInfo | null;
+    selectedFaculty: FacultyResponse | null;
+
+    // Existing student state
+    students: StudentResponse[];
+    studentPagination: PaginationInfo | null;
+    selectedStudent: StudentResponse | null;
+
+    // Add exam state
+    exams: ExamResponse[];
+    examPagination: PaginationInfo | null;
+    selectedExam: ExamResponse | null;
+
+    // Existing loading states
+    isLoading: boolean;
+    isFacultyLoading: boolean;
+    isStudentLoading: boolean;
+    isExamLoading: boolean; // Add this
+
+    // Existing error states
+    error: string | null;
+    facultyError: string | null;
+    studentError: string | null;
+    examError: string | null; // Add this
+
+    successMessage: string | null;
+}
