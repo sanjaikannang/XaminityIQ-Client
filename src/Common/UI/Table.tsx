@@ -123,12 +123,12 @@ const Table: React.FC<TableProps> = ({
                         }}
                     >
                         {/* Table Header */}
-                        <thead className={`bg-gray-50 rounded-t-md border-b border-gray-200 ${headerClassName}`}>
+                        <thead className={`bg-tertiary rounded-t-md border-b border-gray-200 ${headerClassName}`}>
                             <tr>
                                 {columns.map((column) => (
                                     <th
                                         key={column.key}
-                                        className={`px-4 py-5 text-sm font-medium text-gray-500 tracking-wider ${column.align === 'center' ? 'text-center' :
+                                        className={`px-4 py-5 text-sm font-medium text-gray-800 tracking-wider ${column.align === 'center' ? 'text-center' :
                                             column.align === 'right' ? 'text-right' : 'text-left'
                                             }`}
                                         style={{
