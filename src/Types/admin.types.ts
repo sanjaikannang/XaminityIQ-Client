@@ -1,4 +1,4 @@
-import { Gender, MaritalStatus } from "../Utils/enum";
+import { DifficultyLevel, ExamMode, ExamStatus, Gender, MaritalStatus, QuestionType } from "../Utils/enum";
 
 export interface Address {
     street?: string;
@@ -389,3 +389,90 @@ export interface AdminState {
 
     successMessage: string | null;
 }
+
+export interface BufferTime {
+    beforeExam?: number;
+    afterExam?: number;
+}
+
+export interface ScheduleDetails {
+    examDate?: string;
+    startTime?: string;
+    endTime?: string;
+    startDate?: string;
+    endDate?: string;
+    bufferTime?: BufferTime;
+}
+
+export interface QuestionOption {
+    optionText: string;
+    optionImage?: string;
+    isCorrect: boolean;
+}
+
+export interface CorrectAnswer {
+    answerText: string;
+    keywords: string[];
+    marks: number;
+}
+
+export interface CreateQuestion {
+    questionText: string;
+    questionImage?: string;
+    questionType: QuestionType;
+    marks: number;
+    questionOrder: number;
+    difficultyLevel: DifficultyLevel;
+    options?: QuestionOption[];
+    correctAnswers?: CorrectAnswer[];
+    correctAnswer?: boolean;
+    explanation?: string;
+}
+
+export interface CreateExamSection {
+    sectionName: string;
+    sectionOrder: number;
+    sectionMarks: number;
+    questionType: QuestionType;
+    totalQuestions: number;
+    sectionInstructions?: string[];
+    timeLimit?: number;
+    isOptional?: boolean;
+    questions: CreateQuestion[];
+}
+
+export interface CreateExamRequest {
+    examStatus: ExamStatus;
+    examTitle: string;
+    examDescription?: string;
+    subject: string;
+    totalMarks: number;
+    passingMarks: number;
+    duration: number;
+    examMode: ExamMode;
+    generalInstructions?: string[];
+    batchId: string;
+    courseId: string;
+    branchId: string;
+    sectionIds?: string[];
+    scheduleDetails: ScheduleDetails;
+    assignedFacultyIds?: string[];
+    examSections: CreateExamSection[];
+}
+
+export interface ExamData {
+    examId: string;
+    examTitle: string;
+    examStatus: string;
+    totalMarks: number;
+    duration: number;
+}
+
+export interface CreateExamResponse {
+    success: boolean;
+    message: string;
+    data?: ExamData;
+}
+
+// Form Values Interface for Formik
+export interface CreateExamFormValues extends CreateExamRequest { }
