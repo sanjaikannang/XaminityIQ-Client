@@ -5,11 +5,11 @@ import FacultyDashboard from '../Dashboard/FacultyDashboard';
 import ExamDashboard from '../Dashboard/ExamDashboard';
 import CreateStudent from './CreateStudent';
 import CreateFaculty from './CreateFaculty';
-import CreateExam from './CreateExam';
 import StudentDetail from './StudentDetail';
 import FacultyDetail from './FacultyDetail';
 import BulkUploadStudent from './BulkUploadStudent';
 import AllExam from './AllExam';
+import CreateExam from './Exam/CreateExam/CreateExam';
 
 const MainComponent = () => {
 
