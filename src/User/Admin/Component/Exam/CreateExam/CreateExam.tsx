@@ -1,35 +1,30 @@
-import React, { useState } from 'react';
-import toast from 'react-hot-toast';
-import { Formik, Form } from 'formik';
-import { CreateExamFormValues } from '../../../../../Types/admin.types';
-import StepForm, { Step } from '../../../../../Common/UI/StepForm';
+import { useState } from 'react';
+import { useFormik } from 'formik';
+import { useDispatch } from 'react-redux';
+import { ChevronDown, Save, Send } from 'lucide-react';
+import ExamInfo from './Component/ExamInfo';
+import ExamAssignment from './Component/ExamAssignment';
+import Schedule from './Component/Schedule';
+import ExamStructure from './Component/ExamStructure';
+import Questions from './Component/Questions';
+import { CreateExamFormValues, createExamSchema } from '../../../FormikSchema/create-exam.schema';
 import { ExamMode, ExamStatus } from '../../../../../Utils/enum';
+import { setLoading } from '../../../../../State/Slices/adminSlice';
+import { CreateExamRequest } from '../../../../../Types/admin.types';
 import { createExam } from '../../../../../Services/Admin/adminAPI';
-import ExamInfoStep from './Component/ExamInfoStep';
-import ExamAssignmentStep from './Component/ExamAssignmentStep';
-import ScheduleStep from './Component/ScheduleStep';
-import ExamStructureStep from './Component/ExamStructureStep';
-import QuestionsStep from './Component/QuestionsStep';
-import {
-    createExamValidationSchema,
-    examAssignmentValidationSchema,
-    examInfoValidationSchema,
-    scheduleValidationSchema
-} from '../../../FormikSchema/create-exam.schema';
+import toast from 'react-hot-toast';
 
 
-const CreateExam: React.FC = () => {
-    const [currentStep, setCurrentStep] = useState(1);
+const CreateExam = () => {
+    const dispatch = useDispatch();
+    const [isExamInfoOpen, setIsExamInfoOpen] = useState(true);
+    const [isTargetAudienceOpen, setIsTargetAudienceOpen] = useState(true);
+    const [isScheduleOpen, setIsScheduleOpen] = useState(true);
+    const [isExamStructureOpen, setIsExamStructureOpen] = useState(true);
+    const [isQuestionsOpen, setIsQuestionsOpen] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const steps: Step[] = [
-        { id: 1, title: 'Exam Info', description: 'Basic Exam Information' },
-        { id: 2, title: 'Exam Assignment', description: 'Target Audience & Assignment' },
-        { id: 3, title: 'Schedule & Timing', description: 'Schedule & Timing' },
-        { id: 4, title: 'Exam Structure & Sections', description: 'Exam Structure & Sections' },
-        { id: 5, title: 'Questions & Answers', description: 'Questions & Answers' },
-    ];
-
+    // Initial values for the form
     const initialValues: CreateExamFormValues = {
         examStatus: ExamStatus.DRAFT,
         examTitle: '',
@@ -45,173 +40,235 @@ const CreateExam: React.FC = () => {
         branchId: '',
         sectionIds: [],
         scheduleDetails: {
-            examDate: '',
+            examDate: undefined,
             startTime: '',
             endTime: '',
-            startDate: '',
-            endDate: '',
+            startDate: undefined,
+            endDate: undefined,
             bufferTime: {
                 beforeExam: 0,
-                afterExam: 0
-            }
+                afterExam: 0,
+            },
         },
         assignedFacultyIds: [],
-        examSections: []
+        examSections: [],
     };
 
-    const getStepValidationSchema = (step: number) => {
-        switch (step) {
-            case 1:
-                return examInfoValidationSchema;
-            case 2:
-                return examAssignmentValidationSchema;
-            case 3:
-                return scheduleValidationSchema;
-            case 4:
-            case 5:
-                return createExamValidationSchema;
-            default:
-                return createExamValidationSchema;
-        }
-    };
+    // Formik setup
+    const formik = useFormik<CreateExamFormValues>({
+        initialValues,
+        validationSchema: createExamSchema,
+        onSubmit: async (values) => {
+            await handleSubmit(values, ExamStatus.PUBLISH);
+        },
+    });
 
-    const handleStepChange = (step: number) => {
-        setCurrentStep(step);
-    };
-
-    const handleNext = async (values: CreateExamFormValues, validateForm: Function) => {
-        try {
-            const validationSchema = getStepValidationSchema(currentStep);
-            await validationSchema.validate(values, { abortEarly: false, context: { examMode: values.examMode } });
-
-            if (currentStep < steps.length) {
-                setCurrentStep(currentStep + 1);
-            }
-        } catch (error: any) {
-            if (error.errors) {
-                toast.error(`Please fix the following errors: ${error.errors.join(', ')}`);
-            } else {
-                toast.error('Please fill in all required fields correctly');
-            }
-        }
-    };
-
-    const handlePrevious = () => {
-        if (currentStep > 1) {
-            setCurrentStep(currentStep - 1);
-        }
-    };
-
-    const handleSubmit = async (values: CreateExamFormValues) => {
+    // Handle form submission
+    const handleSubmit = async (values: CreateExamFormValues, status: ExamStatus) => {
         try {
             setIsSubmitting(true);
+            dispatch(setLoading(true));
 
-            // Final validation
-            await createExamValidationSchema.validate(values, {
-                abortEarly: false,
-                context: { examMode: values.examMode }
-            });
+            const examData: CreateExamRequest = {
+                ...values,
+                examStatus: status,
+                generalInstructions: values.generalInstructions?.filter(
+                    (instruction): instruction is string => typeof instruction === 'string' && instruction.trim() !== ''
+                ),
+                scheduleDetails: {
+                    ...values.scheduleDetails,
+                    examDate: values.scheduleDetails.examDate?.toISOString(),
+                    startDate: values.scheduleDetails.startDate?.toISOString(),
+                    endDate: values.scheduleDetails.endDate?.toISOString(),
+                },
+            };
 
-            const response = await createExam(values);
+            const response = await createExam(examData);
 
             if (response.success) {
-                toast.success(response.message);
-                // Reset form or redirect
-                console.log('Exam created successfully:', response.data);
-                // You can navigate to exam list or reset the form here
+                // dispatch(addExam(response.data));
+                toast.success(response.message || 'Exam created successfully');
+
+                // Reset form after successful submission
+                formik.resetForm();
+
+                // Close all sections
+                setIsExamInfoOpen(false);
+                setIsTargetAudienceOpen(false);
+                setIsScheduleOpen(false);
+                setIsExamStructureOpen(false);
+                setIsQuestionsOpen(false);
             } else {
-                toast.error(response.message);
+                toast.error(response.message || 'Failed to create exam');
             }
         } catch (error: any) {
             console.error('Error creating exam:', error);
-            if (error.errors) {
-                toast.error(`Validation errors: ${error.errors.join(', ')}`);
-            } else {
-                toast.error(error.message || 'Failed to create exam');
-            }
+            toast.error(error.response?.data?.message || 'Failed to create exam');
         } finally {
             setIsSubmitting(false);
+            dispatch(setLoading(false));
         }
     };
 
-    const renderStepContent = (values: CreateExamFormValues, errors: any, touched: any, setFieldValue: Function) => {
-        switch (currentStep) {
-            case 1:
-                return (
-                    <ExamInfoStep
-                        values={values}
-                        errors={errors}
-                        touched={touched}
-                        setFieldValue={setFieldValue}
-                    />
-                );
-            case 2:
-                return (
-                    <ExamAssignmentStep
-                        values={values}
-                        errors={errors}
-                        touched={touched}
-                        setFieldValue={setFieldValue}
-                    />
-                );
-            case 3:
-                return (
-                    <ScheduleStep
-                        values={values}
-                        errors={errors}
-                        touched={touched}
-                        setFieldValue={setFieldValue}
-                    />
-                );
-            case 4:
-                return (
-                    <ExamStructureStep
-                        values={values}
-                        errors={errors}
-                        touched={touched}
-                        setFieldValue={setFieldValue}
-                    />
-                );
-            case 5:
-                return (
-                    <QuestionsStep
-                        values={values}
-                        errors={errors}
-                        touched={touched}
-                        setFieldValue={setFieldValue}
-                    />
-                );
-            default:
-                return null;
-        }
+    // Handle save as draft
+    const handleSaveAsDraft = async () => {
+        const values = formik.values;
+        await handleSubmit(values, ExamStatus.DRAFT);
     };
+
+    // Toggle functions
+    const toggleExamInfo = () => setIsExamInfoOpen(!isExamInfoOpen);
+    const toggleTargetAudience = () => setIsTargetAudienceOpen(!isTargetAudienceOpen);
+    const toggleSchedule = () => setIsScheduleOpen(!isScheduleOpen);
+    const toggleExamStructure = () => setIsExamStructureOpen(!isExamStructureOpen);
+    const toggleQuestions = () => setIsQuestionsOpen(!isQuestionsOpen);
 
     return (
         <>
-            <Formik
-                initialValues={initialValues}
-                validationSchema={createExamValidationSchema}
-                onSubmit={handleSubmit}
-                enableReinitialize
-            >
-                {({ values, errors, touched, setFieldValue, validateForm }) => (
-                    <Form>
-                        <StepForm
-                            title="Create Exam"
-                            steps={steps}
-                            currentStep={currentStep}
-                            onStepChange={handleStepChange}
-                            onComplete={() => handleSubmit(values)}
-                            onNext={() => handleNext(values, validateForm)}
-                            onPrevious={handlePrevious}
-                            submitButtonText={isSubmitting ? "Creating..." : "Create Exam"}
-                            allowStepNavigation={false} // Disable free navigation to ensure validation
-                        >
-                            {renderStepContent(values, errors, touched, setFieldValue)}
-                        </StepForm>
-                    </Form>
-                )}
-            </Formik>
+            <div className="min-h-screen bg-gray-50 p-4">
+                <div className="max-w-9xl mx-auto">
+                    <form onSubmit={formik.handleSubmit}>
+                        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                            <div className="bg-primary text-whiteColor p-4 flex items-center justify-between">
+                                <h1 className="text-2xl font-semibold">Create Exam</h1>
+
+                                {/* Action buttons */}
+                                <div className="flex space-x-4">
+                                    <button
+                                        type="button"
+                                        onClick={handleSaveAsDraft}
+                                        disabled={isSubmitting}
+                                        className="flex items-center space-x-2 px-4 py-1.5 bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <Save className="w-4 h-4" />
+                                        <span>Save as Draft</span>
+                                    </button>
+
+                                    <button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="flex items-center space-x-2 px-4 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <Send className="w-4 h-4" />
+                                        <span>{isSubmitting ? 'Publishing...' : 'Publish Exam'}</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Exam Info Section */}
+                            <div>
+                                <div
+                                    className="bg-gray-50 border-b border-gray-300 p-4 cursor-pointer hover:bg-gray-100 transition-colors duration-200 flex items-center justify-between"
+                                    onClick={toggleExamInfo}
+                                >
+                                    <h3 className="text-lg font-semibold text-gray-800">Exam Info</h3>
+                                    <ChevronDown
+                                        className={`w-5 h-5 text-gray-600 transform transition-transform duration-200 ${isExamInfoOpen ? 'rotate-180' : 'rotate-0'
+                                            }`}
+                                    />
+                                </div>
+
+                                <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isExamInfoOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+                                    }`}>
+                                    <ExamInfo formik={formik} />
+                                </div>
+                            </div>
+
+                            {/* Target Audience Section */}
+                            <div>
+                                <div
+                                    className="bg-gray-50 border-b border-gray-300 p-4 cursor-pointer hover:bg-gray-100 transition-colors duration-200 flex items-center justify-between"
+                                    onClick={toggleTargetAudience}
+                                >
+                                    <h3 className="text-lg font-semibold text-gray-800">Target Audience</h3>
+                                    <ChevronDown
+                                        className={`w-5 h-5 text-gray-600 transform transition-transform duration-200 ${isTargetAudienceOpen ? 'rotate-180' : 'rotate-0'
+                                            }`}
+                                    />
+                                </div>
+
+                                <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isTargetAudienceOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+                                    }`}>
+                                    <ExamAssignment formik={formik} />
+                                </div>
+                            </div>
+
+                            {/* Schedule Section */}
+                            <div>
+                                <div
+                                    className="bg-gray-50 border-b border-gray-300 p-4 cursor-pointer hover:bg-gray-100 transition-colors duration-200 flex items-center justify-between"
+                                    onClick={toggleSchedule}
+                                >
+                                    <h3 className="text-lg font-semibold text-gray-800">Schedule</h3>
+                                    <ChevronDown
+                                        className={`w-5 h-5 text-gray-600 transform transition-transform duration-200 ${isScheduleOpen ? 'rotate-180' : 'rotate-0'
+                                            }`}
+                                    />
+                                </div>
+
+                                <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isScheduleOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+                                    }`}>
+                                    <Schedule formik={formik} />
+                                </div>
+                            </div>
+
+                            {/* Exam Structure Section */}
+                            <div>
+                                <div
+                                    className="bg-gray-50 border-b border-gray-300 p-4 cursor-pointer hover:bg-gray-100 transition-colors duration-200 flex items-center justify-between"
+                                    onClick={toggleExamStructure}
+                                >
+                                    <h3 className="text-lg font-semibold text-gray-800">Exam Structure</h3>
+                                    <ChevronDown
+                                        className={`w-5 h-5 text-gray-600 transform transition-transform duration-200 ${isExamStructureOpen ? 'rotate-180' : 'rotate-0'
+                                            }`}
+                                    />
+                                </div>
+
+                                <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isExamStructureOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+                                    }`}>
+                                    <ExamStructure formik={formik} />
+                                </div>
+                            </div>
+
+                            {/* Questions Section */}
+                            <div>
+                                <div
+                                    className="bg-gray-50 border-b border-gray-300 p-4 cursor-pointer hover:bg-gray-100 transition-colors duration-200 flex items-center justify-between"
+                                    onClick={toggleQuestions}
+                                >
+                                    <h3 className="text-lg font-semibold text-gray-800">Questions</h3>
+                                    <ChevronDown
+                                        className={`w-5 h-5 text-gray-600 transform transition-transform duration-200 ${isQuestionsOpen ? 'rotate-180' : 'rotate-0'
+                                            }`}
+                                    />
+                                </div>
+
+                                <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isQuestionsOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+                                    }`}>
+                                    <Questions formik={formik} />
+                                </div>
+                            </div>
+
+                            {/* Form validation errors summary */}
+                            {Object.keys(formik.errors).length > 0 && formik.touched && (
+                                <div className="bg-red-50 border-l-4 border-red-400 p-4 m-4">
+                                    <div className="text-red-700">
+                                        <h3 className="font-medium">Please fix the following errors:</h3>
+                                        <ul className="mt-2 text-sm list-disc list-inside">
+                                            {Object.entries(formik.errors).map(([field, error]) => (
+                                                <li key={field}>
+                                                    {typeof error === 'string' ? error : `${field}: Please check this field`}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </form>
+                </div>
+            </div>
         </>
     );
 };
