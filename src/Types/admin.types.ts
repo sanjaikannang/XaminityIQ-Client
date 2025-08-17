@@ -1,4 +1,4 @@
-import { DifficultyLevel, ExamMode, ExamStatus, Gender, MaritalStatus, QuestionType } from "../Utils/enum";
+import { ExamMode, ExamStatus, Gender, MaritalStatus } from "../Utils/enum";
 
 export interface Address {
     street?: string;
@@ -419,10 +419,10 @@ export interface CorrectAnswer {
 export interface CreateQuestion {
     questionText: string;
     questionImage?: string;
-    questionType: QuestionType;
+    questionType: 'MCQ' | 'SHORT_ANSWER' | 'LONG_ANSWER' | 'TRUE_FALSE';
     marks: number;
     questionOrder: number;
-    difficultyLevel: DifficultyLevel;
+    difficultyLevel: 'EASY' | 'MEDIUM' | 'HARD';
     options?: QuestionOption[];
     correctAnswers?: CorrectAnswer[];
     correctAnswer?: boolean;
@@ -433,7 +433,7 @@ export interface CreateExamSection {
     sectionName: string;
     sectionOrder: number;
     sectionMarks: number;
-    questionType: QuestionType;
+    questionType: 'MCQ' | 'SHORT_ANSWER' | 'LONG_ANSWER' | 'TRUE_FALSE';
     totalQuestions: number;
     sectionInstructions?: string[];
     timeLimit?: number;
