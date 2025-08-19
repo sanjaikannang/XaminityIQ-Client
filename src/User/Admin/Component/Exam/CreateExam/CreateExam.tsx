@@ -9,9 +9,7 @@ import ExamStructure from './Component/ExamStructure';
 import Questions from './Component/Questions';
 
 
-const CreateExam = () => {
-    const [status, setStatus] = useState(ExamStatus.DRAFT);
-    const [isOpen, setIsOpen] = useState(false);
+const CreateExam = () => {    
     const [isExamInfoOpen, setIsExamInfoOpen] = useState(true);
     const [isTargetAudienceOpen, setIsTargetAudienceOpen] = useState(true);
     const [isScheduleOpen, setIsScheduleOpen] = useState(true);
@@ -61,7 +59,7 @@ const CreateExam = () => {
                 <div className="max-w-9xl mx-auto">
                     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
                         <div className="bg-primary text-whiteColor p-4 flex items-center justify-between">
-                            <h1 className="text-2xl font-semibold">Create Exam</h1>                            
+                            <h1 className="text-2xl font-semibold">Create Exam</h1>
                         </div>
 
                         {/* Exam Info Section */}
