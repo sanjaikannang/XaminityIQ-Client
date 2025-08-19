@@ -1,6 +1,26 @@
 import { Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
 const ExamStructure = () => {
+
+    const [instructions, setInstructions] = useState<string[]>([]);
+
+    const handleAddInstruction = () => {
+        if (instructions.length < 10) {
+            setInstructions([...instructions, '']);
+        }
+    };
+
+    const handleInstructionChange = (index: number, value: string) => {
+        const updated = [...instructions];
+        updated[index] = value;
+        setInstructions(updated);
+    };
+
+    const handleDeleteInstruction = (index: number) => {
+        const updated = instructions.filter((_, i) => i !== index);
+        setInstructions(updated);
+    };
 
     return (
         <>
@@ -16,7 +36,7 @@ const ExamStructure = () => {
                                 </label>
                                 <input
                                     type="text"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                     placeholder="Enter section name"
                                 />
                             </div>
@@ -27,7 +47,7 @@ const ExamStructure = () => {
                                     Question Type *
                                 </label>
                                 <select
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                 >
                                     <option value="MCQ">Multiple Choice</option>
                                     <option value="SHORT_ANSWER">Short Answer</option>
@@ -44,7 +64,7 @@ const ExamStructure = () => {
                                 <input
                                     type="number"
                                     min="1"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                     placeholder="0"
                                 />
                             </div>
@@ -57,7 +77,7 @@ const ExamStructure = () => {
                                 <input
                                     type="number"
                                     min="1"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                     placeholder="0"
                                 />
                             </div>
@@ -70,7 +90,7 @@ const ExamStructure = () => {
                                 <input
                                     type="number"
                                     min="0"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                     placeholder="0"
                                 />
                             </div>
@@ -88,33 +108,39 @@ const ExamStructure = () => {
                         </div>
 
                         {/* Section Instructions */}
-                        <div>
-                            <div className="flex items-center justify-between mb-2">
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Section Instructions
-                                </label>
+                        <div className="p-4 rounded-md border border-gray-300 mt-4">
+                            <div className="flex items-center justify-center">
                                 <button
                                     type="button"
-                                    className="text-xs px-2 py-1 bg-primary text-white rounded hover:bg-primary-dark"
+                                    onClick={handleAddInstruction}
+                                    className="px-3 py-2 text-sm bg-primary text-white rounded-md cursor-pointer"
                                 >
                                     Add Instruction
                                 </button>
                             </div>
 
-                            <div className="space-y-2">
-                                <div className="flex items-center space-x-2">
+                            {/* Show inputs only if instructions exist */}
+                            {instructions.map((instruction, index) => (
+                                <div key={index} className="flex items-center space-x-2 mb-2 mt-4">
+                                    <span className="text-gray-700">{index + 1}.</span>
+
                                     <input
                                         type="text"
-                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary focus:border-primary"
+                                        value={instruction}
+                                        onChange={(e) => handleInstructionChange(index, e.target.value)}
+                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                        placeholder="Instruction"
                                     />
+
                                     <button
                                         type="button"
-                                        className="p-1 text-red-400 hover:text-red-600"
+                                        className="p-2 bg-red-500 text-white rounded-sm hover:bg-red-600 cursor-pointer"
+                                        onClick={() => handleDeleteInstruction(index)}
                                     >
-                                        <Trash2 className="w-4 h-4" />
+                                        <Trash2 size={22} />
                                     </button>
                                 </div>
-                            </div>
+                            ))}
                         </div>
                     </div>
                 </div>
