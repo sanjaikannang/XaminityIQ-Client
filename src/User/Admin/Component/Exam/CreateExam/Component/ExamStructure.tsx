@@ -41,6 +41,31 @@ const ExamStructure = () => {
                                 />
                             </div>
 
+                            {/* Section Order */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Section Order *
+                                </label>
+                                <input
+                                    type="text"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                    placeholder="Enter section name"
+                                />
+                            </div>
+
+                            {/* Section Marks */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Section Marks *
+                                </label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                    placeholder="0"
+                                />
+                            </div>
+
                             {/* Question Type */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -60,19 +85,6 @@ const ExamStructure = () => {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Total Questions *
-                                </label>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
-                                    placeholder="0"
-                                />
-                            </div>
-
-                            {/* Section Marks */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Section Marks *
                                 </label>
                                 <input
                                     type="number"

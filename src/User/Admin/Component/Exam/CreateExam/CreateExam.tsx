@@ -6,7 +6,7 @@ import { ExamMode, ExamStatus } from '../../../../../Utils/enum';
 import ExamAssignment from './Component/ExamAssignment';
 import Schedule from './Component/Schedule';
 import ExamStructure from './Component/ExamStructure';
-import { MCQOptions, QuestionCard, SectionQuestionsCard, TextAnswers, TrueFalseAnswer } from './Component/Questions';
+import Questions from './Component/Questions';
 
 
 const CreateExam = () => {
@@ -153,11 +153,7 @@ const CreateExam = () => {
 
                             <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isQuestionsOpen ? 'h-full opacity-100' : 'max-h-0 opacity-0'
                                 }`}>
-                                <SectionQuestionsCard />
-                                <QuestionCard />
-                                <MCQOptions/>
-                                <TextAnswers/>
-                                <TrueFalseAnswer/>
+                                <Questions />
                             </div>
                         </div>
                     </div>
