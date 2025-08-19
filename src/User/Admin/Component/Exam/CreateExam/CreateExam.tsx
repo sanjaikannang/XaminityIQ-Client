@@ -6,10 +6,10 @@ import { ExamMode, ExamStatus } from '../../../../../Utils/enum';
 import ExamAssignment from './Component/ExamAssignment';
 import Schedule from './Component/Schedule';
 import ExamStructure from './Component/ExamStructure';
-import { MCQOptions, QuestionCard, SectionQuestionsCard, TextAnswers, TrueFalseAnswer } from './Component/Questions';
+import Questions from './Component/Questions';
 
 
-const CreateExam = () => {
+const CreateExam = () => {    
     const [isExamInfoOpen, setIsExamInfoOpen] = useState(true);
     const [isTargetAudienceOpen, setIsTargetAudienceOpen] = useState(true);
     const [isScheduleOpen, setIsScheduleOpen] = useState(true);
@@ -68,7 +68,7 @@ const CreateExam = () => {
                                 className="bg-gray-50 border-b border-gray-300 p-4 cursor-pointer hover:bg-gray-100 transition-colors duration-200 flex items-center justify-between"
                                 onClick={toggleExamInfo}
                             >
-                                <h3 className="text-lg font-semibold text-gray-800">Exam Info</h3>
+                                <h3 className="text-lg font-semibold text-gray-800">1. Exam Info</h3>
                                 <ChevronDown
                                     className={`w-5 h-5 text-gray-600 transform transition-transform duration-200 ${isExamInfoOpen ? 'rotate-180' : 'rotate-0'
                                         }`}
@@ -87,7 +87,7 @@ const CreateExam = () => {
                                 className="bg-gray-50 border-b border-gray-300 p-4 cursor-pointer hover:bg-gray-100 transition-colors duration-200 flex items-center justify-between"
                                 onClick={toggleTargetAudience}
                             >
-                                <h3 className="text-lg font-semibold text-gray-800">Target Audience</h3>
+                                <h3 className="text-lg font-semibold text-gray-800">2. Target Audience</h3>
                                 <ChevronDown
                                     className={`w-5 h-5 text-gray-600 transform transition-transform duration-200 ${isTargetAudienceOpen ? 'rotate-180' : 'rotate-0'
                                         }`}
@@ -106,7 +106,7 @@ const CreateExam = () => {
                                 className="bg-gray-50 border-b border-gray-300 p-4 cursor-pointer hover:bg-gray-100 transition-colors duration-200 flex items-center justify-between"
                                 onClick={toggleSchedule}
                             >
-                                <h3 className="text-lg font-semibold text-gray-800">Schedule</h3>
+                                <h3 className="text-lg font-semibold text-gray-800">3. Schedule</h3>
                                 <ChevronDown
                                     className={`w-5 h-5 text-gray-600 transform transition-transform duration-200 ${isScheduleOpen ? 'rotate-180' : 'rotate-0'
                                         }`}
@@ -125,7 +125,7 @@ const CreateExam = () => {
                                 className="bg-gray-50 border-b border-gray-300 p-4 cursor-pointer hover:bg-gray-100 transition-colors duration-200 flex items-center justify-between"
                                 onClick={toggleExamStructure}
                             >
-                                <h3 className="text-lg font-semibold text-gray-800">Exam Structure</h3>
+                                <h3 className="text-lg font-semibold text-gray-800">4. Exam Structure</h3>
                                 <ChevronDown
                                     className={`w-5 h-5 text-gray-600 transform transition-transform duration-200 ${isExamStructureOpen ? 'rotate-180' : 'rotate-0'
                                         }`}
@@ -144,7 +144,7 @@ const CreateExam = () => {
                                 className="bg-gray-50 border-b border-gray-300 p-4 cursor-pointer hover:bg-gray-100 transition-colors duration-200 flex items-center justify-between"
                                 onClick={toggleQuestions}
                             >
-                                <h3 className="text-lg font-semibold text-gray-800">Questions</h3>
+                                <h3 className="text-lg font-semibold text-gray-800">5. Questions</h3>
                                 <ChevronDown
                                     className={`w-5 h-5 text-gray-600 transform transition-transform duration-200 ${isQuestionsOpen ? 'rotate-180' : 'rotate-0'
                                         }`}
@@ -153,11 +153,7 @@ const CreateExam = () => {
 
                             <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isQuestionsOpen ? 'h-full opacity-100' : 'max-h-0 opacity-0'
                                 }`}>
-                                <SectionQuestionsCard />
-                                <QuestionCard />
-                                <MCQOptions/>
-                                <TextAnswers/>
-                                <TrueFalseAnswer/>
+                                <Questions />
                             </div>
                         </div>
                     </div>
