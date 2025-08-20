@@ -1,10 +1,19 @@
 import { Trash2 } from 'lucide-react';
 import { ExamMode } from '../../../../../../Utils/enum';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-const ExamInfo = () => {
+interface ExamInfoProps {
+    onExamModeChange: (mode: ExamMode) => void;
+}
+
+const ExamInfo = ({ onExamModeChange }: ExamInfoProps) => {
 
     const [instructions, setInstructions] = useState<string[]>([]);
+    const [examMode, setExamMode] = useState<ExamMode>(ExamMode.AUTO);
+
+    useEffect(() => {
+        onExamModeChange(examMode);
+    }, [examMode, onExamModeChange]);
 
     const handleAddInstruction = () => {
         if (instructions.length < 10) {
@@ -35,6 +44,8 @@ const ExamInfo = () => {
                             </label>
                             <select
                                 name="examMode"
+                                value={examMode}
+                                onChange={(e) => setExamMode(e.target.value as ExamMode)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                             >
                                 {Object.values(ExamMode).map((mode) => (

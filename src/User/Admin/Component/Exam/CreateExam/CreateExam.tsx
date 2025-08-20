@@ -11,6 +11,8 @@ import Questions from './Component/Questions';
 
 const CreateExam = () => {
     const [status, setStatus] = useState('DRAFT');
+    const [currentExamMode, setCurrentExamMode] = useState<ExamMode>(ExamMode.AUTO);
+
     const [isExamInfoOpen, setIsExamInfoOpen] = useState(true);
     const [isTargetAudienceOpen, setIsTargetAudienceOpen] = useState(true);
     const [isScheduleOpen, setIsScheduleOpen] = useState(true);
@@ -54,6 +56,10 @@ const CreateExam = () => {
     const toggleExamStructure = () => setIsExamStructureOpen(!isExamStructureOpen);
     const toggleQuestions = () => setIsQuestionsOpen(!isQuestionsOpen);
 
+    const handleExamModeChange = (mode: ExamMode) => {
+        setCurrentExamMode(mode);
+    };
+
     return (
         <>
             <div className="p-4">
@@ -95,7 +101,7 @@ const CreateExam = () => {
 
                             <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isExamInfoOpen ? 'h-full opacity-100' : 'max-h-0 opacity-0'
                                 }`}>
-                                <ExamInfo />
+                                <ExamInfo onExamModeChange={handleExamModeChange} />
                             </div>
                         </div>
 
@@ -114,7 +120,7 @@ const CreateExam = () => {
 
                             <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isTargetAudienceOpen ? 'h-full opacity-100' : 'max-h-0 opacity-0'
                                 }`}>
-                                <ExamAssignment />
+                                <ExamAssignment examMode={currentExamMode} />
                             </div>
                         </div>
 
