@@ -9,7 +9,8 @@ import ExamStructure from './Component/ExamStructure';
 import Questions from './Component/Questions';
 
 
-const CreateExam = () => {    
+const CreateExam = () => {
+    const [status, setStatus] = useState('DRAFT');
     const [isExamInfoOpen, setIsExamInfoOpen] = useState(true);
     const [isTargetAudienceOpen, setIsTargetAudienceOpen] = useState(true);
     const [isScheduleOpen, setIsScheduleOpen] = useState(true);
@@ -60,6 +61,23 @@ const CreateExam = () => {
                     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
                         <div className="bg-primary text-whiteColor p-4 flex items-center justify-between">
                             <h1 className="text-2xl font-semibold">Create Exam</h1>
+
+                            <div className="border border-white rounded-full overflow-hidden">
+                                <button
+                                    className={`px-4 transition-colors cursor-pointer ${status === 'DRAFT' ? 'bg-white text-primary rounded-full' : 'bg-transparent text-whiteColor'
+                                        }`}
+                                    onClick={() => setStatus('DRAFT')}
+                                >
+                                    DRAFT
+                                </button>
+                                <button
+                                    className={`px-2 transition-colors cursor-pointer ${status === 'PUBLISH' ? 'bg-white text-primary rounded-full' : 'bg-transparent text-whiteColor'
+                                        }`}
+                                    onClick={() => setStatus('PUBLISH')}
+                                >
+                                    PUBLISH
+                                </button>
+                            </div>
                         </div>
 
                         {/* Exam Info Section */}
