@@ -1,4 +1,10 @@
-const ExamAssignment = () => {
+import { ExamMode } from "../../../../../../Utils/enum";
+
+interface ExamAssignmentProps {
+    examMode: ExamMode;
+}
+
+const ExamAssignment = ({ examMode }: ExamAssignmentProps) => {
 
     return (
         <>
@@ -70,20 +76,22 @@ const ExamAssignment = () => {
                         </div>
 
                         {/* Faculty Selection */}
-                        <div>
-                            <label htmlFor="facultyId" className="block text-sm font-medium text-gray-700 mb-0.5">
-                                Faculty *
-                            </label>
-                            <select
-                                id="facultyId"
-                                name="facultyId"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
-                            >
-                                <option>
-                                    Faculty
-                                </option>
-                            </select>
-                        </div>
+                        {examMode === ExamMode.PROCTORING && (
+                            <div>
+                                <label htmlFor="facultyId" className="block text-sm font-medium text-gray-700 mb-0.5">
+                                    Faculty *
+                                </label>
+                                <select
+                                    id="facultyId"
+                                    name="facultyId"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                >
+                                    <option>
+                                        Faculty
+                                    </option>
+                                </select>
+                            </div>
+                        )}
 
                     </div>
                 </div>

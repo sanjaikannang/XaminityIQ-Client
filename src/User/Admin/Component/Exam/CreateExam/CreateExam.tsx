@@ -9,7 +9,10 @@ import ExamStructure from './Component/ExamStructure';
 import Questions from './Component/Questions';
 
 
-const CreateExam = () => {    
+const CreateExam = () => {
+    const [status, setStatus] = useState('DRAFT');
+    const [currentExamMode, setCurrentExamMode] = useState<ExamMode>(ExamMode.AUTO);
+
     const [isExamInfoOpen, setIsExamInfoOpen] = useState(true);
     const [isTargetAudienceOpen, setIsTargetAudienceOpen] = useState(true);
     const [isScheduleOpen, setIsScheduleOpen] = useState(true);
@@ -53,6 +56,10 @@ const CreateExam = () => {
     const toggleExamStructure = () => setIsExamStructureOpen(!isExamStructureOpen);
     const toggleQuestions = () => setIsQuestionsOpen(!isQuestionsOpen);
 
+    const handleExamModeChange = (mode: ExamMode) => {
+        setCurrentExamMode(mode);
+    };
+
     return (
         <>
             <div className="p-4">
@@ -60,6 +67,23 @@ const CreateExam = () => {
                     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
                         <div className="bg-primary text-whiteColor p-4 flex items-center justify-between">
                             <h1 className="text-2xl font-semibold">Create Exam</h1>
+
+                            <div className="border border-white rounded-full overflow-hidden">
+                                <button
+                                    className={`px-4 transition-colors cursor-pointer ${status === 'DRAFT' ? 'bg-white text-primary rounded-full' : 'bg-transparent text-whiteColor'
+                                        }`}
+                                    onClick={() => setStatus('DRAFT')}
+                                >
+                                    DRAFT
+                                </button>
+                                <button
+                                    className={`px-2 transition-colors cursor-pointer ${status === 'PUBLISH' ? 'bg-white text-primary rounded-full' : 'bg-transparent text-whiteColor'
+                                        }`}
+                                    onClick={() => setStatus('PUBLISH')}
+                                >
+                                    PUBLISH
+                                </button>
+                            </div>
                         </div>
 
                         {/* Exam Info Section */}
@@ -77,7 +101,7 @@ const CreateExam = () => {
 
                             <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isExamInfoOpen ? 'h-full opacity-100' : 'max-h-0 opacity-0'
                                 }`}>
-                                <ExamInfo />
+                                <ExamInfo onExamModeChange={handleExamModeChange} />
                             </div>
                         </div>
 
@@ -96,7 +120,7 @@ const CreateExam = () => {
 
                             <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isTargetAudienceOpen ? 'h-full opacity-100' : 'max-h-0 opacity-0'
                                 }`}>
-                                <ExamAssignment />
+                                <ExamAssignment examMode={currentExamMode} />
                             </div>
                         </div>
 
