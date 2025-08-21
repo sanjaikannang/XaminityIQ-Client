@@ -474,5 +474,30 @@ export interface CreateExamResponse {
     data?: ExamData;
 }
 
+export interface GetBatchesResponse {
+    success: boolean;
+    message: string;
+    data?: any;
+
+}
+
+export interface GetCoursesByBatchResponse {
+    success: boolean;
+    message: string;
+    data?: any;
+}
+
+export interface GetBranchesByCourseResponse {
+    success: boolean;
+    message: string;
+    data?: any;
+}
+
+export interface GetSectionsByBranchResponse {
+    success: boolean;
+    message: string;
+    data?: any;
+}
+
 // Form Values Interface for Formik
 export interface CreateExamFormValues extends CreateExamRequest { }

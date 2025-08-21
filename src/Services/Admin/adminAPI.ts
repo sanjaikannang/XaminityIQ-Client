@@ -1,5 +1,5 @@
 import api from "../../Api/axios";
-import { CreateExamRequest, CreateExamResponse, CreateFacultyRequest, CreateFacultyResponse, CreateStudentRequest, CreateStudentResponse, DeleteFacultyResponse, DeleteStudentResponse, GetAllExamRequest, GetAllExamResponse, GetAllFacultyRequest, GetAllFacultyResponse, GetAllStudentRequest, GetAllStudentResponse, GetFacultyResponse, GetStudentResponse } from "../../Types/admin.types";
+import { CreateExamRequest, CreateExamResponse, CreateFacultyRequest, CreateFacultyResponse, CreateStudentRequest, CreateStudentResponse, DeleteFacultyResponse, DeleteStudentResponse, GetAllExamRequest, GetAllExamResponse, GetAllFacultyRequest, GetAllFacultyResponse, GetAllStudentRequest, GetAllStudentResponse, GetBatchesResponse, GetBranchesByCourseResponse, GetCoursesByBatchResponse, GetFacultyResponse, GetSectionsByBranchResponse, GetStudentResponse } from "../../Types/admin.types";
 
 // Create Student
 export async function createStudent(data: CreateStudentRequest): Promise<CreateStudentResponse> {
@@ -98,3 +98,32 @@ export async function getAllExam(params?: GetAllExamRequest): Promise<GetAllExam
     const response = await api.get<GetAllExamResponse>(url);
     return response.data;
 }
+
+
+// Get All Batch
+export async function getAllBatch(): Promise<GetBatchesResponse> {
+    const response = await api.get<GetBatchesResponse>(`/admin/get-batches`);
+    return response.data;
+}
+
+
+// Get Course By Batch
+export async function getCoursesByBatch(batchId: string): Promise<GetCoursesByBatchResponse> {
+    const response = await api.get<GetCoursesByBatchResponse>(`/admin/get-courses-by-batch?batchId=${batchId}`);
+    return response.data;
+}
+
+
+// Get Branch By Course
+export async function getBranchesByCourse(courseId: string): Promise<GetBranchesByCourseResponse> {
+    const response = await api.get<GetBranchesByCourseResponse>(`/admin/get-branches-by-course?courseId=${courseId}`);
+    return response.data;
+}
+
+
+// Get Section By Branch
+export async function getSectionsByBranch(branchId: string): Promise<GetSectionsByBranchResponse> {
+    const response = await api.get<GetSectionsByBranchResponse>(`/admin/get-sections-by-branch?branchId=${branchId}`);
+    return response.data;
+}
+
