@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import ExamInfo from './Component/ExamInfo';
-import { CreateExamFormValues } from '../../../FormikSchema/create-exam.schema';
-import { ExamMode, ExamStatus } from '../../../../../Utils/enum';
+import { ExamMode } from '../../../../../Utils/enum';
 import ExamAssignment from './Component/ExamAssignment';
 import Schedule from './Component/Schedule';
 import ExamStructure from './Component/ExamStructure';
