@@ -9,7 +9,7 @@ import Questions from './Component/Questions';
 
 
 const CreateExam = () => {
-    const [status, setStatus] = useState('DRAFT');
+    const [status, setStatus] = useState(ExamStatus.DRAFT);
     const [currentExamMode, setCurrentExamMode] = useState<ExamMode>(ExamMode.AUTO);
 
     const [isExamInfoOpen, setIsExamInfoOpen] = useState(true);
@@ -42,14 +42,14 @@ const CreateExam = () => {
                                 <button
                                     className={`px-4 transition-colors cursor-pointer ${status === 'DRAFT' ? 'bg-white text-primary rounded-full' : 'bg-transparent text-whiteColor'
                                         }`}
-                                    onClick={() => setStatus('DRAFT')}
+                                    onClick={() => setStatus(ExamStatus.DRAFT)}
                                 >
                                     DRAFT
                                 </button>
                                 <button
                                     className={`px-2 transition-colors cursor-pointer ${status === 'PUBLISH' ? 'bg-white text-primary rounded-full' : 'bg-transparent text-whiteColor'
                                         }`}
-                                    onClick={() => setStatus('PUBLISH')}
+                                    onClick={() => setStatus(ExamStatus.PUBLISH)}
                                 >
                                     PUBLISH
                                 </button>
@@ -109,7 +109,7 @@ const CreateExam = () => {
 
                             <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isScheduleOpen ? 'h-full opacity-100' : 'max-h-0 opacity-0'
                                 }`}>
-                                <Schedule />
+                                <Schedule examMode={currentExamMode} />
                             </div>
                         </div>
 
