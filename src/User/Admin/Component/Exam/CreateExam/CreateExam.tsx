@@ -19,36 +19,7 @@ const CreateExam = () => {
     const [isExamStructureOpen, setIsExamStructureOpen] = useState(true);
     const [isQuestionsOpen, setIsQuestionsOpen] = useState(true);
 
-    // Initial values for the form
-    const initialValues: CreateExamFormValues = {
-        examStatus: ExamStatus.DRAFT,
-        examTitle: '',
-        examDescription: '',
-        subject: '',
-        totalMarks: 0,
-        passingMarks: 0,
-        duration: 0,
-        examMode: ExamMode.AUTO,
-        generalInstructions: [],
-        batchId: '',
-        courseId: '',
-        branchId: '',
-        sectionIds: [],
-        scheduleDetails: {
-            examDate: undefined,
-            startTime: '',
-            endTime: '',
-            startDate: undefined,
-            endDate: undefined,
-            bufferTime: {
-                beforeExam: 0,
-                afterExam: 0,
-            },
-        },
-        assignedFacultyIds: [],
-        examSections: [],
-    };
-
+  
     // Toggle functions
     const toggleExamInfo = () => setIsExamInfoOpen(!isExamInfoOpen);
     const toggleTargetAudience = () => setIsTargetAudienceOpen(!isTargetAudienceOpen);
