@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import ExamInfo from './Component/ExamInfo';
-import { CreateExamFormValues } from '../../../FormikSchema/create-exam.schema';
 import { ExamMode, ExamStatus } from '../../../../../Utils/enum';
 import ExamAssignment from './Component/ExamAssignment';
 import Schedule from './Component/Schedule';
@@ -34,34 +33,34 @@ const CreateExam = () => {
     const [isQuestionsOpen, setIsQuestionsOpen] = useState(true);
 
     // Initial values for the form
-    const initialValues: CreateExamFormValues = {
-        examStatus: ExamStatus.DRAFT,
-        examTitle: '',
-        examDescription: '',
-        subject: '',
-        totalMarks: 0,
-        passingMarks: 0,
-        duration: 0,
-        examMode: ExamMode.AUTO,
-        generalInstructions: [],
-        batchId: '',
-        courseId: '',
-        branchId: '',
-        sectionIds: [],
-        scheduleDetails: {
-            examDate: undefined,
-            startTime: '',
-            endTime: '',
-            startDate: undefined,
-            endDate: undefined,
-            bufferTime: {
-                beforeExam: 0,
-                afterExam: 0,
-            },
-        },
-        assignedFacultyIds: [],
-        examSections: [],
-    };
+    // const initialValues: CreateExamFormValues = {
+    //     examStatus: ExamStatus.DRAFT,
+    //     examTitle: '',
+    //     examDescription: '',
+    //     subject: '',
+    //     totalMarks: 0,
+    //     passingMarks: 0,
+    //     duration: 0,
+    //     examMode: ExamMode.AUTO,
+    //     generalInstructions: [],
+    //     batchId: '',
+    //     courseId: '',
+    //     branchId: '',
+    //     sectionIds: [],
+    //     scheduleDetails: {
+    //         examDate: undefined,
+    //         startTime: '',
+    //         endTime: '',
+    //         startDate: undefined,
+    //         endDate: undefined,
+    //         bufferTime: {
+    //             beforeExam: 0,
+    //             afterExam: 0,
+    //         },
+    //     },
+    //     assignedFacultyIds: [],
+    //     examSections: [],
+    // };
 
     // Toggle functions
     const toggleExamInfo = () => setIsExamInfoOpen(!isExamInfoOpen);
