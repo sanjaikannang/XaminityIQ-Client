@@ -10,6 +10,7 @@ import FacultyDetail from './FacultyDetail';
 import BulkUploadStudent from './BulkUploadStudent';
 import AllExam from './AllExam';
 import CreateExam from './Exam/CreateExam/CreateExam';
+import MasterDataDashboard from '../Dashboard/MasterDataDashboard';
 
 const MainComponent = () => {
 
@@ -35,6 +36,9 @@ const MainComponent = () => {
                         <Route path="exam" element={<ExamDashboard />} />
                         <Route path="exam/all-exam" element={<AllExam />} />
                         <Route path="exam/create-exam" element={<CreateExam />} />
+
+                        {/* MasterData Screens */}
+                        <Route path="data" element={<MasterDataDashboard />} />                        
 
                     </Routes>
                 </div>

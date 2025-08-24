@@ -6,6 +6,7 @@ import {
     getCoursesByBatch,
     getBranchesByCourse,
     getSectionsByBranch,
+    getAllFaculty,
 } from "../../../../../../Services/Admin/adminAPI";
 
 interface ExamAssignmentProps {
@@ -63,9 +64,12 @@ const ExamAssignment = ({ examMode }: ExamAssignmentProps) => {
 
     const [errors, setErrors] = useState<Partial<FormData>>({});
 
-    // Fetch batches on component mount
+    // Fetch batches and faculties on component mount
     useEffect(() => {
         fetchBatches();
+        if (examMode === ExamMode.PROCTORING) {
+            fetchFaculties();
+        }
     }, [examMode]);
 
     // Fetch courses when batch changes
@@ -205,6 +209,32 @@ const ExamAssignment = ({ examMode }: ExamAssignmentProps) => {
             setLoadingStates(prev => ({ ...prev, sections: false }));
         }
     };
+
+
+    // Get All Faculty
+    const fetchFaculties = async () => {
+        setLoadingStates(prev => ({ ...prev, faculties: true }));
+        try {
+            const response = await getAllFaculty();
+            if (response.success && response.data && response.data.faculty) {
+                const facultyOptions: SelectOption[] = response.data.faculty.map((faculty: {
+                    userId: { _id: any; email: any; };
+                    personalInfo: { firstName: any; lastName: any; };
+                }) => ({
+                    value: faculty.userId._id,
+                    label: `${faculty.personalInfo.firstName} ${faculty.personalInfo.lastName}`,
+                }));
+                setOptions(prev => ({ ...prev, faculties: facultyOptions }));
+            }
+        } catch (error) {
+            console.error('Error fetching faculties:', error);
+            setErrors(prev => ({ ...prev, facultyId: 'Failed to load faculties' }));
+        } finally {
+            setLoadingStates(prev => ({ ...prev, faculties: false }));
+        }
+    };
+
+
 
     const handleSelectChange = (field: keyof FormData) => (value: string | number) => {
         setFormData(prev => ({ ...prev, [field]: value.toString() }));
