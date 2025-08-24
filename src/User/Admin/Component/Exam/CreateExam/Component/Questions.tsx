@@ -69,84 +69,83 @@ const Questions: React.FC<QuestionsProps> = ({ sections }) => {
     }
 
     return (
-        <div className="p-4 space-y-4">
-            {sections.map((section, sectionIndex) => {
-                const totalQuestions = parseInt(section.totalQuestions) || 0;
-                const isExpanded = expandedSections[section.id] ?? true;
+        <>
+            <div className="p-4 space-y-4">
+                {sections.map((section, sectionIndex) => {
+                    const totalQuestions = parseInt(section.totalQuestions) || 0;
+                    const isExpanded = expandedSections[section.id] ?? true;
 
-                return (
-                    <div key={section.id} className="border border-gray-300 rounded-lg">
-                        {/* Section Header */}
-                        <div
-                            className="bg-gray-100 p-4 rounded-t-lg cursor-pointer hover:bg-gray-200 transition-colors"
-                            onClick={() => toggleSectionExpansion(section.id)}
-                        >
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-4">
-                                    <h3 className="text-lg font-semibold text-gray-800">
-                                        Section {sectionIndex + 1}: {section.name || 'Unnamed Section'}
-                                    </h3>
-                                    <div className="flex items-center space-x-4 text-sm text-gray-600">
-                                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                                            {section.questionType.replace('_', ' ')}
-                                        </span>
-                                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
-                                            {totalQuestions} Question{totalQuestions !== 1 ? 's' : ''}
-                                        </span>
-                                        <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded">
-                                            {section.marks} Mark{section.marks !== '1' ? 's' : ''}
-                                        </span>
-                                        {section.isOptional && (
-                                            <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                                                Optional
+                    return (
+                        <div key={section.id} className="border border-gray-300 rounded-md">
+                            {/* Section Header */}
+                            <div
+                                className="bg-gray-100 p-4 rounded-t-md cursor-pointer hover:bg-gray-200 transition-colors"
+                                onClick={() => toggleSectionExpansion(section.id)}
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h3 className="text-md font-semibold text-gray-800">
+                                            Section {sectionIndex + 1}: {section.name || 'Unnamed Section'}
+                                        </h3>
+
+                                        <div className="flex items-center space-x-4 text-xs text-gray-600">
+                                            <span>
+                                                {section.questionType.replace('_', ' ')}
                                             </span>
+                                            <span>
+                                                {totalQuestions} Question{totalQuestions !== 1 ? 's' : ''}
+                                            </span>
+                                            <span>
+                                                {section.marks} Mark{section.marks !== '1' ? 's' : ''}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center">
+                                        {isExpanded ? (
+                                            <ChevronUp className="w-5 h-5 text-gray-600" />
+                                        ) : (
+                                            <ChevronDown className="w-5 h-5 text-gray-600" />
                                         )}
                                     </div>
                                 </div>
-                                <div className="flex items-center">
-                                    {isExpanded ? (
-                                        <ChevronUp className="w-5 h-5 text-gray-600" />
-                                    ) : (
-                                        <ChevronDown className="w-5 h-5 text-gray-600" />
-                                    )}
-                                </div>
-                            </div>
 
-                            {/* Section Instructions */}
-                            {section.instructions.length > 0 && (
-                                <div className="mt-3 p-3 bg-blue-50 rounded border-l-4 border-blue-400">
-                                    <h4 className="text-sm font-medium text-blue-900 mb-2">Section Instructions:</h4>
-                                    <ul className="text-sm text-blue-800 space-y-1">
-                                        {section.instructions.map((instruction, index) => (
-                                            <li key={index} className="flex items-start">
-                                                <span className="mr-2">{index + 1}.</span>
-                                                <span>{instruction}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Section Questions */}
-                        {isExpanded && (
-                            <div className="p-4 space-y-4">
-                                {totalQuestions === 0 ? (
-                                    <div className="text-center py-8 text-gray-500">
-                                        <p>No questions to display.</p>
-                                        <p className="text-sm mt-1">Please set the total questions count for this section.</p>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-6">
-                                        {renderQuestionsForSection(section, sectionIndex)}
+                                {/* Section Instructions */}
+                                {section.instructions.length > 0 && (
+                                    <div className="mt-3 p-2 bg-blue-50 rounded border-l-4 border-blue-400">
+                                        <h4 className="text-sm font-medium text-blue-900 mb-2">Section Instructions:</h4>
+                                        <ul className="text-sm text-blue-800 space-y-1">
+                                            {section.instructions.map((instruction, index) => (
+                                                <li key={index} className="flex items-start">
+                                                    <span className="mr-2">{index + 1}.</span>
+                                                    <span>{instruction}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
                                     </div>
                                 )}
                             </div>
-                        )}
-                    </div>
-                );
-            })}
-        </div>
+
+                            {/* Section Questions */}
+                            {isExpanded && (
+                                <div className="p-2 space-y-4">
+                                    {totalQuestions === 0 ? (
+                                        <div className="text-center py-8 text-gray-500">
+                                            <p>No questions to display.</p>
+                                            <p className="text-sm mt-1">Please set the total questions count for this section.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            {renderQuestionsForSection(section, sectionIndex)}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+        </>
     );
 };
 

@@ -93,44 +93,46 @@ const ExamStructure: React.FC<ExamStructureProps> = ({ onSectionsUpdate }) => {
     };
 
     return (
-        <div className='p-4 space-y-4'>
-            {/* Add Section Button */}
-            <div className="flex justify-center">
-                <button
-                    type="button"
-                    onClick={handleAddSection}
-                    disabled={sections.length >= 5}
-                    className={`px-6 py-1.5 rounded-md flex items-center space-x-2 font-medium ${sections.length >= 5
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-primary text-white cursor-pointer'
-                        }`}
-                >
-                    <span>Add Section ({sections.length}/5)</span>
-                </button>
-            </div>
-
-            {/* Render Sections using SectionComponent */}
-            {sections.map((section, sectionIndex) => (
-                <ExamSection
-                    key={section.id}
-                    section={section}
-                    sectionIndex={sectionIndex}
-                    onDeleteSection={handleDeleteSection}
-                    onToggleSection={toggleSection}
-                    onUpdateSection={updateSection}
-                    onAddInstruction={handleAddInstruction}
-                    onInstructionChange={handleInstructionChange}
-                    onDeleteInstruction={handleDeleteInstruction}
-                />
-            ))}
-
-            {sections.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                    <p className="text-lg">No sections created yet.</p>
-                    <p className="text-sm mt-2">Click "Add Section" to create your first exam section.</p>
+        <>
+            <div className='p-4 space-y-4'>
+                {/* Add Section Button */}
+                <div className="flex justify-center">
+                    <button
+                        type="button"
+                        onClick={handleAddSection}
+                        disabled={sections.length >= 5}
+                        className={`px-6 py-1.5 rounded-md flex items-center space-x-2 font-medium ${sections.length >= 5
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-primary text-white cursor-pointer'
+                            }`}
+                    >
+                        <span>Add Section ({sections.length}/5)</span>
+                    </button>
                 </div>
-            )}
-        </div>
+
+                {/* Render Sections using SectionComponent */}
+                {sections.map((section, sectionIndex) => (
+                    <ExamSection
+                        key={section.id}
+                        section={section}
+                        sectionIndex={sectionIndex}
+                        onDeleteSection={handleDeleteSection}
+                        onToggleSection={toggleSection}
+                        onUpdateSection={updateSection}
+                        onAddInstruction={handleAddInstruction}
+                        onInstructionChange={handleInstructionChange}
+                        onDeleteInstruction={handleDeleteInstruction}
+                    />
+                ))}
+
+                {sections.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                        <p className="text-lg">No sections created yet.</p>
+                        <p className="text-sm mt-2">Click "Add Section" to create your first exam section.</p>
+                    </div>
+                )}
+            </div>
+        </>
     );
 };
 
