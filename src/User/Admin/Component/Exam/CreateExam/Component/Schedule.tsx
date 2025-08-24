@@ -16,7 +16,7 @@ const Schedule = ({ examMode }: ExamScheduleProps) => {
                             {/* Exam Date */}
                             <div>
                                 <label htmlFor="examDate" className="block text-sm font-medium text-gray-700 mb-0.5">
-                                    Exam Date *
+                                    Exam Date<span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="date"
@@ -29,7 +29,7 @@ const Schedule = ({ examMode }: ExamScheduleProps) => {
                             {/* Start Time */}
                             <div>
                                 <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-0.5">
-                                    Start Time *
+                                    Start Time<span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="time"
@@ -42,7 +42,7 @@ const Schedule = ({ examMode }: ExamScheduleProps) => {
                             {/* End Time */}
                             <div>
                                 <label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-0.5">
-                                    End Time *
+                                    End Time<span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="time"
@@ -62,7 +62,7 @@ const Schedule = ({ examMode }: ExamScheduleProps) => {
                             {/* Start Date */}
                             <div>
                                 <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-0.5">
-                                    Start Date *
+                                    Start Date<span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="date"
@@ -75,7 +75,7 @@ const Schedule = ({ examMode }: ExamScheduleProps) => {
                             {/* End Date */}
                             <div>
                                 <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-0.5">
-                                    End Date *
+                                    End Date<span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="date"
@@ -94,7 +94,7 @@ const Schedule = ({ examMode }: ExamScheduleProps) => {
                         {/* Before Exam Buffer */}
                         <div>
                             <label htmlFor="beforeExam" className="block text-sm font-medium text-gray-700 mb-0.5">
-                                Before Exam (minutes)
+                                Before Exam (minutes)<span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="number"
@@ -109,7 +109,7 @@ const Schedule = ({ examMode }: ExamScheduleProps) => {
                         {/* After Exam Buffer */}
                         <div>
                             <label htmlFor="afterExam" className="block text-sm font-medium text-gray-700 mb-0.5">
-                                After Exam (minutes)
+                                After Exam (minutes)<span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="number"

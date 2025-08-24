@@ -76,7 +76,7 @@ const ExamSection: React.FC<SectionComponentProps> = ({
                             {/* Section Name */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Section Name *
+                                    Section Name<span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
@@ -90,7 +90,7 @@ const ExamSection: React.FC<SectionComponentProps> = ({
                             {/* Section Order */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Section Order *
+                                    Section Order<span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
@@ -104,7 +104,7 @@ const ExamSection: React.FC<SectionComponentProps> = ({
                             {/* Section Marks */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Section Marks *
+                                    Section Marks<span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="number"
@@ -119,7 +119,7 @@ const ExamSection: React.FC<SectionComponentProps> = ({
                             {/* Question Type */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Question Type *
+                                    Question Type<span className="text-red-500">*</span>
                                 </label>
                                 <select
                                     value={section.questionType}
@@ -136,7 +136,7 @@ const ExamSection: React.FC<SectionComponentProps> = ({
                             {/* Total Questions */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Total Questions *
+                                    Total Questions<span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="number"
@@ -151,7 +151,7 @@ const ExamSection: React.FC<SectionComponentProps> = ({
                             {/* Time Limit */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Time Limit (minutes)
+                                    Time Limit (minutes)<span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="number"

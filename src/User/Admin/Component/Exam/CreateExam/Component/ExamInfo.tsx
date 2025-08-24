@@ -40,7 +40,7 @@ const ExamInfo = ({ onExamModeChange }: ExamInfoProps) => {
                         {/* Exam Mode */}
                         <div>
                             <label htmlFor="examMode" className="block text-sm font-medium text-gray-700 mb-0.5">
-                                Exam Mode *
+                                Exam Mode<span className="text-red-500">*</span>
                             </label>
                             <select
                                 name="examMode"
@@ -59,7 +59,7 @@ const ExamInfo = ({ onExamModeChange }: ExamInfoProps) => {
                         {/* Exam Title */}
                         <div>
                             <label htmlFor="examTitle" className="block text-sm font-medium text-gray-700 mb-0.5">
-                                Exam Title *
+                                Exam Title<span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -73,7 +73,7 @@ const ExamInfo = ({ onExamModeChange }: ExamInfoProps) => {
                         {/* Subject */}
                         <div>
                             <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-0.5">
-                                Subject *
+                                Subject<span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -87,7 +87,7 @@ const ExamInfo = ({ onExamModeChange }: ExamInfoProps) => {
                         {/* Total Marks */}
                         <div>
                             <label htmlFor="totalMarks" className="block text-sm font-medium text-gray-700 mb-0.5">
-                                Total Marks *
+                                Total Marks<span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="number"
@@ -101,7 +101,7 @@ const ExamInfo = ({ onExamModeChange }: ExamInfoProps) => {
                         {/* Passing Marks */}
                         <div>
                             <label htmlFor="passingMarks" className="block text-sm font-medium text-gray-700 mb-0.5">
-                                Passing Marks *
+                                Passing Marks<span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="number"
@@ -115,7 +115,7 @@ const ExamInfo = ({ onExamModeChange }: ExamInfoProps) => {
                         {/* Duration */}
                         <div>
                             <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-0.5">
-                                Duration (minutes) *
+                                Duration (minutes)<span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="number"
@@ -130,7 +130,7 @@ const ExamInfo = ({ onExamModeChange }: ExamInfoProps) => {
                     {/* Exam Description */}
                     <div className="mt-4">
                         <label htmlFor="examDescription" className="block text-sm font-medium text-gray-700 mb-0.5">
-                            Exam Description
+                            Exam Description<span className="text-red-500">*</span>
                         </label>
                         <textarea
                             id="examDescription"

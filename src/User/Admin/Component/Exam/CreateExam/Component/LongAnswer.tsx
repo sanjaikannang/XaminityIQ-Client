@@ -56,7 +56,7 @@ const LongAnswer: React.FC<LongAnswerProps> = ({ questionNumber, sectionIndex })
                     {/* Question Text */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Question Text *
+                            Question Text<span className="text-red-500">*</span>
                         </label>
                         <textarea
                             rows={4}
@@ -69,7 +69,7 @@ const LongAnswer: React.FC<LongAnswerProps> = ({ questionNumber, sectionIndex })
                         {/* Question Type */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Question Type *
+                                Question Type<span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -82,7 +82,7 @@ const LongAnswer: React.FC<LongAnswerProps> = ({ questionNumber, sectionIndex })
                         {/* Marks */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Marks *
+                                Marks<span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="number"
@@ -95,7 +95,7 @@ const LongAnswer: React.FC<LongAnswerProps> = ({ questionNumber, sectionIndex })
                         {/* Question Order */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Order *
+                                Order<span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="number"
@@ -109,7 +109,7 @@ const LongAnswer: React.FC<LongAnswerProps> = ({ questionNumber, sectionIndex })
                         {/* Difficulty Level */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Difficulty *
+                                Difficulty<span className="text-red-500">*</span>
                             </label>
                             <select
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900"
@@ -125,7 +125,7 @@ const LongAnswer: React.FC<LongAnswerProps> = ({ questionNumber, sectionIndex })
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Expected Word Count (Min)
+                                Expected Word Count (Min)<span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="number"
@@ -137,7 +137,7 @@ const LongAnswer: React.FC<LongAnswerProps> = ({ questionNumber, sectionIndex })
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Expected Word Count (Max)
+                                Expected Word Count (Max)<span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="number"
@@ -152,7 +152,7 @@ const LongAnswer: React.FC<LongAnswerProps> = ({ questionNumber, sectionIndex })
                     {/* Model Answer */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Model Answer / Key Points
+                            Model Answer / Key Points<span className="text-red-500">*</span>
                         </label>
                         <textarea
                             rows={6}
@@ -165,7 +165,7 @@ const LongAnswer: React.FC<LongAnswerProps> = ({ questionNumber, sectionIndex })
                     <div className="p-4 rounded-md border border-gray-300 mt-4">
                         <div className="flex items-center justify-between mb-4">
                             <h4 className="text-sm font-medium text-gray-700">
-                                Keywords
+                                Keywords<span className="text-red-500">*</span>
                             </h4>
                             <button
                                 type="button"

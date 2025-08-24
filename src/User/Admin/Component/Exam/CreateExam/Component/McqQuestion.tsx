@@ -94,7 +94,7 @@ const McqQuestion: React.FC<McqQuestionProps> = ({
                     {/* Question Text */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Question Text *
+                            Question Text<span className="text-red-500">*</span>
                         </label>
                         <textarea
                             rows={3}
@@ -107,7 +107,7 @@ const McqQuestion: React.FC<McqQuestionProps> = ({
                         {/* Question Type */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Question Type *
+                                Question Type<span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -120,7 +120,7 @@ const McqQuestion: React.FC<McqQuestionProps> = ({
                         {/* Marks */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Marks *
+                                Marks<span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="number"
@@ -133,7 +133,7 @@ const McqQuestion: React.FC<McqQuestionProps> = ({
                         {/* Question Order */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Order *
+                                Order<span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="number"
@@ -147,7 +147,7 @@ const McqQuestion: React.FC<McqQuestionProps> = ({
                         {/* Difficulty Level */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Difficulty *
+                                Difficulty<span className="text-red-500">*</span>
                             </label>
                             <select
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900"
@@ -162,7 +162,7 @@ const McqQuestion: React.FC<McqQuestionProps> = ({
                     {/* Explanation */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Explanation
+                            Explanation<span className="text-red-500">*</span>
                         </label>
                         <textarea
                             rows={3}
