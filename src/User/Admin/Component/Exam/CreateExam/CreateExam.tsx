@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, Eye, FilePen, FileText, Upload } from 'lucide-react';
+import { ChevronDown, FilePen, Upload } from 'lucide-react';
 import ExamInfo from './Component/ExamInfo';
 import { ExamMode, ExamStatus } from '../../../../../Utils/enum';
 import ExamAssignment from './Component/ExamAssignment';
