@@ -45,6 +45,7 @@ export async function getAllStudent(params?: GetAllStudentRequest): Promise<GetA
     return response.data;
 }
 
+
 // Get All Faculty
 export async function getAllFaculty(params?: GetAllFacultyRequest): Promise<GetAllFacultyResponse> {
     const queryParams = new URLSearchParams();
