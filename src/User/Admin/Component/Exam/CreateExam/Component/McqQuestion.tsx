@@ -6,12 +6,28 @@ interface Option {
     isCorrect: boolean;
 }
 
-const McqQuestion = () => {
+interface McqQuestionProps {
+    questionNumber: number;
+    sectionIndex: number;
+    isTrueFalse?: boolean;
+}
 
-    const [options, setOptions] = useState<Option[]>([]);
+const McqQuestion: React.FC<McqQuestionProps> = ({
+    questionNumber,
+    sectionIndex,
+    isTrueFalse = false
+}) => {
+    const [options, setOptions] = useState<Option[]>(
+        isTrueFalse
+            ? [
+                { text: 'True', isCorrect: false },
+                { text: 'False', isCorrect: false }
+            ]
+            : []
+    );
 
     const handleAddOption = () => {
-        if (options.length < 4) {
+        if (!isTrueFalse && options.length < 4) {
             setOptions([...options, { text: '', isCorrect: false }]);
         }
     };
@@ -24,172 +40,200 @@ const McqQuestion = () => {
 
     const handleCorrectChange = (index: number, isCorrect: boolean) => {
         const updated = [...options];
-        updated[index].isCorrect = isCorrect;
-        setOptions(updated);
+
+        if (isTrueFalse || updated.filter(opt => opt.isCorrect).length === 0 || !isCorrect) {
+            updated[index].isCorrect = isCorrect;
+            setOptions(updated);
+        } else if (isCorrect) {
+            // For regular MCQ, allow only one correct answer
+            const singleCorrect = updated.map((opt, i) => ({
+                ...opt,
+                isCorrect: i === index
+            }));
+            setOptions(singleCorrect);
+        }
     };
 
     const handleDeleteOption = (index: number) => {
-        const updated = options.filter((_, i) => i !== index);
-        setOptions(updated);
+        if (!isTrueFalse) {
+            const updated = options.filter((_, i) => i !== index);
+            setOptions(updated);
+        }
     };
 
     return (
-        <>
-            <div className="p-4 bg-white">
-                <div className="border border-gray-300 rounded-md">
+        <div className="bg-white border border-gray-200 rounded-lg">
+            {/* Header Section */}
+            <div className="p-4 bg-gray-50 border-b border-gray-300 rounded-t-lg">
+                <div className="flex items-center space-x-2">
+                    <span className="font-medium text-gray-700">
+                        {isTrueFalse ? 'True/False Question' : 'MCQ Question'}
+                    </span>
+                </div>
+            </div>
 
-                    {/* Header Section */}
+            <div className="p-4">
+                <div className="border border-gray-300 rounded-md">
+                    {/* Question Header */}
                     <div className="p-4 bg-gray-50 border-b border-gray-300 rounded-t-md">
                         <div className="flex items-center space-x-2">
                             <span className="font-medium text-gray-700">
-                                MCQ Question
+                                Section {sectionIndex + 1} - Question {questionNumber}
                             </span>
                         </div>
                     </div>
 
-                    <div className="p-2">
-                        <div className="border border-gray-300 rounded-md">
+                    <div className="p-4 space-y-4">
+                        {/* Question Text */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Question Text *
+                            </label>
+                            <textarea
+                                rows={3}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                placeholder="Enter your question here..."
+                            />
+                        </div>
 
-                            {/* Header Section */}
-                            <div className="p-4 bg-gray-50 border-b border-gray-300 rounded-t-md">
-                                <div className="flex items-center space-x-2">
-                                    <span className="font-medium text-gray-700">
-                                        Question 1
-                                    </span>
-                                </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {/* Question Type */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Question Type *
+                                </label>
+                                <input
+                                    type="text"
+                                    value={isTrueFalse ? 'TRUE_FALSE' : 'MCQ'}
+                                    readOnly
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-700"
+                                />
                             </div>
-                            
-                            <div className="p-2 space-y-4">
-                                {/* Question Text */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-0.5">
-                                        Question Text *
-                                    </label>
-                                    <textarea
-                                        rows={3}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
-                                        placeholder="Enter your question here..."
-                                    />
-                                </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    {/* Question Type */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-0.5">
-                                            Question Type *
-                                        </label>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
-                                        />
-                                    </div>
+                            {/* Marks */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Marks *
+                                </label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    defaultValue="1"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                />
+                            </div>
 
-                                    {/* Marks */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-0.5">
-                                            Marks *
-                                        </label>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
-                                        />
-                                    </div>
+                            {/* Question Order */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Order *
+                                </label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={questionNumber}
+                                    readOnly
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-700"
+                                />
+                            </div>
 
-                                    {/* Question Order */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-0.5">
-                                            Order *
-                                        </label>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
-                                        />
-                                    </div>
+                            {/* Difficulty Level */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Difficulty *
+                                </label>
+                                <select
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900"
+                                >
+                                    <option value="EASY">Easy</option>
+                                    <option value="MEDIUM">Medium</option>
+                                    <option value="HARD">Hard</option>
+                                </select>
+                            </div>
+                        </div>
 
-                                    {/* Difficulty Level */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-0.5">
-                                            Difficulty *
-                                        </label>
-                                        <select
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
-                                        >
-                                            <option value="EASY">Easy</option>
-                                            <option value="MEDIUM">Medium</option>
-                                            <option value="HARD">Hard</option>
-                                        </select>
-                                    </div>
-                                </div>
+                        {/* Explanation */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Explanation
+                            </label>
+                            <textarea
+                                rows={3}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                placeholder="Explain the correct answer..."
+                            />
+                        </div>
 
-                                {/* Explanation */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Explanation
-                                    </label>
-                                    <textarea
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
-                                        placeholder="Explain the correct answer..."
-                                    />
-                                </div>
-
-                                {/* Options */}
-                                <div className="p-4 rounded-md border border-gray-300 mt-4">
-                                    <div className="flex items-center justify-center">
-                                        <button
-                                            type="button"
-                                            onClick={handleAddOption}
-                                            disabled={options.length >= 4}
-                                            className={`px-3 py-2 text-sm rounded-md cursor-pointer ${options.length >= 4
+                        {/* Options */}
+                        <div className="p-4 rounded-md border border-gray-300 mt-4">
+                            <div className="flex items-center justify-between mb-4">
+                                <h4 className="text-sm font-medium text-gray-700">
+                                    {isTrueFalse ? 'True/False Options' : 'Answer Options'}
+                                </h4>
+                                {!isTrueFalse && (
+                                    <button
+                                        type="button"
+                                        onClick={handleAddOption}
+                                        disabled={options.length >= 4}
+                                        className={`px-3 py-2 text-sm rounded-md cursor-pointer ${options.length >= 4
                                                 ? 'bg-gray-400 text-gray-900 cursor-not-allowed'
                                                 : 'bg-primary text-white'
-                                                }`}
-                                        >
-                                            Add Options
-                                        </button>
+                                            }`}
+                                    >
+                                        Add Option ({options.length}/4)
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Options List */}
+                            {options.map((option, index) => (
+                                <div key={index} className="flex items-center space-x-2 mb-3">
+                                    <span className="text-gray-700 font-medium min-w-[20px]">
+                                        {String.fromCharCode(65 + index)}.
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        value={option.text}
+                                        onChange={(e) => handleOptionTextChange(index, e.target.value)}
+                                        readOnly={isTrueFalse}
+                                        className={`flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500 ${isTrueFalse ? 'bg-gray-100' : ''
+                                            }`}
+                                        placeholder={isTrueFalse ? option.text : "Option Text"}
+                                    />
+
+                                    <div className="flex items-center space-x-1">
+                                        <input
+                                            type="checkbox"
+                                            checked={option.isCorrect}
+                                            onChange={(e) => handleCorrectChange(index, e.target.checked)}
+                                            className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded"
+                                        />
+                                        <label className="text-sm text-gray-700 whitespace-nowrap">Correct</label>
                                     </div>
 
-                                    {/* Show inputs only if options exist */}
-                                    {options.map((option, index) => (
-                                        <div key={index} className="flex items-center space-x-2 mb-2 mt-4">
-                                            <span className="text-gray-700 font-medium">{String.fromCharCode(65 + index)}.</span>
-
-                                            <input
-                                                type="text"
-                                                value={option.text}
-                                                onChange={(e) => handleOptionTextChange(index, e.target.value)}
-                                                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
-                                                placeholder="Option Text"
-                                            />
-
-                                            <div className="flex items-center space-x-1">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={option.isCorrect}
-                                                    onChange={(e) => handleCorrectChange(index, e.target.checked)}
-                                                    className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded"
-                                                />
-                                                <label className="text-sm text-gray-700 whitespace-nowrap">Correct</label>
-                                            </div>
-
-                                            <button
-                                                type="button"
-                                                className="p-2 bg-red-500 text-white rounded-sm hover:bg-red-600 cursor-pointer transition-colors"
-                                                onClick={() => handleDeleteOption(index)}
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </div>
-                                    ))}
+                                    {!isTrueFalse && (
+                                        <button
+                                            type="button"
+                                            className="p-2 bg-red-500 text-white rounded-sm hover:bg-red-600 cursor-pointer transition-colors"
+                                            onClick={() => handleDeleteOption(index)}
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    )}
                                 </div>
-                            </div>
+                            ))}
+
+                            {!isTrueFalse && options.length === 0 && (
+                                <div className="text-center py-4 text-gray-500">
+                                    <p className="text-sm">Click "Add Option" to create answer choices</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     )
 }
 

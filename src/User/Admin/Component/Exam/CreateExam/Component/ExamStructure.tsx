@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ExamSection from './ExamSection';
 
 interface Section {
@@ -14,8 +14,20 @@ interface Section {
     isExpanded: boolean;
 }
 
-const ExamStructure = () => {
+interface ExamStructureProps {
+    onSectionsUpdate?: (sections: Section[]) => void;
+}
+
+const ExamStructure: React.FC<ExamStructureProps> = ({ onSectionsUpdate }) => {
+
     const [sections, setSections] = useState<Section[]>([]);
+
+    // Update parent component whenever sections change
+    useEffect(() => {
+        if (onSectionsUpdate) {
+            onSectionsUpdate(sections);
+        }
+    }, [sections, onSectionsUpdate]);
 
     const createNewSection = (): Section => ({
         id: Date.now().toString(),
@@ -93,7 +105,7 @@ const ExamStructure = () => {
                         : 'bg-primary text-white cursor-pointer'
                         }`}
                 >
-                    <span>Add Section</span>
+                    <span>Add Section ({sections.length}/5)</span>
                 </button>
             </div>
 
@@ -111,6 +123,13 @@ const ExamStructure = () => {
                     onDeleteInstruction={handleDeleteInstruction}
                 />
             ))}
+
+            {sections.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                    <p className="text-lg">No sections created yet.</p>
+                    <p className="text-sm mt-2">Click "Add Section" to create your first exam section.</p>
+                </div>
+            )}
         </div>
     );
 };

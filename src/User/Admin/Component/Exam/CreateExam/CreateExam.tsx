@@ -8,10 +8,24 @@ import Schedule from './Component/Schedule';
 import ExamStructure from './Component/ExamStructure';
 import Questions from './Component/Questions';
 
+interface Section {
+    id: string;
+    name: string;
+    order: string;
+    marks: string;
+    questionType: string;
+    totalQuestions: string;
+    timeLimit: string;
+    isOptional: boolean;
+    instructions: string[];
+    isExpanded: boolean;
+}
+
 
 const CreateExam = () => {
     const [status, setStatus] = useState(ExamStatus.DRAFT);
     const [currentExamMode, setCurrentExamMode] = useState<ExamMode>(ExamMode.AUTO);
+    const [sections, setSections] = useState<Section[]>([]);
 
     const [isExamInfoOpen, setIsExamInfoOpen] = useState(true);
     const [isTargetAudienceOpen, setIsTargetAudienceOpen] = useState(true);
@@ -58,6 +72,11 @@ const CreateExam = () => {
 
     const handleExamModeChange = (mode: ExamMode) => {
         setCurrentExamMode(mode);
+    };
+
+    // sections update from ExamStructure
+    const handleSectionsUpdate = (updatedSections: Section[]) => {
+        setSections(updatedSections);
     };
 
     return (
@@ -158,7 +177,7 @@ const CreateExam = () => {
 
                             <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isExamStructureOpen ? 'h-full opacity-100' : 'max-h-0 opacity-0'
                                 }`}>
-                                <ExamStructure />
+                                <ExamStructure onSectionsUpdate={handleSectionsUpdate} />
                             </div>
                         </div>
 
@@ -177,7 +196,7 @@ const CreateExam = () => {
 
                             <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isQuestionsOpen ? 'h-full opacity-100' : 'max-h-0 opacity-0'
                                 }`}>
-                                <Questions />
+                                <Questions sections={sections} />
                             </div>
                         </div>
                     </div>

@@ -1,8 +1,12 @@
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 
-const LongAnswer = () => {
+interface LongAnswerProps {
+    questionNumber: number;
+    sectionIndex: number;
+}
 
+const LongAnswer: React.FC<LongAnswerProps> = ({ questionNumber, sectionIndex }) => {
     const [keywords, setKeywords] = useState<string[]>([]);
 
     const handleAddKeyword = () => {
@@ -23,155 +27,203 @@ const LongAnswer = () => {
     };
 
     return (
-        <>
-            <div className="p-4 bg-white">
-                <div className="border border-gray-300 rounded-md">
+        <div className="bg-white border border-gray-200 rounded-lg">
+            {/* Header Section */}
+            <div className="p-4 bg-gray-50 border-b border-gray-300 rounded-t-lg">
+                <div className="flex items-center space-x-2">
+                    <span className="font-medium text-gray-700">
+                        Long Answer Question
+                    </span>
+                </div>
+            </div>
 
-                    {/* Header Section */}
+            <div className="p-4">
+                <div className="border border-gray-300 rounded-md">
+                    {/* Question Header */}
                     <div className="p-4 bg-gray-50 border-b border-gray-300 rounded-t-md">
                         <div className="flex items-center space-x-2">
                             <span className="font-medium text-gray-700">
-                                Long Answer Question
+                                Section {sectionIndex + 1} - Question {questionNumber}
                             </span>
                         </div>
                     </div>
 
-                    <div className="p-2">
-                        <div className="border border-gray-300 rounded-md">
+                    <div className="p-4 space-y-4">
+                        {/* Question Text */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Question Text *
+                            </label>
+                            <textarea
+                                rows={4}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                placeholder="Enter your detailed question here..."
+                            />
+                        </div>
 
-                            {/* Header Section */}
-                            <div className="p-4 bg-gray-50 border-b border-gray-300 rounded-t-md">
-                                <div className="flex items-center space-x-2">
-                                    <span className="font-medium text-gray-700">
-                                        Question 1
-                                    </span>
-                                </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {/* Question Type */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Question Type *
+                                </label>
+                                <input
+                                    type="text"
+                                    value="LONG_ANSWER"
+                                    readOnly
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-700"
+                                />
                             </div>
 
-                            <div className="p-2 space-y-4">
-                                {/* Question Text */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-0.5">
-                                        Question Text *
-                                    </label>
-                                    <textarea
-                                        rows={3}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
-                                        placeholder="Enter your question here..."
-                                    />
-                                </div>
+                            {/* Marks */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Marks *
+                                </label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    defaultValue="5"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                />
+                            </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    {/* Question Type */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-0.5">
-                                            Question Type *
-                                        </label>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
-                                        />
-                                    </div>
+                            {/* Question Order */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Order *
+                                </label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={questionNumber}
+                                    readOnly
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-700"
+                                />
+                            </div>
 
-                                    {/* Marks */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-0.5">
-                                            Marks *
-                                        </label>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
-                                        />
-                                    </div>
-
-                                    {/* Question Order */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-0.5">
-                                            Order *
-                                        </label>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
-                                        />
-                                    </div>
-
-                                    {/* Difficulty Level */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-0.5">
-                                            Difficulty *
-                                        </label>
-                                        <select
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
-                                        >
-                                            <option value="EASY">Easy</option>
-                                            <option value="MEDIUM">Medium</option>
-                                            <option value="HARD">Hard</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                {/* Explanation */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Answer Text
-                                    </label>
-                                    <textarea
-                                        rows={6}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
-                                        placeholder="Explain the correct answer..."
-                                    />
-                                </div>
-
-                                {/* Keywords Section */}
-                                <div className="p-4 rounded-md border border-gray-300 mt-4">
-                                    <div className="flex items-center justify-center">
-                                        <button
-                                            type="button"
-                                            onClick={handleAddKeyword}
-                                            disabled={keywords.length >= 10}
-                                            className={`px-3 py-2 text-sm rounded-md cursor-pointer transition-colors ${keywords.length >= 10
-                                                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                                                : 'bg-primary text-white'
-                                                }`}
-                                        >
-                                            Add Keywords
-                                        </button>
-                                    </div>
-
-                                    {/* Keywords List */}
-                                    {keywords.map((keyword, index) => (
-                                        <div key={index} className="flex items-center space-x-2 mb-2 mt-4">
-                                            <span className="text-gray-700 font-medium">{index + 1}.</span>
-
-                                            <input
-                                                type="text"
-                                                value={keyword}
-                                                onChange={(e) => handleKeywordChange(index, e.target.value)}
-                                                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
-                                                placeholder="Enter keyword or key phrase"
-                                            />
-
-                                            <button
-                                                type="button"
-                                                className="p-2 bg-red-500 text-white rounded-sm hover:bg-red-600 cursor-pointer transition-colors"
-                                                onClick={() => handleDeleteKeyword(index)}
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
+                            {/* Difficulty Level */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Difficulty *
+                                </label>
+                                <select
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900"
+                                >
+                                    <option value="EASY">Easy</option>
+                                    <option value="MEDIUM">Medium</option>
+                                    <option value="HARD">Hard</option>
+                                </select>
                             </div>
                         </div>
-                    </div>
 
+                        {/* Expected Answer Length */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Expected Word Count (Min)
+                                </label>
+                                <input
+                                    type="number"
+                                    min="50"
+                                    defaultValue="150"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                    placeholder="Minimum words expected"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Expected Word Count (Max)
+                                </label>
+                                <input
+                                    type="number"
+                                    min="100"
+                                    defaultValue="500"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                    placeholder="Maximum words expected"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Model Answer */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Model Answer / Key Points
+                            </label>
+                            <textarea
+                                rows={6}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                placeholder="Provide a model answer or key points that should be covered in the response..."
+                            />
+                        </div>
+
+                        {/* Keywords Section */}
+                        <div className="p-4 rounded-md border border-gray-300 mt-4">
+                            <div className="flex items-center justify-between mb-4">
+                                <h4 className="text-sm font-medium text-gray-700">
+                                    Keywords for Auto-Evaluation
+                                </h4>
+                                <button
+                                    type="button"
+                                    onClick={handleAddKeyword}
+                                    disabled={keywords.length >= 10}
+                                    className={`px-3 py-2 text-sm rounded-md cursor-pointer transition-colors ${keywords.length >= 10
+                                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                                            : 'bg-primary text-white'
+                                        }`}
+                                >
+                                    Add Keyword ({keywords.length}/10)
+                                </button>
+                            </div>
+
+                            {/* Keywords List */}
+                            {keywords.map((keyword, index) => (
+                                <div key={index} className="flex items-center space-x-2 mb-3">
+                                    <span className="text-gray-700 font-medium min-w-[24px]">
+                                        {index + 1}.
+                                    </span>
+
+                                    <input
+                                        type="text"
+                                        value={keyword}
+                                        onChange={(e) => handleKeywordChange(index, e.target.value)}
+                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                        placeholder="Enter important keyword or concept"
+                                    />
+
+                                    <button
+                                        type="button"
+                                        className="p-2 bg-red-500 text-white rounded-sm hover:bg-red-600 cursor-pointer transition-colors"
+                                        onClick={() => handleDeleteKeyword(index)}
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
+                            ))}
+
+                            {keywords.length === 0 && (
+                                <div className="text-center py-4 text-gray-500">
+                                    <p className="text-sm">Add keywords and concepts that should appear in comprehensive answers</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Grading Criteria */}
+                        <div className="p-4 rounded-md border border-gray-300 bg-blue-50">
+                            <h4 className="text-sm font-medium text-blue-900 mb-2">Grading Guidelines:</h4>
+                            <ul className="text-sm text-blue-800 space-y-1">
+                                <li>• Content accuracy and depth of understanding</li>
+                                <li>• Use of relevant keywords and concepts</li>
+                                <li>• Logical structure and coherence</li>
+                                <li>• Meeting minimum word count requirements</li>
+                                <li>• Examples and supporting evidence (if applicable)</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </>
-    )
-}
+        </div>
+    );
+};
 
-export default LongAnswer
+export default LongAnswer;
