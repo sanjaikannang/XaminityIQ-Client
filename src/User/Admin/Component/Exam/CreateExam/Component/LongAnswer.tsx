@@ -26,8 +26,17 @@ const LongAnswer = () => {
         <>
             <div className="p-4 bg-white">
                 <div className="border border-gray-300 rounded-md">
-                    <div className="p-4 space-y-4">
 
+                    {/* Header Section */}
+                    <div className="p-4 bg-gray-50 border-b border-gray-300 rounded-t-md">
+                        <div className="flex items-center space-x-2">
+                            <span className="font-medium text-gray-700">
+                                Long Answer Question
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="p-4 space-y-4">
                         {/* Question Text */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-0.5">
