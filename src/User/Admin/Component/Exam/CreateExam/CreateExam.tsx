@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Eye, FilePen, FileText, Upload } from 'lucide-react';
 import ExamInfo from './Component/ExamInfo';
 import { ExamMode, ExamStatus } from '../../../../../Utils/enum';
 import ExamAssignment from './Component/ExamAssignment';
@@ -86,21 +86,28 @@ const CreateExam = () => {
                         <div className="bg-primary text-whiteColor p-4 flex items-center justify-between">
                             <h1 className="text-2xl font-semibold">Create Exam</h1>
 
-                            <div className="border border-white rounded-full overflow-hidden">
-                                <button
-                                    className={`px-4 transition-colors cursor-pointer ${status === 'DRAFT' ? 'bg-white text-primary rounded-full' : 'bg-transparent text-whiteColor'
-                                        }`}
-                                    onClick={() => setStatus(ExamStatus.DRAFT)}
-                                >
-                                    DRAFT
-                                </button>
-                                <button
-                                    className={`px-2 transition-colors cursor-pointer ${status === 'PUBLISH' ? 'bg-white text-primary rounded-full' : 'bg-transparent text-whiteColor'
-                                        }`}
-                                    onClick={() => setStatus(ExamStatus.PUBLISH)}
-                                >
-                                    PUBLISH
-                                </button>
+                            <div className="bg-primary p-0.5 rounded-full border border-white shadow-lg">
+                                <div className="flex rounded-full overflow-hidden">
+                                    <button
+                                        className={`flex items-center px-3 py-1 transition-all duration-300 ease-in-out cursor-pointer ${status === 'DRAFT'
+                                            ? 'bg-white text-primary shadow-md scale-105'
+                                            : 'bg-transparent text-white hover:bg-white/10'
+                                            } rounded-full font-medium text-sm`}
+                                        onClick={() => setStatus(ExamStatus.DRAFT)}
+                                    >
+                                        <FilePen size={14} />
+                                    </button>
+
+                                    <button
+                                        className={`flex items-center px-3 py-1 transition-all duration-300 ease-in-out cursor-pointer ${status === 'PUBLISH'
+                                            ? 'bg-white text-primary shadow-md scale-105'
+                                            : 'bg-transparent text-white hover:bg-white/10'
+                                            } rounded-full font-medium text-sm`}
+                                        onClick={() => setStatus(ExamStatus.PUBLISH)}
+                                    >
+                                        <Upload size={14} />
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
