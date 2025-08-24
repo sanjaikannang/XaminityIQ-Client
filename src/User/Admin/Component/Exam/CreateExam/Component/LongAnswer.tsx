@@ -165,7 +165,7 @@ const LongAnswer: React.FC<LongAnswerProps> = ({ questionNumber, sectionIndex })
                     <div className="p-4 rounded-md border border-gray-300 mt-4">
                         <div className="flex items-center justify-between mb-4">
                             <h4 className="text-sm font-medium text-gray-700">
-                                Keywords for Auto-Evaluation
+                                Keywords
                             </h4>
                             <button
                                 type="button"

@@ -108,22 +108,7 @@ const Questions: React.FC<QuestionsProps> = ({ sections }) => {
                                             <ChevronDown className="w-5 h-5 text-gray-600" />
                                         )}
                                     </div>
-                                </div>
-
-                                {/* Section Instructions */}
-                                {section.instructions.length > 0 && (
-                                    <div className="mt-3 p-2 bg-blue-50 rounded border-l-4 border-blue-400">
-                                        <h4 className="text-sm font-medium text-blue-900 mb-2">Section Instructions:</h4>
-                                        <ul className="text-sm text-blue-800 space-y-1">
-                                            {section.instructions.map((instruction, index) => (
-                                                <li key={index} className="flex items-start">
-                                                    <span className="mr-2">{index + 1}.</span>
-                                                    <span>{instruction}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
+                                </div>                               
                             </div>
 
                             {/* Section Questions */}
