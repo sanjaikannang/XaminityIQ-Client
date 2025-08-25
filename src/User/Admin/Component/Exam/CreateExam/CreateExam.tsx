@@ -302,7 +302,10 @@ const CreateExam = () => {
 
                             <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isExamStructureOpen ? 'h-full opacity-100' : 'max-h-0 opacity-0'
                                 }`}>
-                                <ExamStructure onSectionsUpdate={handleSectionsUpdate} />
+                                <ExamStructure
+                                    onSectionsUpdate={handleSectionsUpdate}
+                                    onFormDataChange={handleExamStructureDataChange}
+                                />
                             </div>
                         </div>
 

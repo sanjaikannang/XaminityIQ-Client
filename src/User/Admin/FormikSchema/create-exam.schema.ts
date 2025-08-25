@@ -136,3 +136,63 @@ export const scheduleSchema = Yup.object({
         .max(60, 'After exam buffer cannot exceed 60 minutes')
         .required('After exam buffer time is required')
 });
+
+
+export const sectionSchema = Yup.object({
+    name: Yup.string()
+        .min(3, 'Section name must be at least 3 characters')
+        .max(50, 'Section name must be less than 50 characters')
+        .required('Section name is required'),
+
+    order: Yup.string()
+        .min(1, 'Section order is required')
+        .required('Section order is required'),
+
+    marks: Yup.number()
+        .min(1, 'Section marks must be at least 1')
+        .max(100, 'Section marks cannot exceed 100')
+        .required('Section marks are required')
+        .typeError('Section marks must be a valid number'),
+
+    questionType: Yup.string()
+        .oneOf(['MCQ', 'SHORT_ANSWER', 'LONG_ANSWER', 'TRUE_FALSE'], 'Invalid question type')
+        .required('Question type is required'),
+
+    totalQuestions: Yup.number()
+        .min(1, 'Total questions must be at least 1')
+        .max(50, 'Total questions cannot exceed 50')
+        .required('Total questions are required')
+        .typeError('Total questions must be a valid number'),
+
+    timeLimit: Yup.number()
+        .min(0, 'Time limit must be 0 or greater')
+        .max(180, 'Time limit cannot exceed 180 minutes')
+        .required('Time limit is required')
+        .typeError('Time limit must be a valid number'),
+
+    isOptional: Yup.boolean(),
+
+    instructions: Yup.array()
+        .of(Yup.string().min(1, 'Instruction cannot be empty'))
+        .min(0, 'Instructions are optional')
+        .max(10, 'Cannot have more than 10 instructions')
+});
+
+
+export const examStructureSchema = Yup.object({
+    sections: Yup.array()
+        .of(sectionSchema)
+        .min(1, 'At least one section is required')
+        .max(5, 'Cannot have more than 5 sections')
+        .required('Sections are required')
+        .test('unique-names', 'Section names must be unique', function (sections) {
+            if (!sections) return true;
+            const names = sections.map(section => section.name?.toLowerCase().trim()).filter(Boolean);
+            return names.length === new Set(names).size;
+        })
+        .test('unique-orders', 'Section orders must be unique', function (sections) {
+            if (!sections) return true;
+            const orders = sections.map(section => section.order?.trim()).filter(Boolean);
+            return orders.length === new Set(orders).size;
+        })
+});
