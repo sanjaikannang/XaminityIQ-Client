@@ -52,3 +52,25 @@ export const examInfoSchema = Yup.object({
         .required('General instructions are required')
 });
 
+
+export const examAssignmentSchema = Yup.object({
+    batchId: Yup.string()
+        .required('Batch selection is required'),
+
+    courseId: Yup.string()
+        .required('Course selection is required'),
+
+    branchId: Yup.string()
+        .required('Branch selection is required'),
+
+    sectionId: Yup.string()
+        .required('Section selection is required'),
+
+    facultyId: Yup.string()
+        .when('examMode', {
+            is: ExamMode.PROCTORING,
+            then: (schema) => schema.required('Faculty selection is required for proctoring mode'),
+            otherwise: (schema) => schema.optional()
+        })
+});
+

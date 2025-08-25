@@ -81,27 +81,31 @@ const CreateExam = () => {
 
     // Form data handlers
     const handleExamInfoDataChange = (values: ExamInfoFormData, isValid: boolean) => {
-        console.log("parent component form values....", values)
+        // console.log("parent component form values....", values)
         setExamInfoData(values);
         setFormValidation(prev => ({ ...prev, examInfo: isValid }));
     };
 
     const handleTargetAudienceDataChange = (values: any, isValid: boolean) => {
+        console.log("parent component form values....", values)
         setTargetAudienceData(values);
         setFormValidation(prev => ({ ...prev, targetAudience: isValid }));
     };
 
     const handleScheduleDataChange = (values: any, isValid: boolean) => {
+        console.log("parent component form values....", values)
         setScheduleData(values);
         setFormValidation(prev => ({ ...prev, schedule: isValid }));
     };
 
     const handleExamStructureDataChange = (values: any, isValid: boolean) => {
+        console.log("parent component form values....", values)
         setExamStructureData(values);
         setFormValidation(prev => ({ ...prev, examStructure: isValid }));
     };
 
     const handleQuestionsDataChange = (values: any, isValid: boolean) => {
+        console.log("parent component form values....", values)
         setQuestionsData(values);
         setFormValidation(prev => ({ ...prev, questions: isValid }));
     };
@@ -248,7 +252,10 @@ const CreateExam = () => {
 
                             <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isTargetAudienceOpen ? 'h-full opacity-100' : 'max-h-0 opacity-0'
                                 }`}>
-                                <ExamAssignment examMode={currentExamMode} />
+                                <ExamAssignment
+                                    examMode={currentExamMode}
+                                    onFormDataChange={handleTargetAudienceDataChange}
+                                />
                             </div>
                         </div>
 
