@@ -277,7 +277,10 @@ const CreateExam = () => {
 
                             <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isScheduleOpen ? 'h-full opacity-100' : 'max-h-0 opacity-0'
                                 }`}>
-                                <Schedule examMode={currentExamMode} />
+                                <Schedule
+                                    examMode={currentExamMode}
+                                    onFormDataChange={handleScheduleDataChange}
+                                />
                             </div>
                         </div>
 

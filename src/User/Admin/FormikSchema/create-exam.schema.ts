@@ -74,3 +74,65 @@ export const examAssignmentSchema = Yup.object({
         })
 });
 
+
+export const scheduleSchema = Yup.object({
+    // For PROCTORING mode
+    examDate: Yup.string()
+        .when('examMode', {
+            is: ExamMode.PROCTORING,
+            then: (schema) => schema.required('Exam date is required for proctoring mode'),
+            otherwise: (schema) => schema.optional()
+        }),
+
+    startTime: Yup.string()
+        .when('examMode', {
+            is: ExamMode.PROCTORING,
+            then: (schema) => schema.required('Start time is required for proctoring mode'),
+            otherwise: (schema) => schema.optional()
+        }),
+
+    endTime: Yup.string()
+        .when('examMode', {
+            is: ExamMode.PROCTORING,
+            then: (schema) => schema
+                .required('End time is required for proctoring mode')
+                .test('is-after-start', 'End time must be after start time', function (value) {
+                    const { startTime } = this.parent;
+                    if (!startTime || !value) return true;
+                    return value > startTime;
+                }),
+            otherwise: (schema) => schema.optional()
+        }),
+
+    // For AUTO mode
+    startDate: Yup.string()
+        .when('examMode', {
+            is: ExamMode.AUTO,
+            then: (schema) => schema.required('Start date is required for auto mode'),
+            otherwise: (schema) => schema.optional()
+        }),
+
+    endDate: Yup.string()
+        .when('examMode', {
+            is: ExamMode.AUTO,
+            then: (schema) => schema
+                .required('End date is required for auto mode')
+                .test('is-after-start', 'End date must be after or same as start date', function (value) {
+                    const { startDate } = this.parent;
+                    if (!startDate || !value) return true;
+                    return new Date(value) >= new Date(startDate);
+                }),
+            otherwise: (schema) => schema.optional()
+        }),
+
+    // Buffer times (required for both modes)
+    beforeExam: Yup.number()
+        .min(0, 'Before exam buffer must be 0 or greater')
+        .max(60, 'Before exam buffer cannot exceed 60 minutes')
+        .required('Before exam buffer time is required'),
+
+    afterExam: Yup.number()
+        .min(0, 'After exam buffer must be 0 or greater')
+        .max(60, 'After exam buffer cannot exceed 60 minutes')
+        .required('After exam buffer time is required')
+});
