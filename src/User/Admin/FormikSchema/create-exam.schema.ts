@@ -196,3 +196,164 @@ export const examStructureSchema = Yup.object({
             return orders.length === new Set(orders).size;
         })
 });
+
+
+export const optionSchema = Yup.object({
+    text: Yup.string()
+        .min(1, 'Option text is required')
+        .max(200, 'Option text must be less than 200 characters')
+        .required('Option text is required'),
+
+    isCorrect: Yup.boolean().required()
+});
+
+
+export const baseQuestionSchema = Yup.object({
+    questionText: Yup.string()
+        .min(10, 'Question text must be at least 10 characters')
+        .max(1000, 'Question text must be less than 1000 characters')
+        .required('Question text is required'),
+
+    questionType: Yup.string()
+        .oneOf(['MCQ', 'SHORT_ANSWER', 'LONG_ANSWER', 'TRUE_FALSE'], 'Invalid question type')
+        .required('Question type is required'),
+
+    marks: Yup.number()
+        .min(1, 'Marks must be at least 1')
+        .max(20, 'Marks cannot exceed 20')
+        .required('Marks are required')
+        .typeError('Marks must be a valid number'),
+
+    order: Yup.number()
+        .min(1, 'Order must be at least 1')
+        .required('Order is required')
+        .typeError('Order must be a valid number'),
+
+    difficulty: Yup.string()
+        .oneOf(['EASY', 'MEDIUM', 'HARD'], 'Invalid difficulty level')
+        .required('Difficulty level is required'),
+
+    explanation: Yup.string()
+        .min(10, 'Explanation must be at least 10 characters')
+        .max(500, 'Explanation must be less than 500 characters')
+        .required('Explanation is required')
+});
+
+
+export const mcqQuestionSchema = baseQuestionSchema.shape({
+    options: Yup.array()
+        .of(optionSchema)
+        .min(2, 'At least 2 options are required')
+        .max(4, 'Cannot have more than 4 options')
+        .required('Options are required')
+        .test('at-least-one-correct', 'At least one option must be marked as correct', function (options) {
+            if (!options) return false;
+            return options.some(option => option.isCorrect);
+        })
+        .test('mcq-single-correct', 'Only one option can be correct for MCQ questions', function (options) {
+            if (!options) return true;
+            const { questionType } = this.parent;
+            if (questionType === 'MCQ') {
+                const correctCount = options.filter(option => option.isCorrect).length;
+                return correctCount === 1;
+            }
+            return true;
+        })
+});
+
+
+export const trueFalseQuestionSchema = baseQuestionSchema.shape({
+    options: Yup.array()
+        .of(optionSchema)
+        .length(2, 'True/False questions must have exactly 2 options')
+        .required('Options are required')
+        .test('at-least-one-correct', 'At least one option must be marked as correct', function (options) {
+            if (!options) return false;
+            return options.some(option => option.isCorrect);
+        })
+});
+
+
+export const shortAnswerQuestionSchema = baseQuestionSchema.shape({
+    sampleAnswer: Yup.string()
+        .min(10, 'Sample answer must be at least 10 characters')
+        .max(500, 'Sample answer must be less than 500 characters')
+        .required('Sample answer is required'),
+
+    keywords: Yup.array()
+        .of(Yup.string().min(1, 'Keyword cannot be empty'))
+        .min(1, 'At least one keyword is required')
+        .max(10, 'Cannot have more than 10 keywords')
+        .required('Keywords are required')
+});
+
+
+export const longAnswerQuestionSchema = baseQuestionSchema.shape({
+    modelAnswer: Yup.string()
+        .min(50, 'Model answer must be at least 50 characters')
+        .max(2000, 'Model answer must be less than 2000 characters')
+        .required('Model answer is required'),
+
+    minWordCount: Yup.number()
+        .min(50, 'Minimum word count must be at least 50')
+        .max(1000, 'Minimum word count cannot exceed 1000')
+        .required('Minimum word count is required')
+        .typeError('Minimum word count must be a valid number'),
+
+    maxWordCount: Yup.number()
+        .min(100, 'Maximum word count must be at least 100')
+        .max(2000, 'Maximum word count cannot exceed 2000')
+        .required('Maximum word count is required')
+        .typeError('Maximum word count must be a valid number')
+        .test('max-greater-than-min', 'Maximum word count must be greater than minimum', function (value) {
+            const { minWordCount } = this.parent;
+            if (!minWordCount || !value) return true;
+            return value > minWordCount;
+        }),
+
+    keywords: Yup.array()
+        .of(Yup.string().min(1, 'Keyword cannot be empty'))
+        .min(1, 'At least one keyword is required')
+        .max(10, 'Cannot have more than 10 keywords')
+        .required('Keywords are required')
+});
+
+
+export const questionValidationSchema = Yup.lazy((value) => {
+    if (!value || !value.questionType) {
+        return baseQuestionSchema;
+    }
+
+    switch (value.questionType) {
+        case 'MCQ':
+            return mcqQuestionSchema;
+        case 'TRUE_FALSE':
+            return trueFalseQuestionSchema;
+        case 'SHORT_ANSWER':
+            return shortAnswerQuestionSchema;
+        case 'LONG_ANSWER':
+            return longAnswerQuestionSchema;
+        default:
+            return baseQuestionSchema;
+    }
+});
+
+
+export const questionsSchema = Yup.object({
+    sections: Yup.array()
+        .of(
+            Yup.object({
+                id: Yup.string().required(),
+                questions: Yup.array()
+                    .of(questionValidationSchema)
+                    .required('Questions are required')
+                    .test('questions-count-match', 'Number of questions must match section total', function (questions, context) {
+                        const sectionData = context.parent;
+                        const expectedCount = parseInt(sectionData.totalQuestions) || 0;
+                        if (!questions) return expectedCount === 0;
+                        return questions.length === expectedCount;
+                    })
+            })
+        )
+        .required('Sections with questions are required')
+});
