@@ -8,9 +8,12 @@ import {
     getSectionsByBranch,
     getAllFaculty,
 } from "../../../../../../Services/Admin/adminAPI";
+import { Form, Formik } from "formik";
+import { examAssignmentSchema } from "../../../../FormikSchema/create-exam.schema";
 
 interface ExamAssignmentProps {
     examMode: ExamMode;
+    onFormDataChange?: (values: FormData, isValid: boolean) => void;
 }
 
 interface FormData {
@@ -19,6 +22,7 @@ interface FormData {
     branchId: string;
     sectionId: string;
     facultyId: string;
+    examMode: ExamMode;
 }
 
 interface LoadingStates {
@@ -37,15 +41,7 @@ interface OptionsState {
     faculties: SelectOption[];
 }
 
-const ExamAssignment = ({ examMode }: ExamAssignmentProps) => {
-    const [formData, setFormData] = useState<FormData>({
-        batchId: '',
-        courseId: '',
-        branchId: '',
-        sectionId: '',
-        facultyId: '',
-    });
-
+const ExamAssignment = ({ examMode, onFormDataChange }: ExamAssignmentProps) => {
     const [options, setOptions] = useState<OptionsState>({
         batches: [],
         courses: [],
@@ -62,7 +58,14 @@ const ExamAssignment = ({ examMode }: ExamAssignmentProps) => {
         faculties: false,
     });
 
-    const [errors, setErrors] = useState<Partial<FormData>>({});
+    const initialValues: FormData = {
+        batchId: '',
+        courseId: '',
+        branchId: '',
+        sectionId: '',
+        facultyId: '',
+        examMode: examMode,
+    };
 
     // Fetch batches and faculties on component mount
     useEffect(() => {
@@ -72,59 +75,16 @@ const ExamAssignment = ({ examMode }: ExamAssignmentProps) => {
         }
     }, [examMode]);
 
-    // Fetch courses when batch changes
-    useEffect(() => {
-        if (formData.batchId) {
-            fetchCourses(formData.batchId);
-            // Reset dependent fields
-            setFormData(prev => ({
-                ...prev,
-                courseId: '',
-                branchId: '',
-                sectionId: ''
-            }));
-            setOptions(prev => ({
-                ...prev,
-                courses: [],
-                branches: [],
-                sections: []
-            }));
-        }
-    }, [formData.batchId]);
+    const handleSubmit = (values: FormData) => {
+        console.log('Form values:', values);
+    };
 
-    // Fetch branches when course changes
-    useEffect(() => {
-        if (formData.courseId) {
-            fetchBranches(formData.courseId);
-            // Reset dependent fields
-            setFormData(prev => ({
-                ...prev,
-                branchId: '',
-                sectionId: ''
-            }));
-            setOptions(prev => ({
-                ...prev,
-                branches: [],
-                sections: []
-            }));
+    const handleFormChange = (values: FormData, isValid: boolean) => {
+        // Send form data to parent component
+        if (onFormDataChange) {
+            onFormDataChange(values, isValid);
         }
-    }, [formData.courseId]);
-
-    // Fetch sections when branch changes
-    useEffect(() => {
-        if (formData.branchId) {
-            fetchSections(formData.branchId);
-            // Reset dependent fields
-            setFormData(prev => ({
-                ...prev,
-                sectionId: ''
-            }));
-            setOptions(prev => ({
-                ...prev,
-                sections: []
-            }));
-        }
-    }, [formData.branchId]);
+    };
 
 
     // Get All Batch
@@ -141,7 +101,6 @@ const ExamAssignment = ({ examMode }: ExamAssignmentProps) => {
             }
         } catch (error) {
             console.error('Error fetching batches:', error);
-            setErrors(prev => ({ ...prev, batchId: 'Failed to load batches' }));
         } finally {
             setLoadingStates(prev => ({ ...prev, batches: false }));
         }
@@ -162,7 +121,6 @@ const ExamAssignment = ({ examMode }: ExamAssignmentProps) => {
             }
         } catch (error) {
             console.error('Error fetching courses:', error);
-            setErrors(prev => ({ ...prev, courseId: 'Failed to load courses' }));
         } finally {
             setLoadingStates(prev => ({ ...prev, courses: false }));
         }
@@ -183,7 +141,6 @@ const ExamAssignment = ({ examMode }: ExamAssignmentProps) => {
             }
         } catch (error) {
             console.error('Error fetching branches:', error);
-            setErrors(prev => ({ ...prev, branchId: 'Failed to load branches' }));
         } finally {
             setLoadingStates(prev => ({ ...prev, branches: false }));
         }
@@ -204,7 +161,6 @@ const ExamAssignment = ({ examMode }: ExamAssignmentProps) => {
             }
         } catch (error) {
             console.error('Error fetching sections:', error);
-            setErrors(prev => ({ ...prev, sectionId: 'Failed to load sections' }));
         } finally {
             setLoadingStates(prev => ({ ...prev, sections: false }));
         }
@@ -228,95 +184,153 @@ const ExamAssignment = ({ examMode }: ExamAssignmentProps) => {
             }
         } catch (error) {
             console.error('Error fetching faculties:', error);
-            setErrors(prev => ({ ...prev, facultyId: 'Failed to load faculties' }));
         } finally {
             setLoadingStates(prev => ({ ...prev, faculties: false }));
-        }
-    };
-
-
-
-    const handleSelectChange = (field: keyof FormData) => (value: string | number) => {
-        setFormData(prev => ({ ...prev, [field]: value.toString() }));
-        // Clear error when user makes a selection
-        if (errors[field]) {
-            setErrors(prev => ({ ...prev, [field]: undefined }));
         }
     };
 
     return (
         <>
             <div className="p-4 space-y-4">
-                <div className="border border-gray-300 rounded-md p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
-                        {/* Batch Selection */}
-                        <CommonSelect
-                            id="batchId"
-                            label="Batch"
-                            options={options.batches}
-                            value={formData.batchId}
-                            onChange={handleSelectChange('batchId')}
-                            required
-                            loading={loadingStates.batches}
-                            error={errors.batchId}
-                        />
+                <Formik
+                    initialValues={initialValues}
+                    validationSchema={examAssignmentSchema}
+                    onSubmit={handleSubmit}
+                    validateOnChange={true}
+                    validateOnBlur={true}
+                    enableReinitialize={true}
+                >
+                    {({ values, setFieldValue, isValid, errors, touched }) => {
 
-                        {/* Course Selection */}
-                        <CommonSelect
-                            id="courseId"
-                            label="Course"
-                            options={options.courses}
-                            value={formData.courseId}
-                            onChange={handleSelectChange('courseId')}
-                            required
-                            loading={loadingStates.courses}
-                            error={errors.courseId}
-                            disabled={!formData.batchId}
-                        />
+                        // Send form data to parent whenever values change
+                        useEffect(() => {
+                            handleFormChange(values, isValid);
+                        }, [values, isValid]);
 
-                        {/* Branch Selection */}
-                        <CommonSelect
-                            id="branchId"
-                            label="Branch"
-                            options={options.branches}
-                            value={formData.branchId}
-                            onChange={handleSelectChange('branchId')}
-                            required
-                            loading={loadingStates.branches}
-                            error={errors.branchId}
-                            disabled={!formData.courseId}
-                        />
+                        // Handle dependent dropdowns
+                        useEffect(() => {
+                            if (values.batchId) {
+                                fetchCourses(values.batchId);
+                                // Reset dependent fields
+                                setFieldValue('courseId', '');
+                                setFieldValue('branchId', '');
+                                setFieldValue('sectionId', '');
+                                setOptions(prev => ({
+                                    ...prev,
+                                    courses: [],
+                                    branches: [],
+                                    sections: []
+                                }));
+                            }
+                        }, [values.batchId]);
 
-                        {/* Section Selection */}
-                        <CommonSelect
-                            id="sectionId"
-                            label="Section"
-                            options={options.sections}
-                            value={formData.sectionId}
-                            onChange={handleSelectChange('sectionId')}
-                            required
-                            loading={loadingStates.sections}
-                            error={errors.sectionId}
-                            disabled={!formData.branchId}
-                        />
+                        useEffect(() => {
+                            if (values.courseId) {
+                                fetchBranches(values.courseId);
+                                // Reset dependent fields
+                                setFieldValue('branchId', '');
+                                setFieldValue('sectionId', '');
+                                setOptions(prev => ({
+                                    ...prev,
+                                    branches: [],
+                                    sections: []
+                                }));
+                            }
+                        }, [values.courseId]);
 
-                        {/* Faculty Selection */}
-                        {examMode === ExamMode.PROCTORING && (
-                            <CommonSelect
-                                id="facultyId"
-                                label="Faculty"
-                                options={options.faculties}
-                                value={formData.facultyId}
-                                onChange={handleSelectChange('facultyId')}
-                                required
-                                loading={loadingStates.faculties}
-                                error={errors.facultyId}
-                            />
-                        )}
+                        useEffect(() => {
+                            if (values.branchId) {
+                                fetchSections(values.branchId);
+                                // Reset dependent fields
+                                setFieldValue('sectionId', '');
+                                setOptions(prev => ({
+                                    ...prev,
+                                    sections: []
+                                }));
+                            }
+                        }, [values.branchId]);
 
-                    </div>
-                </div>
+                        const handleSelectChange = (field: keyof FormData) => (value: string | number) => {
+                            setFieldValue(field, value.toString());
+                        };
+
+                        return (
+                            <Form>
+                                <div className="border border-gray-300 rounded-md p-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                                        {/* Batch Selection */}
+                                        <CommonSelect
+                                            id="batchId"
+                                            label="Batch"
+                                            options={options.batches}
+                                            value={values.batchId}
+                                            onChange={handleSelectChange('batchId')}
+                                            required
+                                            loading={loadingStates.batches}
+                                            error={touched.batchId && errors.batchId ? errors.batchId : undefined}
+                                        />
+
+                                        {/* Course Selection */}
+                                        <CommonSelect
+                                            id="courseId"
+                                            label="Course"
+                                            options={options.courses}
+                                            value={values.courseId}
+                                            onChange={handleSelectChange('courseId')}
+                                            required
+                                            loading={loadingStates.courses}
+                                            error={touched.courseId && errors.courseId ? errors.courseId : undefined}
+                                            disabled={!values.batchId}
+                                        />
+
+                                        {/* Branch Selection */}
+                                        <CommonSelect
+                                            id="branchId"
+                                            label="Branch"
+                                            options={options.branches}
+                                            value={values.branchId}
+                                            onChange={handleSelectChange('branchId')}
+                                            required
+                                            loading={loadingStates.branches}
+                                            error={touched.branchId && errors.branchId ? errors.branchId : undefined}
+                                            disabled={!values.courseId}
+                                        />
+
+                                        {/* Section Selection */}
+                                        <CommonSelect
+                                            id="sectionId"
+                                            label="Section"
+                                            options={options.sections}
+                                            value={values.sectionId}
+                                            onChange={handleSelectChange('sectionId')}
+                                            required
+                                            loading={loadingStates.sections}
+                                            error={touched.sectionId && errors.sectionId ? errors.sectionId : undefined}
+                                            disabled={!values.branchId}
+                                        />
+
+                                        {/* Faculty Selection */}
+                                        {examMode === ExamMode.PROCTORING && (
+                                            <CommonSelect
+                                                id="facultyId"
+                                                label="Faculty"
+                                                options={options.faculties}
+                                                value={values.facultyId}
+                                                onChange={handleSelectChange('facultyId')}
+                                                required
+                                                loading={loadingStates.faculties}
+                                                error={touched.facultyId && errors.facultyId ? errors.facultyId : undefined}
+                                            />
+                                        )}
+
+                                    </div>
+                                </div>
+                            </Form>
+                        )
+                    }}
+                </Formik>
             </div>
         </>
     );

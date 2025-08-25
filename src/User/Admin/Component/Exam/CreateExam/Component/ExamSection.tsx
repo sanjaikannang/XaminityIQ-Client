@@ -1,3 +1,4 @@
+import { FormikErrors, FormikTouched } from 'formik';
 import { Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface Section {
@@ -13,6 +14,10 @@ interface Section {
     isExpanded: boolean;
 }
 
+interface FormData {
+    sections: Section[];
+}
+
 interface SectionComponentProps {
     section: Section;
     sectionIndex: number;
@@ -22,6 +27,8 @@ interface SectionComponentProps {
     onAddInstruction: (sectionId: string) => void;
     onInstructionChange: (sectionId: string, index: number, value: string) => void;
     onDeleteInstruction: (sectionId: string, index: number) => void;
+    errors: FormikErrors<FormData>;
+    touched: FormikTouched<FormData>;
 }
 
 const ExamSection: React.FC<SectionComponentProps> = ({
@@ -32,8 +39,33 @@ const ExamSection: React.FC<SectionComponentProps> = ({
     onUpdateSection,
     onAddInstruction,
     onInstructionChange,
-    onDeleteInstruction
+    onDeleteInstruction,
+    errors,
+    touched
 }) => {
+
+    // Get section-specific errors
+    const sectionErrors = errors.sections && Array.isArray(errors.sections) ? errors.sections[sectionIndex] : {};
+    const sectionTouched = touched.sections && Array.isArray(touched.sections) ? touched.sections[sectionIndex] : {};
+
+    // Helper function to check if a field has an error
+    const hasError = (fieldName: keyof Section) => {
+        return sectionErrors &&
+            typeof sectionErrors === 'object' &&
+            sectionErrors[fieldName] &&
+            sectionTouched &&
+            typeof sectionTouched === 'object' &&
+            sectionTouched[fieldName];
+    };
+
+    // Helper function to get error message
+    const getErrorMessage = (fieldName: keyof Section) => {
+        if (sectionErrors && typeof sectionErrors === 'object') {
+            return sectionErrors[fieldName];
+        }
+        return null;
+    };
+
     return (
         <>
             <div className="border border-gray-300 rounded-md">
@@ -44,6 +76,10 @@ const ExamSection: React.FC<SectionComponentProps> = ({
                             Section {sectionIndex + 1}
                             {section.name && `: ${section.name}`}
                         </span>
+                        {/* Error indicator */}
+                        {sectionErrors && Object.keys(sectionErrors).length > 0 && (
+                            <span className="w-2 h-2 bg-red-500 rounded-full" title="This section has validation errors"></span>
+                        )}
                     </div>
 
                     <div className="flex items-center space-x-2">
@@ -82,9 +118,13 @@ const ExamSection: React.FC<SectionComponentProps> = ({
                                     type="text"
                                     value={section.name}
                                     onChange={(e) => onUpdateSection(section.id, 'name', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                    className={`w-full px-3 py-2 border rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500 ${hasError('name') ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                                        }`}
                                     placeholder="Enter section name"
                                 />
+                                {hasError('name') && (
+                                    <p className="text-xs text-red-600 mt-1">{getErrorMessage('name')}</p>
+                                )}
                             </div>
 
                             {/* Section Order */}
@@ -96,9 +136,13 @@ const ExamSection: React.FC<SectionComponentProps> = ({
                                     type="text"
                                     value={section.order}
                                     onChange={(e) => onUpdateSection(section.id, 'order', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
-                                    placeholder="Enter section order"
+                                    className={`w-full px-3 py-2 border rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500 ${hasError('order') ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                                        }`}
+                                    placeholder="Enter section order (e.g., 1, 2, A, B)"
                                 />
+                                {hasError('order') && (
+                                    <p className="text-xs text-red-600 mt-1">{getErrorMessage('order')}</p>
+                                )}
                             </div>
 
                             {/* Section Marks */}
@@ -111,9 +155,13 @@ const ExamSection: React.FC<SectionComponentProps> = ({
                                     min="1"
                                     value={section.marks}
                                     onChange={(e) => onUpdateSection(section.id, 'marks', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                    className={`w-full px-3 py-2 border rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500 ${hasError('marks') ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                                        }`}
                                     placeholder="0"
                                 />
+                                {hasError('marks') && (
+                                    <p className="text-xs text-red-600 mt-1">{getErrorMessage('marks')}</p>
+                                )}
                             </div>
 
                             {/* Question Type */}
@@ -124,13 +172,17 @@ const ExamSection: React.FC<SectionComponentProps> = ({
                                 <select
                                     value={section.questionType}
                                     onChange={(e) => onUpdateSection(section.id, 'questionType', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                    className={`w-full px-3 py-2 border rounded-md focus:outline-none duration-200 text-gray-900 ${hasError('questionType') ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                                        }`}
                                 >
                                     <option value="MCQ">Multiple Choice</option>
                                     <option value="SHORT_ANSWER">Short Answer</option>
                                     <option value="LONG_ANSWER">Long Answer</option>
                                     <option value="TRUE_FALSE">True/False</option>
                                 </select>
+                                {hasError('questionType') && (
+                                    <p className="text-xs text-red-600 mt-1">{getErrorMessage('questionType')}</p>
+                                )}
                             </div>
 
                             {/* Total Questions */}
@@ -143,9 +195,13 @@ const ExamSection: React.FC<SectionComponentProps> = ({
                                     min="1"
                                     value={section.totalQuestions}
                                     onChange={(e) => onUpdateSection(section.id, 'totalQuestions', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                    className={`w-full px-3 py-2 border rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500 ${hasError('totalQuestions') ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                                        }`}
                                     placeholder="0"
                                 />
+                                {hasError('totalQuestions') && (
+                                    <p className="text-xs text-red-600 mt-1">{getErrorMessage('totalQuestions')}</p>
+                                )}
                             </div>
 
                             {/* Time Limit */}
@@ -158,9 +214,13 @@ const ExamSection: React.FC<SectionComponentProps> = ({
                                     min="0"
                                     value={section.timeLimit}
                                     onChange={(e) => onUpdateSection(section.id, 'timeLimit', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
+                                    className={`w-full px-3 py-2 border rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500 ${hasError('timeLimit') ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                                        }`}
                                     placeholder="0"
                                 />
+                                {hasError('timeLimit') && (
+                                    <p className="text-xs text-red-600 mt-1">{getErrorMessage('timeLimit')}</p>
+                                )}
                             </div>
 
                             {/* Is Optional */}
@@ -214,6 +274,12 @@ const ExamSection: React.FC<SectionComponentProps> = ({
                                     </button>
                                 </div>
                             ))}
+
+                            {/* Instructions validation error */}
+                            {hasError('instructions') && (
+                                <p className="text-xs text-red-600 mt-2">{getErrorMessage('instructions')}</p>
+                            )}
+
                         </div>
                     </div>
                 )}
