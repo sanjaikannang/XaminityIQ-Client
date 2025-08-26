@@ -1,5 +1,5 @@
 import api from "../../Api/axios";
-import { CreateExamRequest, CreateExamResponse, CreateFacultyRequest, CreateFacultyResponse, CreateStudentRequest, CreateStudentResponse, DeleteFacultyResponse, DeleteStudentResponse, GetAllExamRequest, GetAllExamResponse, GetAllFacultyRequest, GetAllFacultyResponse, GetAllStudentRequest, GetAllStudentResponse, GetBatchesResponse, GetBranchesByCourseResponse, GetCoursesByBatchResponse, GetFacultyResponse, GetSectionsByBranchResponse, GetStudentResponse } from "../../Types/admin.types";
+import { CreateBatchRequest, CreateBatchResponse, CreateBranchRequest, CreateBranchResponse, CreateCourseRequest, CreateCourseResponse, CreateExamRequest, CreateExamResponse, CreateFacultyRequest, CreateFacultyResponse, CreateSectionRequest, CreateSectionResponse, CreateStudentRequest, CreateStudentResponse, DeleteFacultyResponse, DeleteStudentResponse, GetAllExamRequest, GetAllExamResponse, GetAllFacultyRequest, GetAllFacultyResponse, GetAllStudentRequest, GetAllStudentResponse, GetBatchesResponse, GetBranchesByCourseResponse, GetCoursesByBatchResponse, GetFacultyResponse, GetSectionsByBranchResponse, GetStudentResponse } from "../../Types/admin.types";
 
 // Create Student
 export async function createStudent(data: CreateStudentRequest): Promise<CreateStudentResponse> {
@@ -128,3 +128,30 @@ export async function getSectionsByBranch(branchId: string): Promise<GetSections
     return response.data;
 }
 
+
+// Create Batch
+export async function createBatch(data: CreateBatchRequest): Promise<CreateBatchResponse> {
+    const response = await api.post<CreateBatchResponse>('/admin/create-batch', data);
+    return response.data;
+}
+
+
+// Create Course
+export async function createCourse(data: CreateCourseRequest): Promise<CreateCourseResponse> {
+    const response = await api.post<CreateCourseResponse>('/admin/create-course', data);
+    return response.data;
+}
+
+
+// Create Branch
+export async function createBranch(data: CreateBranchRequest): Promise<CreateBranchResponse> {
+    const response = await api.post<CreateBranchResponse>('/admin/create-branch', data);
+    return response.data;
+}
+
+
+// Create Section
+export async function createSection(data: CreateSectionRequest): Promise<CreateSectionResponse> {
+    const response = await api.post<CreateSectionResponse>('/admin/create-section', data);
+    return response.data;
+}

@@ -499,5 +499,55 @@ export interface GetSectionsByBranchResponse {
     data?: any;
 }
 
+export interface CreateBatchRequest {
+    startYear: number;
+    endYear: number;
+}
+
+export interface CreateCourseRequest {
+    name: string;
+    fullName: string;
+    batchId: string;
+    totalSemesters: number;
+    durationYears: number;
+    courseType: string;
+}
+
+export interface CreateBranchRequest {
+    name: string;
+    code: string;
+    courseId: string;
+}
+
+export interface CreateSectionRequest {
+    name: string;
+    branchId: string;
+    capacity?: number;
+}
+
+export interface CreateBatchResponse {
+    success: boolean;
+    message: string;
+    data?: any;
+}
+
+export interface CreateCourseResponse {
+    success: boolean;
+    message: string;
+    data?: any;
+}
+
+export interface CreateBranchResponse {
+    success: boolean;
+    message: string;
+    data?: any;
+}
+
+export interface CreateSectionResponse {
+    success: boolean;
+    message: string;
+    data?: any;
+}
+
 // Form Values Interface for Formik
 export interface CreateExamFormValues extends CreateExamRequest { }
