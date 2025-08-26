@@ -137,6 +137,8 @@ const CreateExam = () => {
             sections: sections
         };
 
+        console.log("Exam Data...", examData);
+
         try {
             // Call API
 
@@ -327,7 +329,9 @@ const CreateExam = () => {
 
                             <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isQuestionsOpen ? 'h-full opacity-100' : 'max-h-0 opacity-0'
                                 }`}>
-                                <Questions sections={sections} />
+                                <Questions
+                                    onFormDataChange={handleQuestionsDataChange}
+                                    sections={sections} />
                             </div>
                         </div>
                     </div>
