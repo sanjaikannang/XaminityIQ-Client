@@ -38,3 +38,11 @@ export enum DifficultyLevel {
     MEDIUM = 'MEDIUM',
     HARD = 'HARD'
 }
+
+export enum CourseType {
+    UG = 'UG',
+    PG = 'PG',
+    DIPLOMA = 'DIPLOMA',
+    PHD = 'PHD',
+    MPhil = 'MPhil',
+}
