@@ -81,11 +81,10 @@ const CommonSelect: React.FC<CommonSelectProps> = ({
                         onClick={handleToggle}
                         disabled={disabled || loading}
                         className={`
-                            w-full px-4 py-2 border rounded-md
+                            w-full px-4 py-2 border border-gray-300 rounded-md
                             transition-all duration-300 ease-in-out
                             text-gray-800 bg-white text-left
-                            focus:outline-none                            
-                            ${error ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'}
+                            focus:outline-none                                                        
                             ${disabled || loading ? 'bg-gray-100 cursor-not-allowed opacity-60' : 'cursor-pointer'}
                             ${isOpen ? '' : ''}
                         `}
@@ -135,7 +134,7 @@ const CommonSelect: React.FC<CommonSelectProps> = ({
                 </div>
 
                 {error && (
-                    <p className="text-red-600 text-sm mt-1 flex items-center">
+                    <p className="text-red-600 text-[12px] flex items-center">
                         {error}
                     </p>
                 )}
