@@ -7,10 +7,13 @@ import CreateStudent from './CreateStudent';
 import CreateFaculty from './CreateFaculty';
 import StudentDetail from './StudentDetail';
 import FacultyDetail from './FacultyDetail';
-import BulkUploadStudent from './BulkUploadStudent';
 import AllExam from './AllExam';
 import CreateExam from './Exam/CreateExam/CreateExam';
 import MasterDataDashboard from '../Dashboard/MasterDataDashboard';
+import ViewBatch from './MasterData/_Component/ViewBatch';
+import ViewCourse from './MasterData/_Component/ViewCourse';
+import ViewBranch from './MasterData/_Component/ViewBranch';
+import ViewSection from './MasterData/_Component/ViewSection';
 
 const MainComponent = () => {
 
@@ -24,7 +27,6 @@ const MainComponent = () => {
                         {/* Students Screens */}
                         <Route path="student" element={<StudentDashboard />} />
                         <Route path="student/create-student" element={<CreateStudent />} />
-                        <Route path="student/create-bulk-student" element={<BulkUploadStudent />} />
                         <Route path="student/:id" element={<StudentDetail />} />
 
                         {/* Faculty Screens */}
@@ -38,7 +40,11 @@ const MainComponent = () => {
                         <Route path="exam/create-exam" element={<CreateExam />} />
 
                         {/* MasterData Screens */}
-                        <Route path="data" element={<MasterDataDashboard />} />                        
+                        <Route path="data" element={<MasterDataDashboard />} />
+                        <Route path="data/view-batch" element={<ViewBatch />} />
+                        <Route path="data/view-course" element={<ViewCourse />} />
+                        <Route path="data/view-branch" element={<ViewBranch />} />
+                        <Route path="data/view-section" element={<ViewSection />} />
 
                     </Routes>
                 </div>

@@ -478,7 +478,24 @@ export interface GetBatchesResponse {
     success: boolean;
     message: string;
     data?: any;
+}
 
+export interface GetCoursesResponse {
+    success: boolean;
+    message: string;
+    data?: any;
+}
+
+export interface GetSectionsResponse {
+    success: boolean;
+    message: string;
+    data?: any;
+}
+
+export interface GetBranchesResponse {
+    success: boolean;
+    message: string;
+    data?: any;
 }
 
 export interface GetCoursesByBatchResponse {
