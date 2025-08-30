@@ -111,10 +111,6 @@ const StudentDashboard = () => {
     navigate("create-student");
   }
 
-  const handleCreateBulkStudent = () => {
-    navigate("create-bulk-student");
-  }
-
   const handleViewStudent = (studentId: string) => {
     navigate(`/admin/student/${studentId}`);
   };
@@ -271,17 +267,7 @@ const StudentDashboard = () => {
             >
               <Plus size={18} />
               Create
-            </button>
-
-            <button
-              onClick={handleCreateBulkStudent}
-              className="bg-primary text-whiteColor px-4 py-1 rounded-md cursor-pointer flex items-center gap-2"
-            >
-              <Plus size={18} />
-              Bulk Upload
-            </button>
-
-
+            </button>          
           </div>
         </div>
 

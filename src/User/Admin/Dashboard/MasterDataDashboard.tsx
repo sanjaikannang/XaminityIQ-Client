@@ -5,22 +5,28 @@ import BatchForm from '../Component/MasterData/_Component/BatchForm';
 import CourseForm from '../Component/MasterData/_Component/CourseForm';
 import BranchForm from '../Component/MasterData/_Component/BranchForm';
 import SectionForm from '../Component/MasterData/_Component/SectionForm';
+import { useNavigate } from 'react-router-dom';
 
 
 const MasterDataDashboard = () => {
+    const navigate = useNavigate()
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeEntityKey, setActiveEntityKey] = useState<string | null>(null);
 
     const entities = [
-        { key: 'batch', title: 'Batch', total: 10, icon: CalendarRange },
-        { key: 'course', title: 'Course', total: 14, icon: GraduationCap },
-        { key: 'branch', title: 'Branch', total: 20, icon: Layers3 },
-        { key: 'section', title: 'Section', total: 16, icon: LayoutList }
+        { key: 'batch', title: 'Batch', total: 10, icon: CalendarRange, viewPath: '/admin/data/view-batch' },
+        { key: 'course', title: 'Course', total: 14, icon: GraduationCap, viewPath: '/admin/data/view-course' },
+        { key: 'branch', title: 'Branch', total: 20, icon: Layers3, viewPath: '/admin/data/view-branch' },
+        { key: 'section', title: 'Section', total: 16, icon: LayoutList, viewPath: '/admin/data/view-section' }
     ];
 
     const handleFormSuccess = () => {
         setIsModalOpen(false);
         setActiveEntityKey(null);
+    };
+
+    const handleViewClick = (viewPath: string) => {
+        navigate(viewPath);
     };
 
     const renderForm = () => {
@@ -74,6 +80,7 @@ const MasterDataDashboard = () => {
                                             </button>
 
                                             <button
+                                                onClick={() => handleViewClick(entity.viewPath)}
                                                 className="w-full bg-gray-200 text-gray-700 px-4 py-2 rounded-md flex items-center justify-center space-x-2 cursor-pointer"
                                             >
                                                 <span>View {entity.title}</span>

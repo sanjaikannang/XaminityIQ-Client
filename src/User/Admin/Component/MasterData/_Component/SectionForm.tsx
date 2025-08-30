@@ -1,7 +1,11 @@
+import toast from 'react-hot-toast';
 import { useState, useEffect } from 'react';
+import { Field, Form, Formik } from 'formik';
+import Spinner from '../../../../../Common/UI/Spinner';
 import CommonSelect from '../../../../../Common/UI/CustomSelect';
-import { createSection, getSectionsByBranch } from '../../../../../Services/Admin/adminAPI';
 import { CreateSectionRequest } from '../../../../../Types/admin.types';
+import { createSectionSchema } from '../../../FormikSchema/create-section.schema';
+import { createSection, getAllBranches } from '../../../../../Services/Admin/adminAPI';
 
 interface SectionFormProps {
     onSuccess: () => void;
@@ -10,160 +14,147 @@ interface SectionFormProps {
 interface SectionFormData {
     name: string;
     branchId: string;
-    capacity: string;
+    capacity: number | '';
 }
 
-interface Errors {
-    [key: string]: string;
-}
-
-interface Touched {
-    [key: string]: boolean;
+interface BranchOption {
+    value: string;
+    label: string;
 }
 
 const SectionForm = ({ onSuccess }: SectionFormProps) => {
-    const [formData, setFormData] = useState<SectionFormData>({
+    const [branches, setBranches] = useState<BranchOption[]>([]);
+    const [branchesLoading, setBranchesLoading] = useState(false);
+
+    const initialValues: SectionFormData = {
         name: '',
         branchId: '',
         capacity: ''
-    });
+    };
 
-    const [loading, setLoading] = useState(false);
-    const [sectionsLoading, setSectionsLoading] = useState(false);
-    const [errors, setErrors] = useState<Errors>({});
-    const [touched, setTouched] = useState<Touched>({});
-    const [branches] = useState<Array<{ value: string; label: string }>>([]);
-
-    // Load sections when branch is selected
+    // Load all branches on component mount
     useEffect(() => {
-        if (formData.branchId) {
-            loadSectionsByBranch(formData.branchId);
-        }
-    }, [formData.branchId]);
+        loadAllBranches();
+    }, []);
 
-    const loadSectionsByBranch = async (branchId: string) => {
-        setSectionsLoading(true);
+    const loadAllBranches = async () => {
+        setBranchesLoading(true);
         try {
-            const response = await getSectionsByBranch(branchId);
-            // Handle the response if needed
+            const response = await getAllBranches();
+            if (response.success && response.data) {
+                const branchOptions = response.data.map((branch: any) => ({
+                    value: branch._id || branch.id,
+                    label: branch.name
+                }));
+                setBranches(branchOptions);
+            }
         } catch (error) {
-            console.error('Error loading sections:', error);
+            console.error('Error loading branches:', error);
+            toast.error('Failed to load branches');
         } finally {
-            setSectionsLoading(false);
+            setBranchesLoading(false);
         }
     };
 
-    const handleInputChange = (field: string) => (
-        e: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: e.target.value
-        }));
-        setTouched(prev => ({ ...prev, [field]: true }));
-    };
-
-    const handleSelectChange = (field: string) => (
-        value: string
-    ) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: value
-        }));
-        setTouched(prev => ({ ...prev, [field]: true }));
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-
+    const handleSubmit = async (values: SectionFormData, { setSubmitting, setFieldError }: any) => {
         try {
             const sectionData: CreateSectionRequest = {
-                name: formData.name,
-                branchId: formData.branchId,
-                capacity: formData.capacity ? parseInt(formData.capacity) : undefined
+                name: values.name,
+                branchId: values.branchId,
+                capacity: Number(values.capacity)
             };
+
             const response = await createSection(sectionData);
 
             if (response.success) {
-                alert('section created successfully!');
-                setFormData({
-                    name: '',
-                    branchId: '',
-                    capacity: ''
-                });
-                setErrors({});
-                setTouched({});
+                toast.success('Section created successfully!');
                 onSuccess();
             } else {
-                setErrors({ general: response.message });
+                toast.error(response.message || 'Error creating section');
             }
         } catch (error: any) {
             console.error('Error creating section:', error);
-            setErrors({ general: error.response?.data?.message || 'Error creating section' });
+            const errorMessage = error.response?.data?.message || 'Error creating section';
+            toast.error(errorMessage);
+
+            // If there are specific field errors from the API
+            if (error.response?.data?.errors) {
+                Object.keys(error.response.data.errors).forEach(field => {
+                    setFieldError(field, error.response.data.errors[field]);
+                });
+            }
         } finally {
-            setLoading(false);
+            setSubmitting(false);
         }
     };
 
     return (
         <>
-            <form onSubmit={handleSubmit} className="space-y-4 px-2">
-                <div>
-                    <label htmlFor="branchId" className="block text-sm font-medium text-gray-700 mb-1">
-                        Branch
-                    </label>
-                    <CommonSelect
-                        id="branchId"
-                        label=""
-                        options={branches}
-                        value={formData.branchId}
-                        onChange={handleSelectChange('branchId')}
-                        required
-                        loading={sectionsLoading}
-                        error={touched['branchId'] && errors['branchId'] ? errors['branchId'] : undefined}
-                    />
-                </div>
-                <div>
-                    <label htmlFor="sectionName" className="block text-sm font-medium text-gray-700 mb-1">
-                        Section Name<span className="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        id="sectionName"
-                        value={formData.name}
-                        onChange={handleInputChange('name')}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none"
-                        placeholder="A"
-                        required
-                    />
-                </div>
-                <div>
-                    <label htmlFor="capacity" className="block text-sm font-medium text-gray-700 mb-1">
-                        Capacity<span className="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="number"
-                        id="capacity"
-                        value={formData.capacity}
-                        onChange={handleInputChange('capacity')}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none"
-                        placeholder="60"
-                    />
-                </div>
-                {errors.general && (
-                    <div className="text-red-600 text-sm">{errors.general}</div>
+            <Formik
+                initialValues={initialValues}
+                validationSchema={createSectionSchema}
+                onSubmit={handleSubmit}
+            >
+                {({ isSubmitting, errors, touched, values, setFieldValue }) => (
+                    <Form className="space-y-4 px-2">
+                        <div>
+                            <CommonSelect
+                                id="branchId"
+                                label="Branch"
+                                options={branches}
+                                value={values.branchId}
+                                onChange={(value) => setFieldValue('branchId', value)}
+                                required
+                                loading={branchesLoading}
+                                error={touched.branchId && errors.branchId ? errors.branchId : undefined}
+                                placeholder="Select a branch"
+                            />
+                        </div>
+
+                        <div>
+                            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                                Section Name<span className="text-red-500">*</span>
+                            </label>
+                            <Field
+                                type="text"
+                                name="name"
+                                id="name"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none"
+                                placeholder="A"
+                            />
+                            {errors.name && touched.name && (
+                                <p className="text-xs text-red-600 mt-1">{errors.name}</p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label htmlFor="capacity" className="block text-sm font-medium text-gray-700 mb-1">
+                                Capacity<span className="text-red-500">*</span>
+                            </label>
+                            <Field
+                                type="number"
+                                name="capacity"
+                                id="capacity"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none"
+                                placeholder="60"
+                            />
+                            {errors.capacity && touched.capacity && (
+                                <p className="text-xs text-red-600 mt-1">{errors.capacity}</p>
+                            )}
+                        </div>
+
+                        <div className="flex justify-end space-x-3 pt-4">
+                            <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="px-4 py-2 bg-primary text-white rounded-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isSubmitting ? <Spinner /> : 'Create'}
+                            </button>
+                        </div>
+                    </Form>
                 )}
-                <div className="flex justify-end space-x-3 pt-4">
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="px-4 py-1 bg-primary text-white rounded-md cursor-pointer"
-                    >
-                        {loading ? <Spinner /> : 'Create'}
-                    </button>
-                </div>
-            </form>
+            </Formik>
         </>
     );
 };

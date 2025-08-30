@@ -1,5 +1,36 @@
 import api from "../../Api/axios";
-import { CreateBatchRequest, CreateBatchResponse, CreateBranchRequest, CreateBranchResponse, CreateCourseRequest, CreateCourseResponse, CreateExamRequest, CreateExamResponse, CreateFacultyRequest, CreateFacultyResponse, CreateSectionRequest, CreateSectionResponse, CreateStudentRequest, CreateStudentResponse, DeleteFacultyResponse, DeleteStudentResponse, GetAllExamRequest, GetAllExamResponse, GetAllFacultyRequest, GetAllFacultyResponse, GetAllStudentRequest, GetAllStudentResponse, GetBatchesResponse, GetBranchesByCourseResponse, GetCoursesByBatchResponse, GetFacultyResponse, GetSectionsByBranchResponse, GetStudentResponse } from "../../Types/admin.types";
+import { 
+    CreateBatchRequest, 
+    CreateBatchResponse, 
+    CreateBranchRequest, 
+    CreateBranchResponse, 
+    CreateCourseRequest, 
+    CreateCourseResponse, 
+    CreateExamRequest, 
+    CreateExamResponse, 
+    CreateFacultyRequest, 
+    CreateFacultyResponse, 
+    CreateSectionRequest, 
+    CreateSectionResponse, 
+    CreateStudentRequest, 
+    CreateStudentResponse, 
+    DeleteFacultyResponse, 
+    DeleteStudentResponse, 
+    GetAllExamRequest, 
+    GetAllExamResponse, 
+    GetAllFacultyRequest, 
+    GetAllFacultyResponse, 
+    GetAllStudentRequest, 
+    GetAllStudentResponse, 
+    GetBatchesResponse, 
+    GetBranchesByCourseResponse, 
+    GetBranchesResponse, 
+    GetCoursesByBatchResponse, 
+    GetCoursesResponse, 
+    GetFacultyResponse, 
+    GetSectionsByBranchResponse, 
+    GetSectionsResponse, 
+    GetStudentResponse } from "../../Types/admin.types";
 
 // Create Student
 export async function createStudent(data: CreateStudentRequest): Promise<CreateStudentResponse> {
@@ -104,6 +135,27 @@ export async function getAllExam(params?: GetAllExamRequest): Promise<GetAllExam
 // Get All Batch
 export async function getAllBatch(): Promise<GetBatchesResponse> {
     const response = await api.get<GetBatchesResponse>(`/admin/get-batches`);
+    return response.data;
+}
+
+
+// Get All Courses
+export async function getAllCourses(): Promise<GetCoursesResponse> {
+    const response = await api.get<GetCoursesResponse>(`/admin/get-courses`);
+    return response.data;
+}
+
+
+// Get All Branches
+export async function getAllBranches(): Promise<GetBranchesResponse> {
+    const response = await api.get<GetBranchesResponse>(`/admin/get-branches`);
+    return response.data;
+}
+
+
+// Get All Sections
+export async function getAllSections(): Promise<GetSectionsResponse> {
+    const response = await api.get<GetSectionsResponse>(`/admin/get-sections`);
     return response.data;
 }
 
