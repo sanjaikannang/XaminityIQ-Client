@@ -7,7 +7,6 @@ import CreateStudent from './CreateStudent';
 import CreateFaculty from './CreateFaculty';
 import StudentDetail from './StudentDetail';
 import FacultyDetail from './FacultyDetail';
-import BulkUploadStudent from './BulkUploadStudent';
 import AllExam from './AllExam';
 import CreateExam from './Exam/CreateExam/CreateExam';
 import MasterDataDashboard from '../Dashboard/MasterDataDashboard';
@@ -28,7 +27,6 @@ const MainComponent = () => {
                         {/* Students Screens */}
                         <Route path="student" element={<StudentDashboard />} />
                         <Route path="student/create-student" element={<CreateStudent />} />
-                        <Route path="student/create-bulk-student" element={<BulkUploadStudent />} />
                         <Route path="student/:id" element={<StudentDetail />} />
 
                         {/* Faculty Screens */}
