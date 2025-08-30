@@ -1,5 +1,36 @@
 import api from "../../Api/axios";
-import { CreateBatchRequest, CreateBatchResponse, CreateBranchRequest, CreateBranchResponse, CreateCourseRequest, CreateCourseResponse, CreateExamRequest, CreateExamResponse, CreateFacultyRequest, CreateFacultyResponse, CreateSectionRequest, CreateSectionResponse, CreateStudentRequest, CreateStudentResponse, DeleteFacultyResponse, DeleteStudentResponse, GetAllExamRequest, GetAllExamResponse, GetAllFacultyRequest, GetAllFacultyResponse, GetAllStudentRequest, GetAllStudentResponse, GetBatchesResponse, GetBranchesByCourseResponse, GetBranchesResponse, GetCoursesByBatchResponse, GetCoursesResponse, GetFacultyResponse, GetSectionsByBranchResponse, GetSectionsResponse, GetStudentResponse } from "../../Types/admin.types";
+import { 
+    CreateBatchRequest, 
+    CreateBatchResponse, 
+    CreateBranchRequest, 
+    CreateBranchResponse, 
+    CreateCourseRequest, 
+    CreateCourseResponse, 
+    CreateExamRequest, 
+    CreateExamResponse, 
+    CreateFacultyRequest, 
+    CreateFacultyResponse, 
+    CreateSectionRequest, 
+    CreateSectionResponse, 
+    CreateStudentRequest, 
+    CreateStudentResponse, 
+    DeleteFacultyResponse, 
+    DeleteStudentResponse, 
+    GetAllExamRequest, 
+    GetAllExamResponse, 
+    GetAllFacultyRequest, 
+    GetAllFacultyResponse, 
+    GetAllStudentRequest, 
+    GetAllStudentResponse, 
+    GetBatchesResponse, 
+    GetBranchesByCourseResponse, 
+    GetBranchesResponse, 
+    GetCoursesByBatchResponse, 
+    GetCoursesResponse, 
+    GetFacultyResponse, 
+    GetSectionsByBranchResponse, 
+    GetSectionsResponse, 
+    GetStudentResponse } from "../../Types/admin.types";
 
 // Create Student
 export async function createStudent(data: CreateStudentRequest): Promise<CreateStudentResponse> {
