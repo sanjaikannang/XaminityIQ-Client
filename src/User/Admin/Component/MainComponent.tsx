@@ -11,6 +11,7 @@ import BulkUploadStudent from './BulkUploadStudent';
 import AllExam from './AllExam';
 import CreateExam from './Exam/CreateExam/CreateExam';
 import MasterDataDashboard from '../Dashboard/MasterDataDashboard';
+import ViewBatch from './MasterData/_Component/ViewBatch';
 
 const MainComponent = () => {
 
@@ -38,7 +39,11 @@ const MainComponent = () => {
                         <Route path="exam/create-exam" element={<CreateExam />} />
 
                         {/* MasterData Screens */}
-                        <Route path="data" element={<MasterDataDashboard />} />                        
+                        <Route path="data" element={<MasterDataDashboard />} />
+                        <Route path="data/view-batch" element={<ViewBatch />} />
+                        {/* <Route path="data/view-course" element={<ViewCourse />} />
+                        <Route path="data/view-branch" element={<ViewBranch />} />
+                        <Route path="data/view-section" element={<ViewSection />} /> */}
 
                     </Routes>
                 </div>
