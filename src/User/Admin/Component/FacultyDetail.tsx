@@ -85,23 +85,14 @@ const FacultyDetail = () => {
     const faculty = facultyData.data.faculty[0];
     const { personalInfo, contactInfo, professionalInfo, userId } = faculty;
 
-    // Helper function to format date
-    // const formatDate = (dateString: string) => {
-    //     return new Date(dateString).toLocaleDateString('en-US', {
-    //         year: 'numeric',
-    //         month: 'long',
-    //         day: 'numeric'
-    //     });
-    // };
-
     return (
         <>
             <div className="min-h-screen bg-gray-50">
                 <div className="max-w-9xl mx-auto px-4">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                         {/* Profile Card */}
                         <div className="lg:col-span-1">
-                            <div className="bg-white rounded-lg shadow-md p-4 sticky top-4">
+                            <div className="bg-white rounded-md border border-gray-300 p-4 sticky top-4">
                                 <div className="flex flex-col items-center">
                                     <img
                                         src={personalInfo.photo || ''}
@@ -115,17 +106,17 @@ const FacultyDetail = () => {
                                     <p className="text-gray-600 text-sm mb-4">{professionalInfo.department} Department</p>
 
                                     <div className="w-full space-y-2">
-                                        <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                        <div className="flex justify-between items-center py-2">
                                             <span className="text-sm text-gray-500">Faculty ID</span>
-                                            <span className="text-sm font-medium">{faculty.facultyId}</span>
+                                            <span className="text-sm">{faculty.facultyId}</span>
                                         </div>
-                                        <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                        <div className="flex justify-between items-center py-2">
                                             <span className="text-sm text-gray-500">Employee ID</span>
-                                            <span className="text-sm font-medium">{professionalInfo.employeeId}</span>
+                                            <span className="text-sm">{professionalInfo.employeeId}</span>
                                         </div>
-                                        <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                        <div className="flex justify-between items-center py-2">
                                             <span className="text-sm text-gray-500">Status</span>
-                                            <span className={`text-sm font-medium px-4 py-1 rounded-full ${faculty.status === 'Active'
+                                            <span className={`text-sm px-4 rounded-sm ${faculty.status === 'Active'
                                                 ? 'bg-green-100 text-green-800'
                                                 : 'bg-red-100 text-red-800'
                                                 }`}>
@@ -134,7 +125,7 @@ const FacultyDetail = () => {
                                         </div>
                                         <div className="flex justify-between items-center py-2">
                                             <span className="text-sm text-gray-500">Joining Date</span>
-                                            <span className="text-sm font-medium">
+                                            <span className="text-sm">
                                                 {new Date(faculty.joiningDate).toLocaleDateString('en-US', {
                                                     year: 'numeric',
                                                     month: 'short',
@@ -148,8 +139,7 @@ const FacultyDetail = () => {
                         </div>
 
                         {/* Details Cards */}
-                        <div className="lg:col-span-2 space-y-6 py-4">
-                            {/* Personal Information */}
+                        <div className="lg:col-span-2 space-y-4 py-4">
                             <InfoCard title="Personal Information">
                                 <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <InfoItem label="First Name" value={personalInfo.firstName} />
