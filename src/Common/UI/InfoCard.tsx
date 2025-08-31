@@ -9,7 +9,7 @@ interface InfoCardProps {
 export const InfoCard = ({ title, children, icon }: InfoCardProps) => {
     return (
         <>
-            <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200">
+            <div className="bg-white rounded-md border border-gray-300 p-4">
                 <div className="flex items-center mb-4 border-b border-gray-200 pb-2">
                     {icon && <div className="mr-2">{icon}</div>}
                     <h3 className="text-lg font-semibold text-gray-800">{title}</h3>

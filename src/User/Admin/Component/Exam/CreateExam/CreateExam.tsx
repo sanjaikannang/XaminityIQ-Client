@@ -6,6 +6,8 @@ import ExamAssignment from './Component/ExamAssignment';
 import Schedule from './Component/Schedule';
 import ExamStructure from './Component/ExamStructure';
 import Questions from './Component/Questions';
+import toast from 'react-hot-toast';
+import { createExam } from '../../../../../Services/Admin/adminAPI';
 
 interface Section {
     id: string;
@@ -43,6 +45,7 @@ const CreateExam = () => {
     const [status, setStatus] = useState(ExamStatus.DRAFT);
     const [currentExamMode, setCurrentExamMode] = useState<ExamMode>(ExamMode.AUTO);
     const [sections, setSections] = useState<Section[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Form data state
     const [examInfoData, setExamInfoData] = useState<ExamInfoFormData | null>(null);
@@ -120,30 +123,91 @@ const CreateExam = () => {
         return Object.values(formValidation).every(isValid => isValid);
     };
 
+    // Format exam data based on exam mode
+    const formatExamData = (examStatus: ExamStatus) => {
+        if (!examInfoData || !targetAudienceData || !scheduleData || !examStructureData || !questionsData) {
+            throw new Error('Missing required form data');
+        }
+
+        const baseExamData = {
+            examTitle: examInfoData.examTitle,
+            examDescription: examInfoData.examDescription,
+            subject: examInfoData.subject,
+            totalMarks: examInfoData.totalMarks,
+            passingMarks: examInfoData.passingMarks,
+            duration: examInfoData.duration,
+            examMode: currentExamMode,
+            generalInstructions: examInfoData.generalInstructions,
+            batchId: targetAudienceData.batchId,
+            courseId: targetAudienceData.courseId,
+            branchId: targetAudienceData.branchId,
+            sectionIds: targetAudienceData.sectionIds,
+            examSections: questionsData.examSections || []
+        };
+
+        if (currentExamMode === ExamMode.AUTO) {
+            // AUTO mode - uses date range
+            return {
+                ...baseExamData,
+                scheduleDetails: {
+                    startDate: scheduleData.startDate,
+                    endDate: scheduleData.endDate,
+                    bufferTime: {
+                        beforeExam: scheduleData.bufferTime?.beforeExam,
+                        afterExam: scheduleData.bufferTime?.afterExam
+                    }
+                }
+            };
+        } else {
+            // PROCTORING mode - uses specific date and time with assigned faculty
+            return {
+                ...baseExamData,
+                scheduleDetails: {
+                    examDate: scheduleData.examDate,
+                    startTime: scheduleData.startTime,
+                    endTime: scheduleData.endTime,
+                    bufferTime: {
+                        beforeExam: scheduleData.bufferTime?.beforeExam,
+                        afterExam: scheduleData.bufferTime?.afterExam
+                    }
+                },
+                assignedFacultyIds: scheduleData.assignedFacultyIds || []
+            };
+        }
+    };
+
     // Handle exam submission
     const handleExamSubmission = async (examStatus: ExamStatus) => {
         if (!isAllFormsValid()) {
-            alert('Please fill all required fields correctly before submitting.');
+            toast.error('Please fill all required fields correctly before submitting.');
             return;
         }
 
-        const examData = {
-            status: examStatus,
-            examInfo: examInfoData,
-            targetAudience: targetAudienceData,
-            schedule: scheduleData,
-            examStructure: examStructureData,
-            questions: questionsData,
-            sections: sections
-        };
-
-        console.log("Exam Data...", examData);
+        setIsSubmitting(true);
 
         try {
-            // Call API
+            const formattedExamData = formatExamData(examStatus);
+            console.log("Formatted Exam Data...", formattedExamData);
+
+            // Call the API
+            const response = await createExam(formattedExamData);
+
+            console.log("API Response:", response);
+
+            // Update status on successful submission
+            setStatus(examStatus);
+
+            // Show success message
+            const actionText = examStatus === ExamStatus.DRAFT ? 'saved as draft' : 'published';
+            toast.success(`Exam ${actionText} successfully!`);
 
         } catch (error) {
             console.error('Error submitting exam:', error);
+
+            const actionText = examStatus === ExamStatus.DRAFT ? 'saving' : 'publishing';
+            toast.error(`Error ${actionText} exam. Please try again.`);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -161,30 +225,30 @@ const CreateExam = () => {
                                         className={`flex items-center px-3 py-1 transition-all duration-300 ease-in-out cursor-pointer ${status === 'DRAFT'
                                             ? 'bg-white text-primary shadow-md scale-105'
                                             : 'bg-transparent text-white hover:bg-white/10'
-                                            } rounded-full font-medium text-sm`}
-                                        onClick={() => {
-                                            setStatus(ExamStatus.DRAFT);
-                                            handleExamSubmission(ExamStatus.DRAFT);
-                                        }}
-                                        disabled={!isAllFormsValid()}
+                                            } rounded-full font-medium text-sm ${(!isAllFormsValid() || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        onClick={() => handleExamSubmission(ExamStatus.DRAFT)}
+                                        disabled={!isAllFormsValid() || isSubmitting}
                                         title={!isAllFormsValid() ? 'Please fill all required fields' : 'Save as draft'}
                                     >
                                         <FilePen size={14} />
+                                        {isSubmitting && status === ExamStatus.DRAFT && (
+                                            <span className="ml-1">Saving...</span>
+                                        )}
                                     </button>
 
                                     <button
                                         className={`flex items-center px-3 py-1 transition-all duration-300 ease-in-out cursor-pointer ${status === 'PUBLISH'
                                             ? 'bg-white text-primary shadow-md scale-105'
                                             : 'bg-transparent text-white hover:bg-white/10'
-                                            } rounded-full font-medium text-sm`}
-                                        onClick={() => {
-                                            setStatus(ExamStatus.PUBLISH);
-                                            handleExamSubmission(ExamStatus.PUBLISH);
-                                        }}
-                                        disabled={!isAllFormsValid()}
+                                            } rounded-full font-medium text-sm ${(!isAllFormsValid() || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        onClick={() => handleExamSubmission(ExamStatus.PUBLISH)}
+                                        disabled={!isAllFormsValid() || isSubmitting}
                                         title={!isAllFormsValid() ? 'Please fill all required fields' : 'Publish exam'}
                                     >
                                         <Upload size={14} />
+                                        {isSubmitting && status === ExamStatus.PUBLISH && (
+                                            <span className="ml-1">Publishing...</span>
+                                        )}
                                     </button>
                                 </div>
                             </div>
