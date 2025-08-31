@@ -4,15 +4,13 @@ import { InfoItem } from "./InfoItem";
 type Props = {
     title: string;
     member: ParentInfo | GuardianInfo;
-    icon: React.ReactNode;
 };
 
-export const FamilyMemberCard = ({ title, member, icon }: Props) => {
+export const FamilyMemberCard = ({ title, member }: Props) => {
     return (
         <>
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
-                <div className="flex items-center mb-3">
-                    {icon}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-sm p-4">
+                <div className="flex items-center mb-3">                   
                     <h4 className="text-md font-semibold text-gray-800 ml-2">{title}</h4>
                 </div>
                 <dl className="grid grid-cols-1 gap-2">

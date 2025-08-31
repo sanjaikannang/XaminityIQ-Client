@@ -90,74 +90,57 @@ const StudentDetail = () => {
   return (
     <>
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="max-w-9xl mx-auto px-4 py-6">
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Profile Card */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-md p-6 sticky top-6">
+              <div className="bg-white rounded-md border border-gray-300 p-6 sticky top-6">
                 <div className="flex flex-col items-center">
                   <img
                     src={personalInfo.photo || ''}
                     alt={`${personalInfo.firstName} ${personalInfo.lastName}`}
-                    className="w-32 h-32 rounded-full object-cover border-4 border-green-100 mb-4"
+                    className="w-32 h-32 rounded-full object-cover border-4 border-primary mb-4"
                   />
-                  <h2 className="text-xl font-bold text-gray-900 text-center">
+                  <h2 className="text-xl font-medium text-gray-900 text-center">
                     {personalInfo.firstName} {personalInfo.lastName}
                   </h2>
-                  <p className="text-green-600 font-medium mb-2">{academicInfo.course} - {academicInfo.branch}</p>
+                  <p className="text-primary font-medium mb-2">{academicInfo.course} - {academicInfo.branch}</p>
                   <p className="text-gray-600 text-sm mb-4">Semester {academicInfo.semester} | Section {academicInfo.section}</p>
 
                   <div className="w-full space-y-2">
-                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <div className="flex justify-between items-center py-2">
                       <span className="text-sm text-gray-500">Student ID</span>
-                      <span className="text-sm font-medium">{student.studentId}</span>
+                      <span className="text-sm">{student.studentId}</span>
                     </div>
-                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <div className="flex justify-between items-center py-2">
                       <span className="text-sm text-gray-500">Roll Number</span>
-                      <span className="text-sm font-medium">{student.rollNumber}</span>
+                      <span className="text-sm">{student.rollNumber}</span>
                     </div>
-                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <div className="flex justify-between items-center py-2">
                       <span className="text-sm text-gray-500">Status</span>
-                      <span className={`text-sm font-medium px-2 py-1 rounded-full ${student.status === 'Active'
+                      <span className={`text-sm px-4 rounded-sm ${student.status === 'Active'
                         ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
                         }`}>
                         {student.status}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                      <span className="text-sm text-gray-500">Batch</span>
-                      <span className="text-sm font-medium">{academicInfo.batch}</span>
-                    </div>
                     <div className="flex justify-between items-center py-2">
-                      <span className="text-sm text-gray-500">Age</span>
-                      {/* <span className="text-sm font-medium">{personalInfo.dateOfBirth}</span> */}
-                    </div>
+                      <span className="text-sm text-gray-500">Batch</span>
+                      <span className="text-sm">{academicInfo.batch}</span>
+                    </div>                    
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Details Cards */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Personal Information */}
-              <InfoCard
-                title="Personal Information"
-                icon={
-                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                  </svg>
-                }
-              >
+            <div className="lg:col-span-2 space-y-4">
+              <InfoCard title="Personal Information">
                 <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <InfoItem label="First Name" value={personalInfo.firstName} />
-                  <InfoItem label="Last Name" value={personalInfo.lastName} />
-                  {/* <InfoItem
-                    label="Date of Birth"
-                    value={personalInfo.dateOfBirth ? formatDate(personalInfo.dateOfBirth) : null}
-                  />
-                  <InfoItem label="Age" value={`${calculateAge(personalInfo.dateOfBirth)} years`} /> */}
+                  <InfoItem label="Last Name" value={personalInfo.lastName} />                 
                   <InfoItem label="Gender" value={personalInfo.gender} />
                   <InfoItem label="Nationality" value={personalInfo.nationality} />
                   <InfoItem label="Religion" value={personalInfo.religion} />
@@ -165,15 +148,7 @@ const StudentDetail = () => {
               </InfoCard>
 
               {/* Academic Information */}
-              <InfoCard
-                title="Academic Information"
-                icon={
-                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5z"></path>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
-                  </svg>
-                }
-              >
+              <InfoCard title="Academic Information">
                 <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <InfoItem label="Course" value={academicInfo.course} />
                   <InfoItem label="Branch" value={academicInfo.branch} />
@@ -186,14 +161,7 @@ const StudentDetail = () => {
               </InfoCard>
 
               {/* Contact Information */}
-              <InfoCard
-                title="Contact Information"
-                icon={
-                  <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                  </svg>
-                }
-              >
+              <InfoCard title="Contact Information">
                 <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <InfoItem label="Phone" value={contactInfo.phone} />
                   <InfoItem label="Email" value={userId.email} />
@@ -217,36 +185,17 @@ const StudentDetail = () => {
               </InfoCard>
 
               {/* Family Information */}
-              <InfoCard
-                title="Family Information"
-                icon={
-                  <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                  </svg>
-                }
-              >
+              <InfoCard title="Family Information">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {/* Father */}
                   <FamilyMemberCard
                     title="Father"
-                    member={familyInfo.father}
-                    icon={
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                      </svg>
-                    }
-                  />
+                    member={familyInfo.father}/>
 
                   {/* Mother */}
                   <FamilyMemberCard
                     title="Mother"
-                    member={familyInfo.mother}
-                    icon={
-                      <svg className="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                      </svg>
-                    }
-                  />
+                    member={familyInfo.mother}/>
                 </div>
 
                 {/* Guardian */}
@@ -254,33 +203,17 @@ const StudentDetail = () => {
                   <div className="mt-4">
                     <FamilyMemberCard
                       title="Guardian"
-                      member={familyInfo.guardian}
-                      icon={
-                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                        </svg>
-                      }
-                    />
+                      member={familyInfo.guardian}/>
                   </div>
                 )}
               </InfoCard>
 
               {/* Account Information */}
-              <InfoCard
-                title="Account Information"
-                icon={
-                  <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  </svg>
-                }
-              >
+              <InfoCard title="Account Information">
                 <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <InfoItem label="User Role" value={userId.role} />
                   <InfoItem label="Account Status" value={userId.isActive ? 'Active' : 'Inactive'} />
-                  <InfoItem label="Email Verified" value={userId.isEmailVerified ? 'Yes' : 'No'} />
-                  {/* <InfoItem label="Last Login" value={userId.lastLogin ? formatDate(userId.lastLogin) : 'Never'} />
-                  <InfoItem label="Account Created" value={formatDate(userId.createdAt)} /> */}
+                  <InfoItem label="Email Verified" value={userId.isEmailVerified ? 'Yes' : 'No'} />                 
                 </dl>
               </InfoCard>
             </div>
