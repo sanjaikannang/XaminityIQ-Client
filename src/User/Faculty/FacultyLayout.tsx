@@ -1,76 +1,34 @@
-import { LogOut } from "lucide-react";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { logoutAPI } from "../../Services/Auth/authAPI";
-import { logout } from "../../State/Slices/authSlice";
-import Spinner from "../../Common/UI/Spinner";
-import toast from "react-hot-toast";
-import { useState } from "react";
+import React, { useState } from "react"
+import Sidebar from "./Component/Sidebar";
+import Header from "./Component/Header";
+import MainComponent from "./Component/MainComponent";
 
-const FacultyLayout = () => {
-
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-
-  const handleLogout = async () => {
-    try {
-      setIsLoggingOut(true);
-
-      // Call the logout API
-      await logoutAPI();
-
-      toast.success('Logged out successfully');
-
-      // Dispatch logout action to clear Redux state and localStorage
-      dispatch(logout());
-
-      // Navigate to login page
-      navigate('/login');
-    } catch (error: any) {
-      console.error('Logout failed:', error);
-
-      const errorMessage = error?.response?.data?.message ||
-        error?.message ||
-        'Logout failed. Please try again.';
-      toast.error(errorMessage);
-
-      // Even if API fails, clear local state and redirect
-      dispatch(logout());
-      navigate('/login');
-    } finally {
-      setIsLoggingOut(false);
-    }
-  };
+const StudentLayout: React.FC = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
     <>
-      <div className="h-screen flex justify-center items-center">
-        <h1>FacultyLayout</h1>
-        <div>
-          <button
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            className={`group flex items-center justify-center w-full px-3 py-3 text-sm font-medium transition-colors cursor-pointer ${isLoggingOut
-              ? 'text-red-400 cursor-not-allowed'
-              : 'text-red-500 hover:text-red-600'
-              }`}
-          >
-            {isLoggingOut ? (
-              <>
-                <Spinner borderColor={"red-500"} />
-              </>
-            ) : (
-              <>
-                <LogOut className="mr-3 h-5 w-5" />
-                Logout
-              </>
-            )}
-          </button>
+      <div className="flex h-screen">
+        {/* Sidebar */}
+        <Sidebar
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+        />
+
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col overflow-auto">
+          {/* Header */}
+          <Header
+            isSidebarOpen={isSidebarOpen}
+            setIsSidebarOpen={setIsSidebarOpen}
+          />
+
+          {/* Main Content */}
+          <MainComponent />
         </div>
       </div>
     </>
   )
 }
 
-export default FacultyLayout
+export default StudentLayout
