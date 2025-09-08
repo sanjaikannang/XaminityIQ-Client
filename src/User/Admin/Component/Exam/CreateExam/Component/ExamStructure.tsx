@@ -127,10 +127,21 @@ const ExamStructure: React.FC<ExamStructureProps> = ({ onSectionsUpdate, onFormD
                     values={{ sections }}
                 >
                     {({ isValid, errors, touched }) => {
+                        // Check if form is actually valid (has required data)
+                        const isFormActuallyValid = isValid &&
+                            sections.length > 0 &&
+                            sections.every(section =>
+                                section.name.trim() !== '' &&
+                                section.order.trim() !== '' &&
+                                section.marks.trim() !== '' &&
+                                section.totalQuestions.trim() !== '' &&
+                                section.timeLimit.trim() !== ''
+                            );
+
                         // Send form data to parent whenever values change
                         useEffect(() => {
-                            handleFormChange({ sections }, isValid);
-                        }, [sections, isValid]);
+                            handleFormChange({ sections }, isFormActuallyValid);
+                        }, [sections, isFormActuallyValid]);
 
                         return (
                             <Form>
