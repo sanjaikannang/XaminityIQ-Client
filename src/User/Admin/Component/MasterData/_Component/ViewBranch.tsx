@@ -38,7 +38,7 @@ const ViewBranch = () => {
     if (loading) {
         return (
             <div className="p-4 bg-gray-50 min-h-screen">
-                <div className="max-w-7xl mx-auto">
+                <div className="max-w-9xl mx-auto">
                     {/* Header Skeleton */}
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center space-x-4">
@@ -75,7 +75,7 @@ const ViewBranch = () => {
     return (
         <>
             <div className="p-4 bg-gray-50 min-h-screen">
-                <div className="max-w-7xl mx-auto">
+                <div className="max-w-9xl mx-auto">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center space-x-4">
