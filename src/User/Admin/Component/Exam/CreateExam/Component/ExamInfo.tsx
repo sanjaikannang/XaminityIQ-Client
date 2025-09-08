@@ -56,13 +56,24 @@ const ExamInfo = ({ onExamModeChange, onFormDataChange }: ExamInfoProps) => {
                     onSubmit={handleSubmit}
                     validateOnChange={true}
                     validateOnBlur={true}
+                    validateOnMount={true}
                     enableReinitialize={true}
                 >
                     {({ values, setFieldValue, isValid }) => {
+                        // Check if form is actually valid (has required data)
+                        const isFormActuallyValid = isValid &&
+                            values.examTitle.trim() !== '' &&
+                            values.subject.trim() !== '' &&
+                            values.totalMarks !== '' &&
+                            values.passingMarks !== '' &&
+                            values.duration !== '' &&
+                            values.examDescription.trim() !== '' &&
+                            values.generalInstructions.some(instruction => instruction.trim() !== '');
+
                         // Send form data to parent whenever values change
                         useEffect(() => {
-                            handleFormChange(values, isValid);
-                        }, [values, isValid]);
+                            handleFormChange(values, isFormActuallyValid);
+                        }, [values, isFormActuallyValid]);
 
                         return (
                             <Form>

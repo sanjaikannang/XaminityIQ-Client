@@ -59,10 +59,24 @@ const Schedule = ({ examMode, onFormDataChange }: ExamScheduleProps) => {
                     enableReinitialize={true}
                 >
                     {({ values, isValid }) => {
+                        // Check if form is actually valid (has required data)
+                        const isFormActuallyValid = examMode === ExamMode.PROCTORING
+                            ? isValid &&
+                            values.examDate.trim() !== '' &&
+                            values.startTime.trim() !== '' &&
+                            values.endTime.trim() !== '' &&
+                            values.beforeExam !== '' &&
+                            values.afterExam !== ''
+                            : isValid &&
+                            values.startDate.trim() !== '' &&
+                            values.endDate.trim() !== '' &&
+                            values.beforeExam !== '' &&
+                            values.afterExam !== '';
+
                         // Send form data to parent whenever values change
                         useEffect(() => {
-                            handleFormChange(values, isValid);
-                        }, [values, isValid]);
+                            handleFormChange(values, isFormActuallyValid);
+                        }, [values, isFormActuallyValid]);
 
                         return (
                             <Form>
@@ -91,7 +105,7 @@ const Schedule = ({ examMode, onFormDataChange }: ExamScheduleProps) => {
                                                 <Field
                                                     type="time"
                                                     id="startTime"
-                                                    name="scheduleDetails.startTime"
+                                                    name="startTime"
                                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                 />
                                                 <ErrorMessage name="startTime" component="p" className="text-xs text-red-600" />
@@ -105,7 +119,7 @@ const Schedule = ({ examMode, onFormDataChange }: ExamScheduleProps) => {
                                                 <Field
                                                     type="time"
                                                     id="endTime"
-                                                    name="scheduleDetails.endTime"
+                                                    name="endTime"
                                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                 />
                                                 <ErrorMessage name="endTime" component="p" className="text-xs text-red-600" />
@@ -160,7 +174,7 @@ const Schedule = ({ examMode, onFormDataChange }: ExamScheduleProps) => {
                                             <Field
                                                 type="number"
                                                 id="beforeExam"
-                                                name="scheduleDetails.bufferTime.beforeExam"
+                                                name="beforeExam"
                                                 min="0"
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                 placeholder="Enter buffer time before exam"
@@ -176,7 +190,7 @@ const Schedule = ({ examMode, onFormDataChange }: ExamScheduleProps) => {
                                             <Field
                                                 type="number"
                                                 id="afterExam"
-                                                name="scheduleDetails.bufferTime.afterExam"
+                                                name="afterExam"
                                                 min="0"
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none duration-200 text-gray-900 placeholder-gray-500"
                                                 placeholder="Enter buffer time after exam"

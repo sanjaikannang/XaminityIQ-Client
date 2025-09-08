@@ -80,9 +80,18 @@ const ExamAssignment = ({ examMode, onFormDataChange }: ExamAssignmentProps) => 
     };
 
     const handleFormChange = (values: FormData, isValid: boolean) => {
+
+        // Check if form is actually valid (has required data)
+        const isFormActuallyValid = isValid &&
+            values.batchId.trim() !== '' &&
+            values.courseId.trim() !== '' &&
+            values.branchId.trim() !== '' &&
+            values.sectionId.trim() !== '' &&
+            (examMode === ExamMode.PROCTORING ? values.facultyId.trim() !== '' : true);
+
         // Send form data to parent component
         if (onFormDataChange) {
-            onFormDataChange(values, isValid);
+            onFormDataChange(values, isFormActuallyValid);
         }
     };
 
@@ -199,14 +208,23 @@ const ExamAssignment = ({ examMode, onFormDataChange }: ExamAssignmentProps) => 
                     onSubmit={handleSubmit}
                     validateOnChange={true}
                     validateOnBlur={true}
+                    validateOnMount={true}
                     enableReinitialize={true}
                 >
                     {({ values, setFieldValue, isValid, errors, touched }) => {
 
+                        // Check if form is actually valid (has required data)
+                        const isFormActuallyValid = isValid &&
+                            values.batchId.trim() !== '' &&
+                            values.courseId.trim() !== '' &&
+                            values.branchId.trim() !== '' &&
+                            values.sectionId.trim() !== '' &&
+                            (examMode === ExamMode.PROCTORING ? values.facultyId.trim() !== '' : true);
+
                         // Send form data to parent whenever values change
                         useEffect(() => {
-                            handleFormChange(values, isValid);
-                        }, [values, isValid]);
+                            handleFormChange(values, isFormActuallyValid);
+                        }, [values, isFormActuallyValid]);
 
                         // Handle dependent dropdowns
                         useEffect(() => {

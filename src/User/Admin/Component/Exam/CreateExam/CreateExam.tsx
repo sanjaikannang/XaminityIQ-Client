@@ -130,12 +130,13 @@ const CreateExam = () => {
         }
 
         const baseExamData = {
+            examStatus: examStatus,
             examTitle: examInfoData.examTitle,
             examDescription: examInfoData.examDescription,
             subject: examInfoData.subject,
-            totalMarks: examInfoData.totalMarks,
-            passingMarks: examInfoData.passingMarks,
-            duration: examInfoData.duration,
+            totalMarks: Number(examInfoData.totalMarks),
+            passingMarks: Number(examInfoData.passingMarks),
+            duration: Number(examInfoData.duration),
             examMode: currentExamMode,
             generalInstructions: examInfoData.generalInstructions,
             batchId: targetAudienceData.batchId,
@@ -153,8 +154,8 @@ const CreateExam = () => {
                     startDate: scheduleData.startDate,
                     endDate: scheduleData.endDate,
                     bufferTime: {
-                        beforeExam: scheduleData.bufferTime?.beforeExam,
-                        afterExam: scheduleData.bufferTime?.afterExam
+                        beforeExam: Number(scheduleData.bufferTime?.beforeExam || 0),
+                        afterExam: Number(scheduleData.bufferTime?.afterExam || 0)
                     }
                 }
             };
@@ -167,8 +168,8 @@ const CreateExam = () => {
                     startTime: scheduleData.startTime,
                     endTime: scheduleData.endTime,
                     bufferTime: {
-                        beforeExam: scheduleData.bufferTime?.beforeExam,
-                        afterExam: scheduleData.bufferTime?.afterExam
+                        beforeExam: Number(scheduleData.bufferTime?.beforeExam || 0),
+                        afterExam: Number(scheduleData.bufferTime?.afterExam || 0)
                     }
                 },
                 assignedFacultyIds: scheduleData.assignedFacultyIds || []
