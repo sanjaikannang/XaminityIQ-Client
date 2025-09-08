@@ -124,18 +124,19 @@ const CreateExam = () => {
     };
 
     // Format exam data based on exam mode
-    const formatExamData = () => {
+    const formatExamData = (examStatus: ExamStatus) => {
         if (!examInfoData || !targetAudienceData || !scheduleData || !examStructureData || !questionsData) {
             throw new Error('Missing required form data');
         }
 
         const baseExamData = {
+            examStatus: examStatus,
             examTitle: examInfoData.examTitle,
             examDescription: examInfoData.examDescription,
             subject: examInfoData.subject,
-            totalMarks: examInfoData.totalMarks,
-            passingMarks: examInfoData.passingMarks,
-            duration: examInfoData.duration,
+            totalMarks: Number(examInfoData.totalMarks),
+            passingMarks: Number(examInfoData.passingMarks),
+            duration: Number(examInfoData.duration),
             examMode: currentExamMode,
             generalInstructions: examInfoData.generalInstructions,
             batchId: targetAudienceData.batchId,
@@ -186,7 +187,7 @@ const CreateExam = () => {
         setIsSubmitting(true);
 
         try {
-            const formattedExamData = formatExamData();
+            const formattedExamData = formatExamData(examStatus);
             console.log("Formatted Exam Data...", formattedExamData);
 
             // Call the API
