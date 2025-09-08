@@ -236,10 +236,44 @@ const Questions: React.FC<QuestionsProps> = ({ sections, onFormDataChange }) => 
                     values={{ sections: sectionsWithQuestions }}
                 >
                     {({ isValid, errors, touched }) => {
+                        // Check if form is actually valid (has required data)
+                        const isFormActuallyValid = isValid &&
+                            sectionsWithQuestions.length > 0 &&
+                            sectionsWithQuestions.every(section =>
+                                section.questions.length > 0 &&
+                                section.questions.every(question =>
+                                    question.questionText.trim() !== '' &&
+                                    question.explanation.trim() !== '' &&
+                                    (
+                                        // MCQ validation
+                                        (question.questionType === 'MCQ' &&
+                                            question.options &&
+                                            question.options.length >= 2 &&
+                                            question.options.some(opt => opt.isCorrect) &&
+                                            question.options.every(opt => opt.text.trim() !== '')) ||
+
+                                        // TRUE_FALSE validation
+                                        (question.questionType === 'TRUE_FALSE' &&
+                                            question.options &&
+                                            question.options.some(opt => opt.isCorrect)) ||
+
+                                        // SHORT_ANSWER validation
+                                        (question.questionType === 'SHORT_ANSWER' &&
+                                            question.sampleAnswer &&
+                                            question.sampleAnswer.trim() !== '') ||
+
+                                        // LONG_ANSWER validation
+                                        (question.questionType === 'LONG_ANSWER' &&
+                                            question.modelAnswer &&
+                                            question.modelAnswer.trim() !== '')
+                                    )
+                                )
+                            );
+
                         // Send form data to parent whenever values change
                         useEffect(() => {
-                            handleFormChange({ sections: sectionsWithQuestions }, isValid);
-                        }, [sectionsWithQuestions, isValid]);
+                            handleFormChange({ sections: sectionsWithQuestions }, isFormActuallyValid);
+                        }, [sectionsWithQuestions, isFormActuallyValid]);
 
                         return (
                             <Form>
