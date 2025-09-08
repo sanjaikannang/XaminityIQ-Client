@@ -124,7 +124,7 @@ const CreateExam = () => {
     };
 
     // Format exam data based on exam mode
-    const formatExamData = (examStatus: ExamStatus) => {
+    const formatExamData = () => {
         if (!examInfoData || !targetAudienceData || !scheduleData || !examStructureData || !questionsData) {
             throw new Error('Missing required form data');
         }
@@ -153,8 +153,8 @@ const CreateExam = () => {
                     startDate: scheduleData.startDate,
                     endDate: scheduleData.endDate,
                     bufferTime: {
-                        beforeExam: scheduleData.bufferTime?.beforeExam,
-                        afterExam: scheduleData.bufferTime?.afterExam
+                        beforeExam: Number(scheduleData.bufferTime?.beforeExam || 0),
+                        afterExam: Number(scheduleData.bufferTime?.afterExam || 0)
                     }
                 }
             };
@@ -167,8 +167,8 @@ const CreateExam = () => {
                     startTime: scheduleData.startTime,
                     endTime: scheduleData.endTime,
                     bufferTime: {
-                        beforeExam: scheduleData.bufferTime?.beforeExam,
-                        afterExam: scheduleData.bufferTime?.afterExam
+                        beforeExam: Number(scheduleData.bufferTime?.beforeExam || 0),
+                        afterExam: Number(scheduleData.bufferTime?.afterExam || 0)
                     }
                 },
                 assignedFacultyIds: scheduleData.assignedFacultyIds || []
@@ -186,7 +186,7 @@ const CreateExam = () => {
         setIsSubmitting(true);
 
         try {
-            const formattedExamData = formatExamData(examStatus);
+            const formattedExamData = formatExamData();
             console.log("Formatted Exam Data...", formattedExamData);
 
             // Call the API

@@ -199,6 +199,7 @@ const ExamAssignment = ({ examMode, onFormDataChange }: ExamAssignmentProps) => 
                     onSubmit={handleSubmit}
                     validateOnChange={true}
                     validateOnBlur={true}
+                    validateOnMount={true}
                     enableReinitialize={true}
                 >
                     {({ values, setFieldValue, isValid, errors, touched }) => {
