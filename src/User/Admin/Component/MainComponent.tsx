@@ -14,6 +14,7 @@ import ViewBatch from './MasterData/_Component/ViewBatch';
 import ViewCourse from './MasterData/_Component/ViewCourse';
 import ViewBranch from './MasterData/_Component/ViewBranch';
 import ViewSection from './MasterData/_Component/ViewSection';
+import Exam from './Exam/Exam';
 
 const MainComponent = () => {
 
@@ -38,6 +39,7 @@ const MainComponent = () => {
                         <Route path="exam" element={<ExamDashboard />} />
                         <Route path="exam/all-exam" element={<AllExam />} />
                         <Route path="exam/create-exam" element={<CreateExam />} />
+                        <Route path="exam/exam-ui" element={<Exam />} />
 
                         {/* MasterData Screens */}
                         <Route path="data" element={<MasterDataDashboard />} />
