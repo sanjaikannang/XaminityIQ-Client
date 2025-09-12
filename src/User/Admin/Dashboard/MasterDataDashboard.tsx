@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { LayoutList, CalendarRange, GraduationCap, Layers3 } from 'lucide-react';
 import Modal from '../../../Common/UI/Modal';
 import BatchForm from '../Component/MasterData/_Component/BatchForm';
 import CourseForm from '../Component/MasterData/_Component/CourseForm';
 import BranchForm from '../Component/MasterData/_Component/BranchForm';
 import SectionForm from '../Component/MasterData/_Component/SectionForm';
 import { useNavigate } from 'react-router-dom';
-
+import Batch from "../../../assets/Images/batch.png";
+import Course from "../../../assets/Images/course.png";
+import Branch from "../../../assets/Images/branch.png";
+import Section from "../../../assets/Images/section.png";
 
 const MasterDataDashboard = () => {
     const navigate = useNavigate()
@@ -14,10 +16,10 @@ const MasterDataDashboard = () => {
     const [activeEntityKey, setActiveEntityKey] = useState<string | null>(null);
 
     const entities = [
-        { key: 'batch', title: 'Batch', total: 10, icon: CalendarRange, viewPath: '/admin/data/view-batch' },
-        { key: 'course', title: 'Course', total: 14, icon: GraduationCap, viewPath: '/admin/data/view-course' },
-        { key: 'branch', title: 'Branch', total: 20, icon: Layers3, viewPath: '/admin/data/view-branch' },
-        { key: 'section', title: 'Section', total: 16, icon: LayoutList, viewPath: '/admin/data/view-section' }
+        { key: 'batch', title: 'Batch', total: 10, image: Batch, viewPath: '/admin/data/view-batch' },
+        { key: 'course', title: 'Course', total: 14, image: Course, viewPath: '/admin/data/view-course' },
+        { key: 'branch', title: 'Branch', total: 20, image: Branch, viewPath: '/admin/data/view-branch' },
+        { key: 'section', title: 'Section', total: 16, image: Section, viewPath: '/admin/data/view-section' }
     ];
 
     const handleFormSuccess = () => {
@@ -54,16 +56,11 @@ const MasterDataDashboard = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {entities.map((entity) => {
-                            const IconComponent = entity.icon;
                             return (
                                 <div key={entity.key} className="bg-white rounded-md shadow-md border border-gray-300">
-                                    <div className="flex items-center justify-evenly border-b border-gray-300">
-                                        <IconComponent className="w-8 h-8 text-gray-600" />
-                                        <div className="w-px h-24 bg-gray-300 mx-2"></div>
-                                        <div>
-                                            <p className="font-medium text-3xl text-gray-600">{entity.total}</p>
-                                            <p className="text-[10px] text-gray-600">{entity.title}</p>
-                                        </div>
+
+                                    <div className="border-b border-gray-100">
+                                        <img src={entity.image} alt="Batch" className="w-full h-48 object-contain" />
                                     </div>
 
                                     <div className="p-4">
