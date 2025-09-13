@@ -2,8 +2,6 @@ import { Route, Routes } from 'react-router-dom';
 import StudentDashboard from '../Dashboard/StudentDashboard';
 import FacultyDashboard from '../Dashboard/FacultyDashboard';
 import ExamDashboard from '../Dashboard/ExamDashboard';
-import CreateFaculty from './CreateFaculty';
-import FacultyDetail from './FacultyDetail';
 import AllExam from './AllExam';
 import CreateExam from './Exam/CreateExam/CreateExam';
 import MasterDataDashboard from '../Dashboard/MasterDataDashboard';
@@ -15,6 +13,8 @@ import Exam from './Exam/Exam';
 import AdminDashboard from '../Dashboard/AdminDashboard';
 import CreateStudent from './StudentDashboard/components/CreateStudent/CreateStudent';
 import StudentDetail from './StudentDashboard/components/StudentDetail/StudentDetail';
+import CreateFaculty from './FacultyDashboard/components/CreateFaculty/CreateFaculty';
+import FacultyDetail from './FacultyDashboard/components/FacultyDetail/FacultyDetail';
 
 const MainComponent = () => {
 

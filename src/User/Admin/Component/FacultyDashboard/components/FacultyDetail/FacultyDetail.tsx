@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
-import { GetFacultyResponse } from "../../../Types/admin.types";
-import { setFacultyError, setFacultyLoading, setSelectedFaculty } from "../../../State/Slices/adminSlice";
-import { getFaculty } from "../../../Services/Admin/adminAPI";
+import { GetFacultyResponse } from "../../../../../../Types/admin.types";
+import { setFacultyError, setFacultyLoading, setSelectedFaculty } from "../../../../../../State/Slices/adminSlice";
+import { getFaculty } from "../../../../../../Services/Admin/adminAPI";
 import { FacultyDetailSkeleton } from "./FacultyDetailSkeleton";
-import { InfoCard } from "../../../Common/UI/InfoCard";
-import { InfoItem } from "../../../Common/UI/InfoItem";
+import { InfoCard } from "../../../../../../Common/UI/InfoCard";
+import { InfoItem } from "../../../../../../Common/UI/InfoItem";
 
 const FacultyDetail = () => {
 
