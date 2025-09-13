@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { CheckCircle, ChevronDown, FilePen, Upload, XCircle } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { FilePen, Upload } from 'lucide-react';
 import ExamInfo from './Component/ExamInfo';
 import { ExamMode, ExamStatus } from '../../../../../Utils/enum';
 import ExamAssignment from './Component/ExamAssignment';
@@ -8,6 +8,8 @@ import ExamStructure from './Component/ExamStructure';
 import Questions from './Component/Questions';
 import toast from 'react-hot-toast';
 import { createExam } from '../../../../../Services/Admin/adminAPI';
+import { StepConfig } from '../../../../../Common/UI/StepForm';
+import StepForm from '../../../../../Common/UI/StepForm';
 
 interface Section {
     id: string;
@@ -65,26 +67,12 @@ const CreateExam = () => {
 
     console.log("set exam info form values....", formValidation.examInfo);
 
-    const [isExamInfoOpen, setIsExamInfoOpen] = useState(true);
-    const [isTargetAudienceOpen, setIsTargetAudienceOpen] = useState(true);
-    const [isScheduleOpen, setIsScheduleOpen] = useState(true);
-    const [isExamStructureOpen, setIsExamStructureOpen] = useState(true);
-    const [isQuestionsOpen, setIsQuestionsOpen] = useState(true);
-
-    // Toggle functions
-    const toggleExamInfo = () => setIsExamInfoOpen(!isExamInfoOpen);
-    const toggleTargetAudience = () => setIsTargetAudienceOpen(!isTargetAudienceOpen);
-    const toggleSchedule = () => setIsScheduleOpen(!isScheduleOpen);
-    const toggleExamStructure = () => setIsExamStructureOpen(!isExamStructureOpen);
-    const toggleQuestions = () => setIsQuestionsOpen(!isQuestionsOpen);
-
     const handleExamModeChange = (mode: ExamMode) => {
         setCurrentExamMode(mode);
     };
 
     // Form data handlers
     const handleExamInfoDataChange = (values: ExamInfoFormData, isValid: boolean) => {
-        // console.log("parent component form values....", values)
         setExamInfoData(values);
         setFormValidation(prev => ({ ...prev, examInfo: isValid }));
     };
@@ -212,197 +200,131 @@ const CreateExam = () => {
         }
     };
 
+    // Configure steps for the StepForm component
+    const steps: StepConfig[] = useMemo(() => [
+        {
+            id: 'exam-info',
+            title: 'Exam Information',
+            description: 'Configure basic exam details and settings',
+            isValid: formValidation.examInfo,
+            component: (
+                <ExamInfo
+                    onExamModeChange={handleExamModeChange}
+                    onFormDataChange={handleExamInfoDataChange}
+                />
+            )
+        },
+        {
+            id: 'target-audience',
+            title: 'Target Audience',
+            description: 'Select batches, courses, and sections',
+            isValid: formValidation.targetAudience,
+            component: (
+                <ExamAssignment
+                    examMode={currentExamMode}
+                    onFormDataChange={handleTargetAudienceDataChange}
+                />
+            )
+        },
+        {
+            id: 'schedule',
+            title: 'Schedule',
+            description: 'Set exam dates, times, and buffer periods',
+            isValid: formValidation.schedule,
+            component: (
+                <Schedule
+                    examMode={currentExamMode}
+                    onFormDataChange={handleScheduleDataChange}
+                />
+            )
+        },
+        {
+            id: 'exam-structure',
+            title: 'Exam Structure',
+            description: 'Define sections and exam structure',
+            isValid: formValidation.examStructure,
+            component: (
+                <ExamStructure
+                    onSectionsUpdate={handleSectionsUpdate}
+                    onFormDataChange={handleExamStructureDataChange}
+                />
+            )
+        },
+        {
+            id: 'questions',
+            title: 'Questions',
+            description: 'Add and manage exam questions',
+            isValid: formValidation.questions,
+            component: (
+                <Questions
+                    onFormDataChange={handleQuestionsDataChange}
+                    sections={sections}
+                />
+            )
+        }
+    ], [formValidation, currentExamMode, sections]);
+
+    // Header content for the step form
+    const headerContent = (
+        <div>
+            <h1 className="text-xl font-semibold text-gray-800 mb-1">Create Exam</h1>
+        </div>
+    );
+
+    // Footer actions (Save Draft / Publish buttons)
+    const footerActions = (
+        <div className="flex items-center space-x-2">
+            <button
+                className={`flex items-center px-3 py-1.5 transition-all duration-300 ease-in-out cursor-pointer ${status === 'DRAFT'
+                    ? 'bg-gray-600 text-white shadow-md'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    } rounded-lg font-medium text-sm ${(!isAllFormsValid() || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                onClick={() => handleExamSubmission(ExamStatus.DRAFT)}
+                disabled={!isAllFormsValid() || isSubmitting}
+                title={!isAllFormsValid() ? 'Please fill all required fields' : 'Save as draft'}
+            >
+                <FilePen size={14} className="mr-1" />
+                {isSubmitting && status === ExamStatus.DRAFT ? 'Saving...' : 'Save Draft'}
+            </button>
+
+            <button
+                className={`flex items-center px-3 py-1.5 transition-all duration-300 ease-in-out cursor-pointer ${status === 'PUBLISH'
+                    ? 'bg-green-600 text-white shadow-md'
+                    : 'bg-primary text-white hover:bg-primary/90'
+                    } rounded-lg font-medium text-sm ${(!isAllFormsValid() || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                onClick={() => handleExamSubmission(ExamStatus.PUBLISH)}
+                disabled={!isAllFormsValid() || isSubmitting}
+                title={!isAllFormsValid() ? 'Please fill all required fields' : 'Publish exam'}
+            >
+                <Upload size={14} className="mr-1" />
+                {isSubmitting && status === ExamStatus.PUBLISH ? 'Publishing...' : 'Publish'}
+            </button>
+        </div>
+    );
+
     return (
-        <>
-            <div className="p-4">
-                <div className="max-w-9xl mx-auto">
-                    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                        <div className="bg-primary text-whiteColor p-4 flex items-center justify-between">
-                            <h1 className="text-2xl font-semibold">Create Exam</h1>
-
-                            <div className="bg-primary p-0.5 rounded-full border border-white shadow-lg">
-                                <div className="flex rounded-full overflow-hidden">
-                                    <button
-                                        className={`flex items-center px-3 py-1 transition-all duration-300 ease-in-out cursor-pointer ${status === 'DRAFT'
-                                            ? 'bg-white text-primary shadow-md scale-105'
-                                            : 'bg-transparent text-white hover:bg-white/10'
-                                            } rounded-full font-medium text-sm ${(!isAllFormsValid() || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                        onClick={() => handleExamSubmission(ExamStatus.DRAFT)}
-                                        disabled={!isAllFormsValid() || isSubmitting}
-                                        title={!isAllFormsValid() ? 'Please fill all required fields' : 'Save as draft'}
-                                    >
-                                        <FilePen size={14} />
-                                        {isSubmitting && status === ExamStatus.DRAFT && (
-                                            <span className="ml-1">Saving...</span>
-                                        )}
-                                    </button>
-
-                                    <button
-                                        className={`flex items-center px-3 py-1 transition-all duration-300 ease-in-out cursor-pointer ${status === 'PUBLISH'
-                                            ? 'bg-white text-primary shadow-md scale-105'
-                                            : 'bg-transparent text-white hover:bg-white/10'
-                                            } rounded-full font-medium text-sm ${(!isAllFormsValid() || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                        onClick={() => handleExamSubmission(ExamStatus.PUBLISH)}
-                                        disabled={!isAllFormsValid() || isSubmitting}
-                                        title={!isAllFormsValid() ? 'Please fill all required fields' : 'Publish exam'}
-                                    >
-                                        <Upload size={14} />
-                                        {isSubmitting && status === ExamStatus.PUBLISH && (
-                                            <span className="ml-1">Publishing...</span>
-                                        )}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Validation Status Indicator */}
-                        <div className="bg-gray-100 p-1.5 border-b border-gray-300">
-                            <div className="flex items-center space-x-4 text-sm">
-                                <span className={`flex items-center gap-1 px-1 py-0.5 text-[10px] ${formValidation.examInfo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                    {formValidation.examInfo ? (<CheckCircle size={10} />) : (<XCircle size={10} />)}Exam Info
-                                </span>
-                                <span className={`flex items-center gap-1 px-1 py-0.5 text-[10px] ${formValidation.targetAudience ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                    {formValidation.targetAudience ? (<CheckCircle size={10} />) : (<XCircle size={10} />)}Target Audience
-                                </span>
-                                <span className={`flex items-center gap-1 px-1 py-0.5 text-[10px] ${formValidation.schedule ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                    {formValidation.schedule ? (<CheckCircle size={10} />) : (<XCircle size={10} />)}Schedule
-                                </span>
-                                <span className={`flex items-center gap-1 px-1 py-0.5 text-[10px] ${formValidation.examStructure ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                    {formValidation.examStructure ? (<CheckCircle size={10} />) : (<XCircle size={10} />)}Structure
-                                </span>
-                                <span className={`flex items-center gap-1 px-1 py-0.5 text-[10px] ${formValidation.questions ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                    {formValidation.questions ? (<CheckCircle size={10} />) : (<XCircle size={10} />)}Questions
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Exam Info Section */}
-                        <div>
-                            <div
-                                className="bg-gray-50 border-b border-gray-300 p-4 cursor-pointer hover:bg-gray-100 transition-colors duration-200 flex items-center justify-between"
-                                onClick={toggleExamInfo}
-                            >
-                                <div className="flex items-center space-x-2">
-                                    <h3 className="text-lg font-semibold text-gray-800">1. Exam Info</h3>
-                                    <div className={`w-1.5 h-1.5 rounded-full ${formValidation.examInfo ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                                </div>
-                                <ChevronDown
-                                    className={`w-5 h-5 text-gray-600 transform transition-transform duration-200 ${isExamInfoOpen ? 'rotate-180' : 'rotate-0'
-                                        }`}
-                                />
-                            </div>
-
-                            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isExamInfoOpen ? 'h-full opacity-100' : 'max-h-0 opacity-0'
-                                }`}>
-                                <ExamInfo
-                                    onExamModeChange={handleExamModeChange}
-                                    onFormDataChange={handleExamInfoDataChange}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Target Audience Section */}
-                        <div>
-                            <div
-                                className="bg-gray-50 border-b border-gray-300 p-4 cursor-pointer hover:bg-gray-100 transition-colors duration-200 flex items-center justify-between"
-                                onClick={toggleTargetAudience}
-                            >
-                                <div className="flex items-center space-x-2">
-                                    <h3 className="text-lg font-semibold text-gray-800">2. Target Audience</h3>
-                                    <div className={`w-1.5 h-1.5 rounded-full ${formValidation.targetAudience ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                                </div>
-                                <ChevronDown
-                                    className={`w-5 h-5 text-gray-600 transform transition-transform duration-200 ${isTargetAudienceOpen ? 'rotate-180' : 'rotate-0'
-                                        }`}
-                                />
-                            </div>
-
-                            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isTargetAudienceOpen ? 'h-full opacity-100' : 'max-h-0 opacity-0'
-                                }`}>
-                                <ExamAssignment
-                                    examMode={currentExamMode}
-                                    onFormDataChange={handleTargetAudienceDataChange}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Schedule Section */}
-                        <div>
-                            <div
-                                className="bg-gray-50 border-b border-gray-300 p-4 cursor-pointer hover:bg-gray-100 transition-colors duration-200 flex items-center justify-between"
-                                onClick={toggleSchedule}
-                            >
-                                <div className="flex items-center space-x-2">
-                                    <h3 className="text-lg font-semibold text-gray-800">3. Schedule</h3>
-                                    <div className={`w-1.5 h-1.5 rounded-full ${formValidation.schedule ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                                </div>
-                                <ChevronDown
-                                    className={`w-5 h-5 text-gray-600 transform transition-transform duration-200 ${isScheduleOpen ? 'rotate-180' : 'rotate-0'
-                                        }`}
-                                />
-                            </div>
-
-                            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isScheduleOpen ? 'h-full opacity-100' : 'max-h-0 opacity-0'
-                                }`}>
-                                <Schedule
-                                    examMode={currentExamMode}
-                                    onFormDataChange={handleScheduleDataChange}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Exam Structure Section */}
-                        <div>
-                            <div
-                                className="bg-gray-50 border-b border-gray-300 p-4 cursor-pointer hover:bg-gray-100 transition-colors duration-200 flex items-center justify-between"
-                                onClick={toggleExamStructure}
-                            >
-                                <div className="flex items-center space-x-2">
-                                    <h3 className="text-lg font-semibold text-gray-800">4. Exam Structure</h3>
-                                    <div className={`w-1.5 h-1.5 rounded-full ${formValidation.examStructure ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                                </div>
-                                <ChevronDown
-                                    className={`w-5 h-5 text-gray-600 transform transition-transform duration-200 ${isExamStructureOpen ? 'rotate-180' : 'rotate-0'
-                                        }`}
-                                />
-                            </div>
-
-                            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isExamStructureOpen ? 'h-full opacity-100' : 'max-h-0 opacity-0'
-                                }`}>
-                                <ExamStructure
-                                    onSectionsUpdate={handleSectionsUpdate}
-                                    onFormDataChange={handleExamStructureDataChange}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Questions Section */}
-                        <div>
-                            <div
-                                className="bg-gray-50 border-b border-gray-300 p-4 cursor-pointer hover:bg-gray-100 transition-colors duration-200 flex items-center justify-between"
-                                onClick={toggleQuestions}
-                            >
-                                <div className="flex items-center space-x-2">
-                                    <h3 className="text-lg font-semibold text-gray-800">5. Questions</h3>
-                                    <div className={`w-1.5 h-1.5 rounded-full ${formValidation.questions ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                                </div>
-                                <ChevronDown
-                                    className={`w-5 h-5 text-gray-600 transform transition-transform duration-200 ${isQuestionsOpen ? 'rotate-180' : 'rotate-0'
-                                        }`}
-                                />
-                            </div>
-
-                            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isQuestionsOpen ? 'h-full opacity-100' : 'max-h-0 opacity-0'
-                                }`}>
-                                <Questions
-                                    onFormDataChange={handleQuestionsDataChange}
-                                    sections={sections} />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div >
-        </>
+        <div className="p-4 h-screen">
+            <div className="h-full max-w-full mx-auto">
+                <StepForm
+                    steps={steps}
+                    headerContent={headerContent}
+                    footerActions={footerActions}
+                    onStepChange={(stepIndex) => {
+                        console.log('Step changed to:', stepIndex);
+                    }}
+                    onComplete={() => {
+                        console.log('All steps completed');
+                        // Handle completion if needed
+                    }}
+                    className="h-full"
+                    sidebarWidth="w-12 md:w-16"
+                    allowSkip={true}
+                    showValidationIndicator={true}
+                />
+            </div>
+        </div>
     );
 };
 
