@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { GetStudentResponse } from '../../../Types/admin.types';
-import { setSelectedStudent, setStudentError, setStudentLoading } from '../../../State/Slices/adminSlice';
-import { getStudent } from '../../../Services/Admin/adminAPI';
+import { GetStudentResponse } from '../../../../../../Types/admin.types';
+import { setSelectedStudent, setStudentError, setStudentLoading } from '../../../../../../State/Slices/adminSlice';
+import { getStudent } from '../../../../../../Services/Admin/adminAPI';
+import { InfoCard } from '../../../../../../Common/UI/InfoCard';
+import { InfoItem } from '../../../../../../Common/UI/InfoItem';
+import { FamilyMemberCard } from '../../../../../../Common/UI/FamilyMemberCard';
 import { StudentDetailSkeleton } from './StudentDetailSkeleton';
-import { InfoCard } from '../../../Common/UI/InfoCard';
-import { InfoItem } from '../../../Common/UI/InfoItem';
-import { FamilyMemberCard } from '../../../Common/UI/FamilyMemberCard';
 
 const StudentDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -129,7 +129,7 @@ const StudentDetail = () => {
                     <div className="flex justify-between items-center py-2">
                       <span className="text-sm text-gray-500">Batch</span>
                       <span className="text-sm">{academicInfo.batch}</span>
-                    </div>                    
+                    </div>
                   </div>
                 </div>
               </div>
@@ -140,7 +140,7 @@ const StudentDetail = () => {
               <InfoCard title="Personal Information">
                 <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <InfoItem label="First Name" value={personalInfo.firstName} />
-                  <InfoItem label="Last Name" value={personalInfo.lastName} />                 
+                  <InfoItem label="Last Name" value={personalInfo.lastName} />
                   <InfoItem label="Gender" value={personalInfo.gender} />
                   <InfoItem label="Nationality" value={personalInfo.nationality} />
                   <InfoItem label="Religion" value={personalInfo.religion} />
@@ -190,12 +190,12 @@ const StudentDetail = () => {
                   {/* Father */}
                   <FamilyMemberCard
                     title="Father"
-                    member={familyInfo.father}/>
+                    member={familyInfo.father} />
 
                   {/* Mother */}
                   <FamilyMemberCard
                     title="Mother"
-                    member={familyInfo.mother}/>
+                    member={familyInfo.mother} />
                 </div>
 
                 {/* Guardian */}
@@ -203,7 +203,7 @@ const StudentDetail = () => {
                   <div className="mt-4">
                     <FamilyMemberCard
                       title="Guardian"
-                      member={familyInfo.guardian}/>
+                      member={familyInfo.guardian} />
                   </div>
                 )}
               </InfoCard>
@@ -213,7 +213,7 @@ const StudentDetail = () => {
                 <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <InfoItem label="User Role" value={userId.role} />
                   <InfoItem label="Account Status" value={userId.isActive ? 'Active' : 'Inactive'} />
-                  <InfoItem label="Email Verified" value={userId.isEmailVerified ? 'Yes' : 'No'} />                 
+                  <InfoItem label="Email Verified" value={userId.isEmailVerified ? 'Yes' : 'No'} />
                 </dl>
               </InfoCard>
             </div>
