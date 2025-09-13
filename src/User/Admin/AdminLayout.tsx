@@ -1,7 +1,7 @@
 import React, { useState } from "react"
-import Sidebar from "./Component/Sidebar";
-import Header from "./Component/Header";
 import MainComponent from "./Component/MainComponent";
+import Sidebar from "./Component/Sidebar/Sidebar";
+import Header from "./Component/Header/Header";
 
 const AdminLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);

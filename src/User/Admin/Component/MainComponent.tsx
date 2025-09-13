@@ -1,20 +1,20 @@
 import { Route, Routes } from 'react-router-dom';
-import AdminDashboard from './AdminDashboard';
 import StudentDashboard from '../Dashboard/StudentDashboard';
 import FacultyDashboard from '../Dashboard/FacultyDashboard';
 import ExamDashboard from '../Dashboard/ExamDashboard';
-import CreateStudent from './CreateStudent';
-import CreateFaculty from './CreateFaculty';
-import StudentDetail from './StudentDetail';
-import FacultyDetail from './FacultyDetail';
-import AllExam from './AllExam';
-import CreateExam from './Exam/CreateExam/CreateExam';
 import MasterDataDashboard from '../Dashboard/MasterDataDashboard';
-import ViewBatch from './MasterData/_Component/ViewBatch';
-import ViewCourse from './MasterData/_Component/ViewCourse';
-import ViewBranch from './MasterData/_Component/ViewBranch';
-import ViewSection from './MasterData/_Component/ViewSection';
-import Exam from './Exam/Exam';
+import AdminDashboard from '../Dashboard/AdminDashboard';
+import CreateStudent from './StudentDashboard/components/CreateStudent/CreateStudent';
+import StudentDetail from './StudentDashboard/components/StudentDetail/StudentDetail';
+import CreateFaculty from './FacultyDashboard/components/CreateFaculty/CreateFaculty';
+import FacultyDetail from './FacultyDashboard/components/FacultyDetail/FacultyDetail';
+import CreateExam from './ExamDashboard/components/CreateExam/CreateExam';
+import Exam from './ExamDashboard/components/ExamUI/Exam';
+import ViewBatch from './MasterDataDashboard/components/Batch/ViewBatch';
+import ViewCourse from './MasterDataDashboard/components/Course/ViewCourse';
+import ViewBranch from './MasterDataDashboard/components/Branch/ViewBranch';
+import ViewSection from './MasterDataDashboard/components/Section/ViewSection';
+import AllExam from './ExamDashboard/components/Exam/AllExam';
 
 const MainComponent = () => {
 

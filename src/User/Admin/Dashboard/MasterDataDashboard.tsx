@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import Modal from '../../../Common/UI/Modal';
-import BatchForm from '../Component/MasterData/_Component/BatchForm';
-import CourseForm from '../Component/MasterData/_Component/CourseForm';
-import BranchForm from '../Component/MasterData/_Component/BranchForm';
-import SectionForm from '../Component/MasterData/_Component/SectionForm';
 import { useNavigate } from 'react-router-dom';
 import Batch from "../../../assets/Images/batch.png";
 import Course from "../../../assets/Images/course.png";
 import Branch from "../../../assets/Images/branch.png";
 import Section from "../../../assets/Images/section.png";
+import BatchForm from '../Component/MasterDataDashboard/components/Batch/BatchForm';
+import CourseForm from '../Component/MasterDataDashboard/components/Course/CourseForm';
+import BranchForm from '../Component/MasterDataDashboard/components/Branch/BranchForm';
+import SectionForm from '../Component/MasterDataDashboard/components/Section/SectionForm';
 
 const MasterDataDashboard = () => {
     const navigate = useNavigate()
