@@ -1,15 +1,14 @@
 import { useState, useMemo } from 'react';
 import { FilePen, Upload } from 'lucide-react';
-import ExamInfo from './Component/ExamInfo';
-import { ExamMode, ExamStatus } from '../../../../../Utils/enum';
-import ExamAssignment from './Component/ExamAssignment';
-import Schedule from './Component/Schedule';
-import ExamStructure from './Component/ExamStructure';
-import Questions from './Component/Questions';
 import toast from 'react-hot-toast';
-import { createExam } from '../../../../../Services/Admin/adminAPI';
-import { StepConfig } from '../../../../../Common/UI/StepForm';
-import StepForm from '../../../../../Common/UI/StepForm';
+import { ExamMode, ExamStatus } from '../../../../../../Utils/enum';
+import { createExam } from '../../../../../../Services/Admin/adminAPI';
+import StepForm, { StepConfig } from '../../../../../../Common/UI/StepForm';
+import ExamInfo from './ExamInfo';
+import ExamAssignment from './ExamAssignment';
+import Schedule from './Schedule';
+import ExamStructure from './ExamStructure';
+import Questions from './Questions';
 
 interface Section {
     id: string;

@@ -3,18 +3,18 @@ import StudentDashboard from '../Dashboard/StudentDashboard';
 import FacultyDashboard from '../Dashboard/FacultyDashboard';
 import ExamDashboard from '../Dashboard/ExamDashboard';
 import AllExam from './AllExam';
-import CreateExam from './Exam/CreateExam/CreateExam';
 import MasterDataDashboard from '../Dashboard/MasterDataDashboard';
 import ViewBatch from './MasterData/_Component/ViewBatch';
 import ViewCourse from './MasterData/_Component/ViewCourse';
 import ViewBranch from './MasterData/_Component/ViewBranch';
 import ViewSection from './MasterData/_Component/ViewSection';
-import Exam from './Exam/Exam';
 import AdminDashboard from '../Dashboard/AdminDashboard';
 import CreateStudent from './StudentDashboard/components/CreateStudent/CreateStudent';
 import StudentDetail from './StudentDashboard/components/StudentDetail/StudentDetail';
 import CreateFaculty from './FacultyDashboard/components/CreateFaculty/CreateFaculty';
 import FacultyDetail from './FacultyDashboard/components/FacultyDetail/FacultyDetail';
+import CreateExam from './ExamDashboard/components/CreateExam/CreateExam';
+import Exam from './ExamDashboard/components/ExamUI/Exam';
 
 const MainComponent = () => {
 
