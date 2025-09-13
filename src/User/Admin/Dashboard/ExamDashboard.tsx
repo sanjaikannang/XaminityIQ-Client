@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import AllExam from "../Component/AllExam";
+import AllExam from "../Component/ExamDashboard/components/Exam/AllExam";
 
 const ExamDashboard = () => {
 

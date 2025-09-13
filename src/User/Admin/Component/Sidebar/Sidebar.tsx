@@ -9,10 +9,10 @@ import {
     Database
 } from 'lucide-react';
 import { useDispatch } from "react-redux";
-import { logoutAPI } from "../../../Services/Auth/authAPI";
-import { logout } from "../../../State/Slices/authSlice";
+import { logoutAPI } from "../../../../Services/Auth/authAPI";
+import { logout } from "../../../../State/Slices/authSlice";
 import toast from "react-hot-toast";
-import Spinner from "../../../Common/UI/Spinner";
+import Spinner from "../../../../Common/UI/Spinner";
 
 interface SidebarProps {
     isSidebarOpen: boolean;

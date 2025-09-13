@@ -1,11 +1,11 @@
 import toast from 'react-hot-toast';
 import { useState, useEffect } from 'react';
 import { Field, Form, Formik } from 'formik';
-import Spinner from '../../../../../Common/UI/Spinner';
-import CommonSelect from '../../../../../Common/UI/CustomSelect';
-import { CreateSectionRequest } from '../../../../../Types/admin.types';
-import { createSectionSchema } from '../../../FormikSchema/create-section.schema';
-import { createSection, getAllBranches } from '../../../../../Services/Admin/adminAPI';
+import Spinner from '../../../../../../Common/UI/Spinner';
+import CommonSelect from '../../../../../../Common/UI/CustomSelect';
+import { CreateSectionRequest } from '../../../../../../Types/admin.types';
+import { createSectionSchema } from '../../../../FormikSchema/create-section.schema';
+import { createSection, getAllBranches } from '../../../../../../Services/Admin/adminAPI';
 
 interface SectionFormProps {
     onSuccess: () => void;

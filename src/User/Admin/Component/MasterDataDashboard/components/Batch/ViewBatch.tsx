@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { getAllBatch } from '../../../../../Services/Admin/adminAPI';
+import { getAllBatch } from '../../../../../../Services/Admin/adminAPI';
 
 interface Batch {
     _id: string;

@@ -1,178 +1,179 @@
-import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import React, { useState, ReactNode } from 'react';
+import { CheckCircle, ChevronLeft, ChevronRight, XCircle } from 'lucide-react';
 
-export interface Step {
-    id: number;
+export interface StepConfig {
+    id: string;
     title: string;
-    description: string;
+    description?: string;
+    isValid: boolean;
+    component: ReactNode;
 }
 
-export interface StepFormProps {
-    title: string;
-    steps: Step[];
-    currentStep?: number;
-    onStepChange?: (step: number) => void;
+interface StepFormProps {
+    steps: StepConfig[];
+    onStepChange?: (currentStep: number) => void;
     onComplete?: () => void;
-    onPrevious?: (currentStep: number) => void;
-    onNext?: (currentStep: number) => void;
-    children: React.ReactNode;
-    submitButtonText?: string;
-    nextButtonText?: string;
-    previousButtonText?: string;
-    allowStepNavigation?: boolean;
+    headerContent?: ReactNode;
+    footerActions?: ReactNode;
     className?: string;
+    sidebarWidth?: string;
+    allowSkip?: boolean;
+    showValidationIndicator?: boolean;
 }
 
 const StepForm: React.FC<StepFormProps> = ({
-    title,
     steps,
-    currentStep: controlledCurrentStep,
     onStepChange,
     onComplete,
-    onPrevious,
-    onNext,
-    children,
-    submitButtonText = "Complete",
-    nextButtonText = "Next",
-    previousButtonText = "Previous",
-    allowStepNavigation = true,
-    className = ""
+    className = "",
+    sidebarWidth = "w-20",
+    allowSkip = false,
 }) => {
-    const [internalCurrentStep, setInternalCurrentStep] = useState(1);
+    const [currentStep, setCurrentStep] = useState(0);
 
-    // Use controlled or uncontrolled step management
-    const currentStep = controlledCurrentStep !== undefined ? controlledCurrentStep : internalCurrentStep;
-
-    const updateCurrentStep = (step: number) => {
-        if (controlledCurrentStep === undefined) {
-            setInternalCurrentStep(step);
+    const handleStepChange = (stepIndex: number) => {
+        if (allowSkip || stepIndex <= currentStep || steps[currentStep].isValid) {
+            setCurrentStep(stepIndex);
+            onStepChange?.(stepIndex);
         }
-        onStepChange?.(step);
     };
 
     const nextStep = () => {
-        if (currentStep < steps.length) {
-            const nextStepValue = currentStep + 1;
-            updateCurrentStep(nextStepValue);
-            onNext?.(currentStep);
+        if (currentStep < steps.length - 1) {
+            if (steps[currentStep].isValid || allowSkip) {
+                const newStep = currentStep + 1;
+                setCurrentStep(newStep);
+                onStepChange?.(newStep);
+            }
+        } else if (currentStep === steps.length - 1) {
+            onComplete?.();
         }
     };
 
     const prevStep = () => {
-        if (currentStep > 1) {
-            const prevStepValue = currentStep - 1;
-            updateCurrentStep(prevStepValue);
-            onPrevious?.(currentStep);
+        if (currentStep > 0) {
+            const newStep = currentStep - 1;
+            setCurrentStep(newStep);
+            onStepChange?.(newStep);
         }
     };
 
-    const goToStep = (stepId: number) => {
-        if (allowStepNavigation) {
-            updateCurrentStep(stepId);
-            onStepChange?.(stepId);
-        }
+    const isCurrentStepValid = () => {
+        return steps[currentStep]?.isValid || allowSkip;
     };
 
-    const handleComplete = () => {
-        onComplete?.();
+    const isAllStepsValid = () => {
+        return steps.every(step => step.isValid);
     };
 
     return (
         <>
-            <div className={`min-h-screen bg-gray-50 p-4 ${className}`}>
-                <div className="max-w-9xl mx-auto">
-                    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                        {/* Header */}
-                        <div className="bg-primary text-white p-4">
-                            <h1 className="text-xl sm:text-2xl font-semibold">
-                                {title}
-                            </h1>
+            <div className={`flex bg-white rounded-md shadow-sm border border-gray-300 overflow-hidden ${className}`}>
+                {/* Left Sidebar - Steps */}
+                <div className={`${sidebarWidth} bg-gray-50 border-r border-gray-200 flex flex-col`}>
+                    {/* Steps Navigation */}
+                    <div className="flex-1 p-2 md:p-4">
+                        <div className="space-y-4">
+                            {steps.map((step, index) => (
+                                <div key={step.id} className="relative">
+                                    {/* Step Item */}
+                                    <div
+                                        className={`flex items-start cursor-pointer group transition-all duration-200 ${index === currentStep
+                                            ? 'text-primary'
+                                            : index < currentStep
+                                                ? 'text-green-600'
+                                                : 'text-gray-400'
+                                            } ${(allowSkip || index <= currentStep || steps[currentStep].isValid)
+                                                ? 'hover:text-primary'
+                                                : 'cursor-not-allowed'
+                                            }`}
+                                        onClick={() => handleStepChange(index)}
+                                    >
+                                        {/* Step Indicator */}
+                                        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium border-2 transition-all duration-200 ${index === currentStep
+                                            ? 'bg-primary text-white border-primary shadow-md'
+                                            : index < currentStep
+                                                ? step.isValid
+                                                    ? 'bg-green-500 text-white border-green-500'
+                                                    : 'bg-red-500 text-white border-red-500'
+                                                : 'bg-white text-gray-400 border-gray-300 group-hover:border-primary'
+                                            }`}>
+                                            {index < currentStep ? (
+                                                step.isValid ? (
+                                                    <CheckCircle size={16} />
+                                                ) : (
+                                                    <XCircle size={16} />
+                                                )
+                                            ) : (
+                                                index + 1
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Connector Line */}
+                                    {index < steps.length - 1 && (
+                                        <div className={`absolute left-4 top-8 w-0.5 h-6 transition-colors duration-200 ${index < currentStep ? 'bg-primary' : 'bg-gray-300'
+                                            }`}></div>
+                                    )}
+                                </div>
+                            ))}
                         </div>
+                    </div>
+                </div>
 
-                        <div className="flex flex-row">
-                            {/* Vertical Step Navigation */}
-                            <div className="border-b border-r border-gray-200 bg-gray-50 w-20 flex items-center justify-center">
-                                <div className="p-1">
-                                    <div className="space-y-1">
-                                        {steps.map((step, index) => (
-                                            <div key={step.id} className="relative">
-                                                {/* Vertical connecting line */}
-                                                {index < steps.length - 1 && (
-                                                    <div
-                                                        className={`absolute left-7 top-12 w-0.5 h-8 ${currentStep > step.id ? 'bg-green-500' : 'bg-gray-300'
-                                                            }`}
-                                                    />
-                                                )}
-
-                                                {/* Step item */}
-                                                <div
-                                                    className={`flex items-center p-2 transition-all duration-200 ${allowStepNavigation ? 'cursor-pointer' : 'cursor-default'
-                                                        }`}
-                                                    onClick={() => goToStep(step.id)}
-                                                >
-                                                    {/* Step Circle */}
-                                                    <div
-                                                        className={`flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-200 ${currentStep > step.id
-                                                            ? 'bg-green-500 border-green-500 text-white'
-                                                            : currentStep === step.id
-                                                                ? 'bg-primary text-white'
-                                                                : 'bg-white border-gray-200 text-gray-500'
-                                                            }`}
-                                                    >
-                                                        {currentStep > step.id ? (
-                                                            <Check size={18} />
-                                                        ) : (
-                                                            <span className="text-sm font-semibold">{step.id}</span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
+                {/* Right Content Area */}
+                <div className="flex-1 flex flex-col">
+                    {/* Content Header */}
+                    <div className="bg-gray-50 p-4 border-b border-gray-200">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-xl font-semibold text-gray-800">
+                                    {steps[currentStep]?.title}
+                                </h2>
                             </div>
-
-                            {/* Main Content Area */}
-                            <div className="flex-1 flex flex-col">
-                                {/* Step Content */}
-                                <div className="flex-1">
-                                    {children}
-                                </div>
-
-                                {/* Navigation Buttons */}
-                                <div className="p-4 bg-gray-50 border-t border-gray-200">
-                                    <div className="flex flex-col sm:flex-row justify-between gap-3">
-                                        <button
-                                            onClick={prevStep}
-                                            disabled={currentStep === 1}
-                                            className={`flex items-center justify-center px-4 py-1.5 rounded-md font-medium transition-colors cursor-pointer ${currentStep === 1
-                                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                                : 'bg-gray-600 text-white hover:bg-gray-700'
-                                                }`}
-                                        >
-                                            <ChevronLeft size={20} className="mr-1" />
-                                            {previousButtonText}
-                                        </button>
-
-                                        {currentStep === steps.length ? (
-                                            <button
-                                                onClick={handleComplete}
-                                                className="bg-green-600 text-white px-6 py-1.5 rounded-md hover:bg-green-700 transition-colors font-medium cursor-pointer"
-                                            >
-                                                {submitButtonText}
-                                            </button>
-                                        ) : (
-                                            <button
-                                                onClick={nextStep}
-                                                className="flex items-center justify-center bg-primary text-white px-4 py-1.5 rounded-md transition-colors font-medium cursor-pointer"
-                                            >
-                                                {nextButtonText}
-                                                <ChevronRight size={20} className="ml-1" />
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
+                            <div className="text-sm text-gray-500">
+                                Step {currentStep + 1} of {steps.length}
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Step Content */}
+                    <div className="flex-1 overflow-auto">
+                        {steps[currentStep]?.component}
+                    </div>
+
+                    {/* Footer Navigation */}
+                    <div className="bg-gray-50 px-4 py-3 border-t border-gray-200">
+                        <div className="flex items-center justify-between">
+                            {/* Previous Button */}
+                            <button
+                                onClick={prevStep}
+                                disabled={currentStep === 0}
+                                className={`flex items-center px-4 py-2 rounded-md font-medium text-sm transition-all duration-200 cursor-pointer ${currentStep === 0
+                                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-300'
+                                    }`}
+                            >
+                                <ChevronLeft size={16} className="mr-1" />
+                                Previous
+                            </button>
+
+                            {/* Next Button */}
+                            <button
+                                onClick={nextStep}
+                                disabled={currentStep === steps.length - 1 ? !isAllStepsValid() : !isCurrentStepValid()}
+                                className={`flex items-center px-4 py-2 rounded-md font-medium text-sm transition-all duration-200 cursor-pointer ${currentStep === steps.length - 1
+                                    ? isAllStepsValid()
+                                        ? 'bg-green-600 text-white hover:bg-green-700'
+                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : isCurrentStepValid()
+                                        ? 'bg-primary text-white hover:bg-primary/90'
+                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    }`}
+                            >
+                                {currentStep === steps.length - 1 ? 'Complete' : 'Next'}
+                                <ChevronRight size={16} className="ml-1" />
+                            </button>
                         </div>
                     </div>
                 </div>

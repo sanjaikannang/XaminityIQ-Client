@@ -1,13 +1,13 @@
 import { Field, Form, Formik, FormikHelpers } from "formik";
 import { BadgeInfo, Briefcase, Building2, Calendar, CalendarCheck2, CalendarDays, Flag, Globe, GraduationCap, HeartHandshake, Home, Hourglass, Landmark, Mail, Map, MapPin, Package, Percent, Phone, School, School2, Timer, User, UserCheck, VenusAndMars } from "lucide-react"
-import { createFacultyValidationSchema } from "../FormikSchema/create-faculty.schema";
-import { Gender, MaritalStatus } from "../../../Utils/enum";
+import { createFacultyValidationSchema } from "../../../../FormikSchema/create-faculty.schema";
+import { Gender, MaritalStatus } from "../../../../../../Utils/enum";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
-import { clearError, setError, setLoading } from "../../../State/Slices/adminSlice";
-import { CreateFacultyRequest } from "../../../Types/admin.types";
-import { createFaculty } from "../../../Services/Admin/adminAPI";
-import Spinner from "../../../Common/UI/Spinner";
+import { clearError, setError, setLoading } from "../../../../../../State/Slices/adminSlice";
+import { CreateFacultyRequest } from "../../../../../../Types/admin.types";
+import { createFaculty } from "../../../../../../Services/Admin/adminAPI";
+import Spinner from "../../../../../../Common/UI/Spinner";
 
 interface CreateFacultyFormValues {
     // Personal Information

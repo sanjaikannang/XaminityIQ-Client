@@ -1,9 +1,9 @@
 import toast from 'react-hot-toast';
 import { Field, Form, Formik } from 'formik';
-import Spinner from '../../../../../Common/UI/Spinner';
-import { createBatch } from '../../../../../Services/Admin/adminAPI';
-import { CreateBatchRequest } from '../../../../../Types/admin.types';
-import { createBatchSchema } from '../../../FormikSchema/create-batch.schema';
+import Spinner from '../../../../../../Common/UI/Spinner';
+import { createBatch } from '../../../../../../Services/Admin/adminAPI';
+import { CreateBatchRequest } from '../../../../../../Types/admin.types';
+import { createBatchSchema } from '../../../../FormikSchema/create-batch.schema';
 
 interface BatchFormProps {
     onSuccess: () => void;
