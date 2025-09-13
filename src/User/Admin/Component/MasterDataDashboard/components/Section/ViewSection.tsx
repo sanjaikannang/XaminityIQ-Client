@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { getAllSections } from '../../../../../Services/Admin/adminAPI';
+import { getAllSections } from '../../../../../../Services/Admin/adminAPI';
 
 interface Section {
     _id: string;

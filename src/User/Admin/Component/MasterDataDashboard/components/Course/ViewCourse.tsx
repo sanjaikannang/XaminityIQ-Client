@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { getAllCourses } from '../../../../../Services/Admin/adminAPI';
+import { getAllCourses } from '../../../../../../Services/Admin/adminAPI';
 
 interface Course {
     _id: string;

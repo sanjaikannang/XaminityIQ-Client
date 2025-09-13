@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { getAllBranches } from '../../../../../Services/Admin/adminAPI';
+import { getAllBranches } from '../../../../../../Services/Admin/adminAPI';
 
 interface Branch {
     _id: string;

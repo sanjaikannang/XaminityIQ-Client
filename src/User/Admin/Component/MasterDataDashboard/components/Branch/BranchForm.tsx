@@ -1,11 +1,11 @@
 import toast from 'react-hot-toast';
 import { useState, useEffect } from 'react';
 import { Field, Form, Formik } from 'formik';
-import Spinner from '../../../../../Common/UI/Spinner';
-import CommonSelect from '../../../../../Common/UI/CustomSelect';
-import { CreateBranchRequest } from '../../../../../Types/admin.types';
-import { createBranchSchema } from '../../../FormikSchema/create-branch.schema';
-import { createBranch, getAllCourses } from '../../../../../Services/Admin/adminAPI';
+import Spinner from '../../../../../../Common/UI/Spinner';
+import CommonSelect from '../../../../../../Common/UI/CustomSelect';
+import { CreateBranchRequest } from '../../../../../../Types/admin.types';
+import { createBranchSchema } from '../../../../FormikSchema/create-branch.schema';
+import { createBranch, getAllCourses } from '../../../../../../Services/Admin/adminAPI';
 
 interface BranchFormProps {
     onSuccess: () => void;
