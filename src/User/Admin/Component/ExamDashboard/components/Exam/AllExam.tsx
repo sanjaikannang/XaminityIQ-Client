@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FileText, Eye } from 'lucide-react';
-import { RootState } from '../../../State/store';
-import Table, { TableColumn, TableRow } from '../../../Common/UI/Table';
-import { getAllExam } from '../../../Services/Admin/adminAPI';
-import { setAllExams, setExamError, setExamLoading } from '../../../State/Slices/adminSlice';
-import { ExamResponse } from '../../../Types/admin.types';
+import { RootState } from '../../../../../../State/store';
+import Table, { TableColumn, TableRow } from '../../../../../../Common/UI/Table';
+import { getAllExam } from '../../../../../../Services/Admin/adminAPI';
+import { setAllExams, setExamError, setExamLoading } from '../../../../../../State/Slices/adminSlice';
+import { ExamResponse } from '../../../../../../Types/admin.types';
 
 
 const AllExam = () => {

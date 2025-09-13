@@ -1,13 +1,13 @@
 import { Field, Form, Formik, FormikHelpers } from "formik"
 import { BookOpen, Briefcase, Calendar, CalendarCheck, CalendarClock, CalendarRange, Flag, Globe, Hash, Home, Landmark, Layers, LayoutGrid, ListOrdered, Mail, Map, MapPin, Package, Phone, User, UserCheck, Users, VenusAndMars } from "lucide-react"
-import { createStudentValidationSchema } from "../FormikSchema/create-student.schema";
-import { Gender } from "../../../Utils/enum";
+import { createStudentValidationSchema } from "../../../../FormikSchema/create-student.schema";
 import { useDispatch } from "react-redux";
-import { CreateStudentRequest } from "../../../Types/admin.types";
+import { CreateStudentRequest } from "../../../../../../Types/admin.types";
 import toast from "react-hot-toast";
-import { clearError, setError, setLoading } from "../../../State/Slices/adminSlice";
-import { createStudent } from "../../../Services/Admin/adminAPI";
-import Spinner from "../../../Common/UI/Spinner";
+import { clearError, setError, setLoading } from "../../../../../../State/Slices/adminSlice";
+import { createStudent } from "../../../../../../Services/Admin/adminAPI";
+import Spinner from "../../../../../../Common/UI/Spinner";
+import { Gender } from "../../../../../../Utils/enum";
 
 interface CreateStudentFormValues {
     // Personal Information

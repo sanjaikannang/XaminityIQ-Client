@@ -1,12 +1,12 @@
 import toast from 'react-hot-toast';
 import { useState, useEffect } from 'react';
 import { Field, Form, Formik } from 'formik';
-import Spinner from '../../../../../Common/UI/Spinner';
-import { CourseType } from '../../../../../Utils/enum';
-import CommonSelect from '../../../../../Common/UI/CustomSelect';
-import { CreateCourseRequest } from '../../../../../Types/admin.types';
-import { createCourseSchema } from '../../../FormikSchema/create-course.schema';
-import { createCourse, getAllBatch } from '../../../../../Services/Admin/adminAPI';
+import Spinner from '../../../../../../Common/UI/Spinner';
+import { CourseType } from '../../../../../../Utils/enum';
+import CommonSelect from '../../../../../../Common/UI/CustomSelect';
+import { CreateCourseRequest } from '../../../../../../Types/admin.types';
+import { createCourseSchema } from '../../../../FormikSchema/create-course.schema';
+import { createCourse, getAllBatch } from '../../../../../../Services/Admin/adminAPI';
 
 
 interface CourseFormProps {

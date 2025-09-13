@@ -77,7 +77,7 @@ const ExamInfo = ({ onExamModeChange, onFormDataChange }: ExamInfoProps) => {
 
                         return (
                             <Form>
-                                <div className="p-4 border border-gray-300 rounded-md">
+                                <div className="">
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         {/* Exam Mode */}
                                         <div>
