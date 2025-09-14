@@ -152,7 +152,7 @@ const ExamStructure: React.FC<ExamStructureProps> = ({ onSectionsUpdate, onFormD
                                         type="button"
                                         onClick={handleAddSection}
                                         disabled={sections.length >= 5}
-                                        className={`px-6 py-1.5 rounded-md flex items-center space-x-2 font-medium ${sections.length >= 5
+                                        className={`px-6 py-1.5 rounded-md flex items-center space-x-2 font-medium mb-4 ${sections.length >= 5
                                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                             : 'bg-primary text-white cursor-pointer'
                                             }`}

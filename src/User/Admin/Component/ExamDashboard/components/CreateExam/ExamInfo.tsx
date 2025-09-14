@@ -205,7 +205,7 @@ const ExamInfo = ({ onExamModeChange, onFormDataChange }: ExamInfoProps) => {
                                                             }
                                                         }}
                                                         disabled={values.generalInstructions.length >= 10}
-                                                        className={`px-3 py-2 text-sm rounded-md cursor-pointer ${values.generalInstructions.length >= 10
+                                                        className={`p-2 text-xs rounded-md cursor-pointer ${values.generalInstructions.length >= 10
                                                             ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                                                             : 'bg-primary text-white hover:bg-primary/90'
                                                             }`}
@@ -239,7 +239,7 @@ const ExamInfo = ({ onExamModeChange, onFormDataChange }: ExamInfoProps) => {
 
                                                             <button
                                                                 type="button"
-                                                                className="p-2 bg-red-500 text-white rounded-sm hover:bg-red-600 cursor-pointer mt-0"
+                                                                className="py-3 px-2 text-red-500 cursor-pointer"
                                                                 onClick={() => remove(index)}
                                                             >
                                                                 <Trash2 size={16} />

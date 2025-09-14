@@ -68,7 +68,7 @@ const ExamSection: React.FC<SectionComponentProps> = ({
 
     return (
         <>
-            <div className="border border-gray-300 rounded-md">
+            <div className="border border-gray-300 rounded-md mb-4">
                 {/* Section Header */}
                 <div className="flex items-center justify-between p-4 bg-gray-50 border-b border-gray-300 rounded-t-md">
                     <div className="flex items-center space-x-2">
@@ -245,7 +245,7 @@ const ExamSection: React.FC<SectionComponentProps> = ({
                                     type="button"
                                     onClick={() => onAddInstruction(section.id)}
                                     disabled={section.instructions.length >= 10}
-                                    className={`px-3 py-1 text-sm rounded-md ${section.instructions.length >= 10
+                                    className={`px-3 py-1 text-xs rounded-md ${section.instructions.length >= 10
                                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                         : 'bg-primary text-white cursor-pointer'
                                         }`}
@@ -267,7 +267,7 @@ const ExamSection: React.FC<SectionComponentProps> = ({
                                     />
                                     <button
                                         type="button"
-                                        className="p-2 bg-red-500 text-white rounded-sm hover:bg-red-600 cursor-pointer"
+                                        className="py-3 px-2 text-red-500 cursor-pointer"
                                         onClick={() => onDeleteInstruction(section.id, index)}
                                     >
                                         <Trash2 size={16} />
