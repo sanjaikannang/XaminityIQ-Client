@@ -25,6 +25,7 @@ const StepForm: React.FC<StepFormProps> = ({
     steps,
     onStepChange,
     onComplete,
+    headerContent,
     className = "",
     sidebarWidth = "w-20",
     allowSkip = false,
@@ -131,8 +132,9 @@ const StepForm: React.FC<StepFormProps> = ({
                                     {steps[currentStep]?.title}
                                 </h2>
                             </div>
-                            <div className="text-sm text-gray-500">
-                                Step {currentStep + 1} of {steps.length}
+
+                            <div>
+                                {headerContent}
                             </div>
                         </div>
                     </div>

@@ -263,35 +263,28 @@ const CreateExam = () => {
         }
     ], [formValidation, currentExamMode, sections]);
 
-    // Header content for the step form
+    // Header actions (DRAFT / PUBLISH buttons)
     const headerContent = (
-        <div>
-            <h1 className="text-xl font-semibold text-gray-800 mb-1">Create Exam</h1>
-        </div>
-    );
-
-    // Footer actions (Save Draft / Publish buttons)
-    const footerActions = (
         <div className="flex items-center space-x-2">
             <button
                 className={`flex items-center px-3 py-1.5 transition-all duration-300 ease-in-out cursor-pointer ${status === 'DRAFT'
                     ? 'bg-gray-600 text-white shadow-md'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    } rounded-lg font-medium text-sm ${(!isAllFormsValid() || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''
+                    } rounded-md font-medium text-sm ${(!isAllFormsValid() || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                 onClick={() => handleExamSubmission(ExamStatus.DRAFT)}
                 disabled={!isAllFormsValid() || isSubmitting}
                 title={!isAllFormsValid() ? 'Please fill all required fields' : 'Save as draft'}
             >
                 <FilePen size={14} className="mr-1" />
-                {isSubmitting && status === ExamStatus.DRAFT ? 'Saving...' : 'Save Draft'}
+                {isSubmitting && status === ExamStatus.DRAFT ? 'Saving...' : 'Draft'}
             </button>
 
             <button
                 className={`flex items-center px-3 py-1.5 transition-all duration-300 ease-in-out cursor-pointer ${status === 'PUBLISH'
                     ? 'bg-green-600 text-white shadow-md'
                     : 'bg-primary text-white hover:bg-primary/90'
-                    } rounded-lg font-medium text-sm ${(!isAllFormsValid() || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''
+                    } rounded-md font-medium text-sm ${(!isAllFormsValid() || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                 onClick={() => handleExamSubmission(ExamStatus.PUBLISH)}
                 disabled={!isAllFormsValid() || isSubmitting}
@@ -309,7 +302,6 @@ const CreateExam = () => {
                 <StepForm
                     steps={steps}
                     headerContent={headerContent}
-                    footerActions={footerActions}
                     onStepChange={(stepIndex) => {
                         console.log('Step changed to:', stepIndex);
                     }}
