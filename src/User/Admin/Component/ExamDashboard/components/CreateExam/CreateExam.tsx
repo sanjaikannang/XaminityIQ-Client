@@ -192,6 +192,7 @@ const CreateExam = () => {
                 <ExamAssignment
                     examMode={currentExamMode}
                     onFormDataChange={handleTargetAudienceDataChange}
+                    initialData={targetAudienceData}
                 />
             )
         },
@@ -204,6 +205,7 @@ const CreateExam = () => {
                 <Schedule
                     examMode={currentExamMode}
                     onFormDataChange={handleScheduleDataChange}
+                    initialData={scheduleData}
                 />
             )
         },
@@ -231,7 +233,7 @@ const CreateExam = () => {
                 />
             )
         }
-    ], [formValidation, currentExamMode, sections]);
+    ], [formValidation, currentExamMode, sections, examInfoData, targetAudienceData, scheduleData]);
 
     // Header actions (DRAFT / PUBLISH buttons)
     const headerContent = (

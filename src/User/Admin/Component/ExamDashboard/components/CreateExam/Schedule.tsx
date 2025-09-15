@@ -6,6 +6,7 @@ import { useEffect } from "react";
 interface ExamScheduleProps {
     examMode: ExamMode;
     onFormDataChange?: (values: FormData, isValid: boolean) => void;
+    initialData?: FormData | null;
 }
 
 interface FormData {
@@ -22,9 +23,9 @@ interface FormData {
     afterExam: number | '';
 }
 
-const Schedule = ({ examMode, onFormDataChange }: ExamScheduleProps) => {
+const Schedule = ({ examMode, onFormDataChange, initialData }: ExamScheduleProps) => {
 
-    const initialValues: FormData = {
+    const initialValues: FormData = initialData || {
         examMode: examMode,
         examDate: '',
         startTime: '',
@@ -49,7 +50,6 @@ const Schedule = ({ examMode, onFormDataChange }: ExamScheduleProps) => {
     return (
         <>
             <div className="p-4 space-y-4">
-
                 <Formik
                     initialValues={initialValues}
                     validationSchema={scheduleSchema}
