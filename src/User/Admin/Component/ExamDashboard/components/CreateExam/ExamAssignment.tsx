@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import CommonSelect, { SelectOption } from "../../../../../../Common/UI/CustomSelect";
 import { ExamMode } from "../../../../../../Utils/enum";
 import {
@@ -59,10 +59,6 @@ const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignm
         faculties: false,
     });
 
-    // Track if this is the initial load to prevent clearing data
-    const isInitialLoad = useRef(true);
-    const prevValues = useRef<FormData | null>(null);
-
     const initialValues: FormData = initialData || {
         batchId: '',
         courseId: '',
@@ -78,19 +74,6 @@ const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignm
         if (examMode === ExamMode.PROCTORING) {
             fetchFaculties();
         }
-
-        // If we have initial data, fetch the dependent dropdowns
-        if (initialData) {
-            if (initialData.batchId) {
-                fetchCourses(initialData.batchId);
-            }
-            if (initialData.courseId) {
-                fetchBranches(initialData.courseId);
-            }
-            if (initialData.branchId) {
-                fetchSections(initialData.branchId);
-            }
-        }
     }, [examMode]);
 
     const handleSubmit = (values: FormData) => {
@@ -98,6 +81,7 @@ const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignm
     };
 
     const handleFormChange = (values: FormData, isValid: boolean) => {
+
         // Check if form is actually valid (has required data)
         const isFormActuallyValid = isValid &&
             values.batchId.trim() !== '' &&
@@ -111,6 +95,7 @@ const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignm
             onFormDataChange(values, isFormActuallyValid);
         }
     };
+
 
     // Get All Batch
     const fetchBatches = async () => {
@@ -131,6 +116,7 @@ const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignm
         }
     };
 
+
     // Get Course
     const fetchCourses = async (batchId: string) => {
         setLoadingStates(prev => ({ ...prev, courses: true }));
@@ -149,6 +135,7 @@ const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignm
             setLoadingStates(prev => ({ ...prev, courses: false }));
         }
     };
+
 
     // Get Branch
     const fetchBranches = async (courseId: string) => {
@@ -169,6 +156,7 @@ const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignm
         }
     };
 
+
     // Get Section
     const fetchSections = async (branchId: string) => {
         setLoadingStates(prev => ({ ...prev, sections: true }));
@@ -187,6 +175,7 @@ const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignm
             setLoadingStates(prev => ({ ...prev, sections: false }));
         }
     };
+
 
     // Get All Faculty
     const fetchFaculties = async () => {
@@ -237,65 +226,48 @@ const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignm
                             handleFormChange(values, isFormActuallyValid);
                         }, [values, isFormActuallyValid]);
 
-                        // Handle dependent dropdowns - only reset if user actually changed the value
+                        // Handle dependent dropdowns
                         useEffect(() => {
-                            if (values.batchId && prevValues.current?.batchId !== values.batchId) {
+                            if (values.batchId) {
                                 fetchCourses(values.batchId);
-
-                                // Only reset dependent fields if this is a user-initiated change
-                                if (!isInitialLoad.current) {
-                                    setFieldValue('courseId', '');
-                                    setFieldValue('branchId', '');
-                                    setFieldValue('sectionId', '');
-                                    setOptions(prev => ({
-                                        ...prev,
-                                        courses: [],
-                                        branches: [],
-                                        sections: []
-                                    }));
-                                }
+                                // Reset dependent fields
+                                setFieldValue('courseId', '');
+                                setFieldValue('branchId', '');
+                                setFieldValue('sectionId', '');
+                                setOptions(prev => ({
+                                    ...prev,
+                                    courses: [],
+                                    branches: [],
+                                    sections: []
+                                }));
                             }
-                            prevValues.current = values;
                         }, [values.batchId]);
 
                         useEffect(() => {
-                            if (values.courseId && prevValues.current?.courseId !== values.courseId) {
+                            if (values.courseId) {
                                 fetchBranches(values.courseId);
-
-                                // Only reset dependent fields if this is a user-initiated change
-                                if (!isInitialLoad.current) {
-                                    setFieldValue('branchId', '');
-                                    setFieldValue('sectionId', '');
-                                    setOptions(prev => ({
-                                        ...prev,
-                                        branches: [],
-                                        sections: []
-                                    }));
-                                }
+                                // Reset dependent fields
+                                setFieldValue('branchId', '');
+                                setFieldValue('sectionId', '');
+                                setOptions(prev => ({
+                                    ...prev,
+                                    branches: [],
+                                    sections: []
+                                }));
                             }
                         }, [values.courseId]);
 
                         useEffect(() => {
-                            if (values.branchId && prevValues.current?.branchId !== values.branchId) {
+                            if (values.branchId) {
                                 fetchSections(values.branchId);
-
-                                // Only reset dependent fields if this is a user-initiated change
-                                if (!isInitialLoad.current) {
-                                    setFieldValue('sectionId', '');
-                                    setOptions(prev => ({
-                                        ...prev,
-                                        sections: []
-                                    }));
-                                }
+                                // Reset dependent fields
+                                setFieldValue('sectionId', '');
+                                setOptions(prev => ({
+                                    ...prev,
+                                    sections: []
+                                }));
                             }
                         }, [values.branchId]);
-
-                        // Mark initial load as complete after first render
-                        useEffect(() => {
-                            if (isInitialLoad.current) {
-                                isInitialLoad.current = false;
-                            }
-                        }, []);
 
                         const handleSelectChange = (field: keyof FormData) => (value: string | number) => {
                             setFieldValue(field, value.toString());
