@@ -14,6 +14,7 @@ import { examAssignmentSchema } from "../../../../FormikSchema/create-exam.schem
 interface ExamAssignmentProps {
     examMode: ExamMode;
     onFormDataChange?: (values: FormData, isValid: boolean) => void;
+    initialData?: FormData | null;
 }
 
 interface FormData {
@@ -41,7 +42,7 @@ interface OptionsState {
     faculties: SelectOption[];
 }
 
-const ExamAssignment = ({ examMode, onFormDataChange }: ExamAssignmentProps) => {
+const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignmentProps) => {
     const [options, setOptions] = useState<OptionsState>({
         batches: [],
         courses: [],
@@ -58,7 +59,7 @@ const ExamAssignment = ({ examMode, onFormDataChange }: ExamAssignmentProps) => 
         faculties: false,
     });
 
-    const initialValues: FormData = {
+    const initialValues: FormData = initialData || {
         batchId: '',
         courseId: '',
         branchId: '',
@@ -201,7 +202,6 @@ const ExamAssignment = ({ examMode, onFormDataChange }: ExamAssignmentProps) => 
     return (
         <>
             <div className="p-4 space-y-4">
-
                 <Formik
                     initialValues={initialValues}
                     validationSchema={examAssignmentSchema}
@@ -277,7 +277,6 @@ const ExamAssignment = ({ examMode, onFormDataChange }: ExamAssignmentProps) => 
                             <Form>
                                 <div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-
                                         {/* Batch Selection */}
                                         <CommonSelect
                                             id="batchId"
@@ -342,7 +341,6 @@ const ExamAssignment = ({ examMode, onFormDataChange }: ExamAssignmentProps) => 
                                                 error={touched.facultyId && errors.facultyId ? errors.facultyId : undefined}
                                             />
                                         )}
-
                                     </div>
                                 </div>
                             </Form>

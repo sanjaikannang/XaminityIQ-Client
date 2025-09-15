@@ -1,18 +1,6 @@
 import { FormikErrors, FormikTouched } from 'formik';
 import { Trash2, ChevronDown, ChevronUp } from 'lucide-react';
-
-interface Section {
-    id: string;
-    name: string;
-    order: string;
-    marks: string;
-    questionType: string;
-    totalQuestions: string;
-    timeLimit: string;
-    isOptional: boolean;
-    instructions: string[];
-    isExpanded: boolean;
-}
+import { Section } from '../../../../../../Types/Exam/exam.types';
 
 interface FormData {
     sections: Section[];
