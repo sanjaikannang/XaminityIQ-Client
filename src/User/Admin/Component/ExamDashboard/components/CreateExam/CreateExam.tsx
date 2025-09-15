@@ -9,38 +9,7 @@ import ExamAssignment from './ExamAssignment';
 import Schedule from './Schedule';
 import ExamStructure from './ExamStructure';
 import Questions from './Questions';
-
-interface Section {
-    id: string;
-    name: string;
-    order: string;
-    marks: string;
-    questionType: string;
-    totalQuestions: string;
-    timeLimit: string;
-    isOptional: boolean;
-    instructions: string[];
-    isExpanded: boolean;
-}
-
-interface ExamInfoFormData {
-    examMode: ExamMode;
-    examTitle: string;
-    subject: string;
-    totalMarks: number | '';
-    passingMarks: number | '';
-    duration: number | '';
-    examDescription: string;
-    generalInstructions: string[];
-}
-
-interface FormValidationState {
-    examInfo: boolean;
-    targetAudience: boolean;
-    schedule: boolean;
-    examStructure: boolean;
-    questions: boolean;
-}
+import { ExamInfoFormData, FormValidationState, Section } from '../../../../../../Types/Exam/exam.types';
 
 const CreateExam = () => {
     const [status, setStatus] = useState(ExamStatus.DRAFT);
@@ -210,6 +179,7 @@ const CreateExam = () => {
                 <ExamInfo
                     onExamModeChange={handleExamModeChange}
                     onFormDataChange={handleExamInfoDataChange}
+                    initialData={examInfoData}
                 />
             )
         },
@@ -311,7 +281,7 @@ const CreateExam = () => {
                     }}
                     className="h-full"
                     sidebarWidth="w-12 md:w-16"
-                    allowSkip={true}
+                    allowSkip={false}
                     showValidationIndicator={true}
                 />
             </div>

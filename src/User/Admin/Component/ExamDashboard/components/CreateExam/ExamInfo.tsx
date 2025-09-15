@@ -7,6 +7,7 @@ import { examInfoSchema } from '../../../../FormikSchema/create-exam.schema';
 interface ExamInfoProps {
     onExamModeChange: (mode: ExamMode) => void;
     onFormDataChange: (values: FormValues, isValid: boolean) => void;
+    initialData?: FormValues | null;
 }
 
 interface FormValues {
@@ -20,14 +21,15 @@ interface FormValues {
     generalInstructions: string[];
 }
 
-const ExamInfo = ({ onExamModeChange, onFormDataChange }: ExamInfoProps) => {
-    const [examMode, setExamMode] = useState<ExamMode>(ExamMode.AUTO);
+const ExamInfo = ({ onExamModeChange, onFormDataChange, initialData }: ExamInfoProps) => {
+    const [examMode, setExamMode] = useState<ExamMode>(initialData?.examMode || ExamMode.AUTO);
 
     useEffect(() => {
         onExamModeChange(examMode);
     }, [examMode, onExamModeChange]);
 
-    const initialValues: FormValues = {
+    // Use stored data if available, otherwise use defaults
+    const initialValues: FormValues = initialData || {
         examMode: ExamMode.AUTO,
         examTitle: '',
         subject: '',
@@ -74,6 +76,13 @@ const ExamInfo = ({ onExamModeChange, onFormDataChange }: ExamInfoProps) => {
                         useEffect(() => {
                             handleFormChange(values, isFormActuallyValid);
                         }, [values, isFormActuallyValid]);
+
+                        // Update exam mode when form values change
+                        useEffect(() => {
+                            if (values.examMode !== examMode) {
+                                setExamMode(values.examMode);
+                            }
+                        }, [values.examMode]);
 
                         return (
                             <Form>
