@@ -1,15 +1,17 @@
-import { useState, useMemo } from 'react';
-import { FilePen, Upload } from 'lucide-react';
+import ExamInfo from './ExamInfo';
+import Schedule from './Schedule';
+import Questions from './Questions';
 import toast from 'react-hot-toast';
+import { useState, useMemo } from 'react';
+import ExamStructure from './ExamStructure';
+import ExamAssignment from './ExamAssignment';
+import { FilePen, Upload } from 'lucide-react';
+import Spinner from '../../../../../../Common/UI/Spinner';
 import { ExamMode, ExamStatus } from '../../../../../../Utils/enum';
 import { createExam } from '../../../../../../Services/Admin/adminAPI';
 import StepForm, { StepConfig } from '../../../../../../Common/UI/StepForm';
-import ExamInfo from './ExamInfo';
-import ExamAssignment from './ExamAssignment';
-import Schedule from './Schedule';
-import ExamStructure from './ExamStructure';
-import Questions from './Questions';
 import { ExamInfoFormData, FormValidationState, Section } from '../../../../../../Types/Exam/exam.types';
+
 
 const CreateExam = () => {
     const [status, setStatus] = useState(ExamStatus.DRAFT);
@@ -237,33 +239,33 @@ const CreateExam = () => {
 
     // Header actions (DRAFT / PUBLISH buttons)
     const headerContent = (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center">
             <button
                 className={`flex items-center px-3 py-1.5 transition-all duration-300 ease-in-out cursor-pointer ${status === 'DRAFT'
                     ? 'bg-gray-600 text-white shadow-md'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    } rounded-md font-medium text-sm ${(!isAllFormsValid() || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''
+                    } rounded-l-full font-medium text-sm ${(!isAllFormsValid() || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                 onClick={() => handleExamSubmission(ExamStatus.DRAFT)}
                 disabled={!isAllFormsValid() || isSubmitting}
                 title={!isAllFormsValid() ? 'Please fill all required fields' : 'Save as draft'}
             >
-                <FilePen size={14} className="mr-1" />
-                {isSubmitting && status === ExamStatus.DRAFT ? 'Saving...' : 'Draft'}
+                <FilePen size={14} />
+                {isSubmitting && status === ExamStatus.DRAFT ? <Spinner /> : ''}
             </button>
 
             <button
                 className={`flex items-center px-3 py-1.5 transition-all duration-300 ease-in-out cursor-pointer ${status === 'PUBLISH'
                     ? 'bg-green-600 text-white shadow-md'
                     : 'bg-primary text-white hover:bg-primary/90'
-                    } rounded-md font-medium text-sm ${(!isAllFormsValid() || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''
+                    } rounded-r-full font-medium text-sm ${(!isAllFormsValid() || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                 onClick={() => handleExamSubmission(ExamStatus.PUBLISH)}
                 disabled={!isAllFormsValid() || isSubmitting}
                 title={!isAllFormsValid() ? 'Please fill all required fields' : 'Publish exam'}
             >
-                <Upload size={14} className="mr-1" />
-                {isSubmitting && status === ExamStatus.PUBLISH ? 'Publishing...' : 'Publish'}
+                <Upload size={14} />
+                {isSubmitting && status === ExamStatus.PUBLISH ? <Spinner /> : ''}
             </button>
         </div>
     );
