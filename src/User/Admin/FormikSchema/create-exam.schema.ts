@@ -1,14 +1,5 @@
 import * as Yup from 'yup';
-import { ExamMode, ExamStatus } from '../../../Utils/enum';
-
-export const formSchema = Yup.object({
-
-    examStatus: Yup.string()
-        .oneOf(Object.values(ExamStatus), 'Invalid exam status')
-        .required('Exam status is required'),
-
-})
-
+import { ExamMode } from '../../../Utils/enum';
 
 export const examInfoSchema = Yup.object({
 

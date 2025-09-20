@@ -1,4 +1,4 @@
-import { ExamMode, ExamStatus, Gender, MaritalStatus } from "../Utils/enum";
+import { ExamMode, Gender, MaritalStatus } from "../Utils/enum";
 
 export interface Address {
     street?: string;
@@ -317,7 +317,6 @@ export interface ExamResponse {
     duration: number;
     examMode: string;
     generalInstructions: string[];
-    examStatus: string;
 
     // Target Audience
     batchId: string;
@@ -442,7 +441,6 @@ export interface CreateExamSection {
 }
 
 export interface CreateExamRequest {
-    examStatus: ExamStatus;
     examTitle: string;
     examDescription?: string;
     subject: string;
@@ -463,7 +461,6 @@ export interface CreateExamRequest {
 export interface ExamData {
     examId: string;
     examTitle: string;
-    examStatus: string;
     totalMarks: number;
     duration: number;
 }

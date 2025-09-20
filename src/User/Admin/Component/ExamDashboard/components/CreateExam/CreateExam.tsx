@@ -5,16 +5,13 @@ import toast from 'react-hot-toast';
 import { useState, useMemo } from 'react';
 import ExamStructure from './ExamStructure';
 import ExamAssignment from './ExamAssignment';
-import { FilePen, Upload } from 'lucide-react';
-import Spinner from '../../../../../../Common/UI/Spinner';
-import { ExamMode, ExamStatus } from '../../../../../../Utils/enum';
+import { ExamMode } from '../../../../../../Utils/enum';
 import { createExam } from '../../../../../../Services/Admin/adminAPI';
 import StepForm, { StepConfig } from '../../../../../../Common/UI/StepForm';
 import { ExamInfoFormData, FormValidationState, Section } from '../../../../../../Types/Exam/exam.types';
 
 
 const CreateExam = () => {
-    const [status, setStatus] = useState(ExamStatus.DRAFT);
     const [currentExamMode, setCurrentExamMode] = useState<ExamMode>(ExamMode.AUTO);
     const [sections, setSections] = useState<Section[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -82,13 +79,12 @@ const CreateExam = () => {
     };
 
     // Format exam data based on exam mode
-    const formatExamData = (examStatus: ExamStatus) => {
+    const formatExamData = () => {
         if (!examInfoData || !targetAudienceData || !scheduleData || !examStructureData || !questionsData) {
             throw new Error('Missing required form data');
         }
 
         const baseExamData = {
-            examStatus: examStatus,
             examTitle: examInfoData.examTitle,
             examDescription: examInfoData.examDescription,
             subject: examInfoData.subject,
@@ -136,7 +132,7 @@ const CreateExam = () => {
     };
 
     // Handle exam submission
-    const handleExamSubmission = async (examStatus: ExamStatus) => {
+    const handleExamSubmission = async () => {
         if (!isAllFormsValid()) {
             toast.error('Please fill all required fields correctly before submitting.');
             return;
@@ -145,7 +141,7 @@ const CreateExam = () => {
         setIsSubmitting(true);
 
         try {
-            const formattedExamData = formatExamData(examStatus);
+            const formattedExamData = formatExamData();
             console.log("Formatted Exam Data...", formattedExamData);
 
             // Call the API
@@ -153,18 +149,8 @@ const CreateExam = () => {
 
             console.log("API Response:", response);
 
-            // Update status on successful submission
-            setStatus(examStatus);
-
-            // Show success message
-            const actionText = examStatus === ExamStatus.DRAFT ? 'saved as draft' : 'published';
-            toast.success(`Exam ${actionText} successfully!`);
-
         } catch (error) {
             console.error('Error submitting exam:', error);
-
-            const actionText = examStatus === ExamStatus.DRAFT ? 'saving' : 'publishing';
-            toast.error(`Error ${actionText} exam. Please try again.`);
         } finally {
             setIsSubmitting(false);
         }
@@ -237,45 +223,11 @@ const CreateExam = () => {
         }
     ], [formValidation, currentExamMode, sections, examInfoData, targetAudienceData, scheduleData]);
 
-    // Header actions (DRAFT / PUBLISH buttons)
-    const headerContent = (
-        <div className="flex items-center">
-            <button
-                className={`flex items-center px-3 py-1.5 transition-all duration-300 ease-in-out cursor-pointer ${status === 'DRAFT'
-                    ? 'bg-gray-600 text-white shadow-md'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    } rounded-l-full font-medium text-sm ${(!isAllFormsValid() || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                onClick={() => handleExamSubmission(ExamStatus.DRAFT)}
-                disabled={!isAllFormsValid() || isSubmitting}
-                title={!isAllFormsValid() ? 'Please fill all required fields' : 'Save as draft'}
-            >
-                <FilePen size={14} />
-                {isSubmitting && status === ExamStatus.DRAFT ? <Spinner /> : ''}
-            </button>
-
-            <button
-                className={`flex items-center px-3 py-1.5 transition-all duration-300 ease-in-out cursor-pointer ${status === 'PUBLISH'
-                    ? 'bg-green-600 text-white shadow-md'
-                    : 'bg-primary text-white hover:bg-primary/90'
-                    } rounded-r-full font-medium text-sm ${(!isAllFormsValid() || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                onClick={() => handleExamSubmission(ExamStatus.PUBLISH)}
-                disabled={!isAllFormsValid() || isSubmitting}
-                title={!isAllFormsValid() ? 'Please fill all required fields' : 'Publish exam'}
-            >
-                <Upload size={14} />
-                {isSubmitting && status === ExamStatus.PUBLISH ? <Spinner /> : ''}
-            </button>
-        </div>
-    );
-
     return (
         <div className="p-4 h-screen">
             <div className="h-full max-w-full mx-auto">
                 <StepForm
                     steps={steps}
-                    headerContent={headerContent}
                     onStepChange={(stepIndex) => {
                         console.log('Step changed to:', stepIndex);
                     }}
