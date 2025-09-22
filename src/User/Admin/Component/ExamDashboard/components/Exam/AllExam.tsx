@@ -42,11 +42,6 @@ const AllExam = () => {
             width: '100px'
         },
         {
-            key: 'examStatus',
-            label: 'Status',
-            width: '100px'
-        },
-        {
             key: 'totalMarks',
             label: 'Total Marks',
             width: '120px',
@@ -132,7 +127,6 @@ const AllExam = () => {
         examTitle: exam.examTitle,
         subject: exam.subject,
         examMode: exam.examMode,
-        examStatus: exam.examStatus,
         totalMarks: exam.totalMarks,
         passingMarks: exam.passingMarks,
         duration: exam.duration,
@@ -166,13 +160,6 @@ const AllExam = () => {
                 );
 
             case 'examMode':
-                return (
-                    <div className="flex items-center gap-2">
-                        <span>{value}</span>
-                    </div>
-                )
-
-            case 'examStatus':
                 return (
                     <div className="flex items-center gap-2">
                         <span>{value}</span>
