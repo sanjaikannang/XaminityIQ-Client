@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
-import CommonSelect, { SelectOption } from "../../../../../../Common/UI/CustomSelect";
+import { useState } from "react";
+import { Form, Formik } from "formik";
 import { ExamMode } from "../../../../../../Utils/enum";
+import { examAssignmentSchema } from "../../../../FormikSchema/create-exam.schema";
+import CommonSelect, { SelectOption } from "../../../../../../Common/UI/CustomSelect";
 import {
     getAllBatch,
     getCoursesByBatch,
@@ -8,8 +10,6 @@ import {
     getSectionsByBranch,
     getAllFaculty,
 } from "../../../../../../Services/Admin/adminAPI";
-import { Form, Formik } from "formik";
-import { examAssignmentSchema } from "../../../../FormikSchema/create-exam.schema";
 
 interface ExamAssignmentProps {
     examMode: ExamMode;
@@ -42,7 +42,7 @@ interface OptionsState {
     faculties: SelectOption[];
 }
 
-const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignmentProps) => {
+const ExamAssignment = ({ examMode, initialData }: ExamAssignmentProps) => {
     const [options, setOptions] = useState<OptionsState>({
         batches: [],
         courses: [],
@@ -68,35 +68,6 @@ const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignm
         examMode: examMode,
     };
 
-    // Fetch batches and faculties on component mount
-    useEffect(() => {
-        fetchBatches();
-        if (examMode === ExamMode.PROCTORING) {
-            fetchFaculties();
-        }
-    }, [examMode]);
-
-    const handleSubmit = (values: FormData) => {
-        console.log('Form values:', values);
-    };
-
-    const handleFormChange = (values: FormData, isValid: boolean) => {
-
-        // Check if form is actually valid (has required data)
-        const isFormActuallyValid = isValid &&
-            values.batchId.trim() !== '' &&
-            values.courseId.trim() !== '' &&
-            values.branchId.trim() !== '' &&
-            values.sectionId.trim() !== '' &&
-            (examMode === ExamMode.PROCTORING ? values.facultyId.trim() !== '' : true);
-
-        // Send form data to parent component
-        if (onFormDataChange) {
-            onFormDataChange(values, isFormActuallyValid);
-        }
-    };
-
-
     // Get All Batch
     const fetchBatches = async () => {
         setLoadingStates(prev => ({ ...prev, batches: true }));
@@ -115,7 +86,6 @@ const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignm
             setLoadingStates(prev => ({ ...prev, batches: false }));
         }
     };
-
 
     // Get Course
     const fetchCourses = async (batchId: string) => {
@@ -136,7 +106,6 @@ const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignm
         }
     };
 
-
     // Get Branch
     const fetchBranches = async (courseId: string) => {
         setLoadingStates(prev => ({ ...prev, branches: true }));
@@ -156,7 +125,6 @@ const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignm
         }
     };
 
-
     // Get Section
     const fetchSections = async (branchId: string) => {
         setLoadingStates(prev => ({ ...prev, sections: true }));
@@ -175,7 +143,6 @@ const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignm
             setLoadingStates(prev => ({ ...prev, sections: false }));
         }
     };
-
 
     // Get All Faculty
     const fetchFaculties = async () => {
@@ -205,74 +172,12 @@ const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignm
                 <Formik
                     initialValues={initialValues}
                     validationSchema={examAssignmentSchema}
-                    onSubmit={handleSubmit}
                     validateOnChange={true}
                     validateOnBlur={true}
                     validateOnMount={true}
                     enableReinitialize={true}
                 >
-                    {({ values, setFieldValue, isValid, errors, touched }) => {
-
-                        // Check if form is actually valid (has required data)
-                        const isFormActuallyValid = isValid &&
-                            values.batchId.trim() !== '' &&
-                            values.courseId.trim() !== '' &&
-                            values.branchId.trim() !== '' &&
-                            values.sectionId.trim() !== '' &&
-                            (examMode === ExamMode.PROCTORING ? values.facultyId.trim() !== '' : true);
-
-                        // Send form data to parent whenever values change
-                        useEffect(() => {
-                            handleFormChange(values, isFormActuallyValid);
-                        }, [values, isFormActuallyValid]);
-
-                        // Handle dependent dropdowns
-                        useEffect(() => {
-                            if (values.batchId) {
-                                fetchCourses(values.batchId);
-                                // Reset dependent fields
-                                setFieldValue('courseId', '');
-                                setFieldValue('branchId', '');
-                                setFieldValue('sectionId', '');
-                                setOptions(prev => ({
-                                    ...prev,
-                                    courses: [],
-                                    branches: [],
-                                    sections: []
-                                }));
-                            }
-                        }, [values.batchId]);
-
-                        useEffect(() => {
-                            if (values.courseId) {
-                                fetchBranches(values.courseId);
-                                // Reset dependent fields
-                                setFieldValue('branchId', '');
-                                setFieldValue('sectionId', '');
-                                setOptions(prev => ({
-                                    ...prev,
-                                    branches: [],
-                                    sections: []
-                                }));
-                            }
-                        }, [values.courseId]);
-
-                        useEffect(() => {
-                            if (values.branchId) {
-                                fetchSections(values.branchId);
-                                // Reset dependent fields
-                                setFieldValue('sectionId', '');
-                                setOptions(prev => ({
-                                    ...prev,
-                                    sections: []
-                                }));
-                            }
-                        }, [values.branchId]);
-
-                        const handleSelectChange = (field: keyof FormData) => (value: string | number) => {
-                            setFieldValue(field, value.toString());
-                        };
-
+                    {({ values, errors, touched }) => {
                         return (
                             <Form>
                                 <div>
@@ -283,7 +188,7 @@ const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignm
                                             label="Batch"
                                             options={options.batches}
                                             value={values.batchId}
-                                            onChange={handleSelectChange('batchId')}
+                                            onChange={ }
                                             required
                                             loading={loadingStates.batches}
                                             error={touched.batchId && errors.batchId ? errors.batchId : undefined}
@@ -295,7 +200,7 @@ const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignm
                                             label="Course"
                                             options={options.courses}
                                             value={values.courseId}
-                                            onChange={handleSelectChange('courseId')}
+                                            onChange={ }
                                             required
                                             loading={loadingStates.courses}
                                             error={touched.courseId && errors.courseId ? errors.courseId : undefined}
@@ -308,7 +213,7 @@ const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignm
                                             label="Branch"
                                             options={options.branches}
                                             value={values.branchId}
-                                            onChange={handleSelectChange('branchId')}
+                                            onChange={ }
                                             required
                                             loading={loadingStates.branches}
                                             error={touched.branchId && errors.branchId ? errors.branchId : undefined}
@@ -321,7 +226,7 @@ const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignm
                                             label="Section"
                                             options={options.sections}
                                             value={values.sectionId}
-                                            onChange={handleSelectChange('sectionId')}
+                                            onChange={ }
                                             required
                                             loading={loadingStates.sections}
                                             error={touched.sectionId && errors.sectionId ? errors.sectionId : undefined}
@@ -335,7 +240,7 @@ const ExamAssignment = ({ examMode, onFormDataChange, initialData }: ExamAssignm
                                                 label="Faculty"
                                                 options={options.faculties}
                                                 value={values.facultyId}
-                                                onChange={handleSelectChange('facultyId')}
+                                                onChange={ }
                                                 required
                                                 loading={loadingStates.faculties}
                                                 error={touched.facultyId && errors.facultyId ? errors.facultyId : undefined}
