@@ -57,11 +57,7 @@ const CreateExam = () => {
             description: 'Select batches, courses, and sections',
             isValid: targetAudienceValid,
             component: (
-                <ExamAssignment
-                    examMode={currentExamMode}
-                    onFormDataChange={handleTargetAudienceDataChange}
-                    initialData={targetAudienceData}
-                />
+                <ExamAssignment />
             )
         },
         {
