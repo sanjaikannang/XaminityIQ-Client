@@ -1,7 +1,6 @@
 import { JSX, SetStateAction, useState } from "react";
 import { docs } from "./docs/docs";
 import {
-    Book,
     Code,
     Users,
     Lock,
@@ -21,119 +20,7 @@ import {
     Circle,
     LucideIcon,
 } from "lucide-react";
-
-// ─────────────────────────────────────────────
-// TYPES
-// ─────────────────────────────────────────────
-
-interface ProjectInfo {
-    name: string;
-    version: string;
-    lastUpdated: string;
-    description: string;
-}
-
-interface TechStack {
-    frontend: string[];
-    backend: string[];
-    authentication: string[];
-}
-
-interface OverviewSection {
-    title: string;
-    description: string;
-    techStack: TechStack;
-    features: string[];
-}
-
-interface ArchitectureLayer {
-    name: string;
-    description: string;
-    components: string[];
-}
-
-interface Architecture {
-    title: string;
-    type: string;
-    layers: ArchitectureLayer[];
-}
-
-interface FileNode {
-    name: string;
-    type: "file" | "directory";
-    description?: string;
-    children?: FileNode[];
-    files?: string[];
-}
-
-interface FileStructure {
-    backend: {
-        root: string;
-        structure: FileNode[];
-    };
-    frontend: {
-        root: string;
-        structure: FileNode[];
-    };
-}
-
-interface RoleInfo {
-    name: string;
-    key: string;
-    description: string;
-    permissions: string[];
-    accessibleModules?: string[];
-}
-
-interface ErrorResponse {
-    status: number;
-    body: Record<string, any>;
-}
-
-interface EndpointResponse {
-    status: number;
-    body: Record<string, any>;
-    headers?: Record<string, string>;
-}
-
-interface Endpoint {
-    method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-    path: string;
-    description: string;
-    accessRoles: string[];
-    requestBody?: Record<string, any> | null;
-    queryParams?: Record<string, string>;
-    pathParams?: Record<string, string>;
-    requestCookies?: Record<string, string>;
-    responseSuccess: EndpointResponse;
-    responseError?: ErrorResponse[];
-}
-
-interface ApiModule {
-    id: string;
-    name: string;
-    description: string;
-    icon: string;
-    endpoints: Endpoint[];
-    flowDiagram?: string;
-    sequenceDiagram?: string;
-}
-
-interface ErrorCode {
-    code: number;
-    name: string;
-    description: string;
-}
-
-interface DocumentationData {
-    project: ProjectInfo;
-    overview: OverviewSection;
-    architecture: Architecture;
-    fileStructure: FileStructure;
-    roles: RoleInfo[];
-    apiModules: ApiModule[];
-    errorCodes: ErrorCode[];
-}
+import { ApiModule, DocumentationData, FileNode } from "./types";
 
 type SectionType =
     | "overview"
@@ -143,7 +30,7 @@ type SectionType =
     | "apis"
     | "error-codes";
 
-interface MenuItem {
+export interface MenuItem {
     id: SectionType;
     label: string;
     icon: LucideIcon;
@@ -490,8 +377,8 @@ const Documentation = () => {
                                     <button
                                         onClick={() => setSelectedModule(module)}
                                         className={`w-full text-left p-3 rounded-lg transition-colors ${selectedModule?.id === module.id
-                                                ? "bg-blue-50 text-blue-700 font-medium"
-                                                : "hover:bg-slate-50 text-slate-700"
+                                            ? "bg-blue-50 text-blue-700 font-medium"
+                                            : "hover:bg-slate-50 text-slate-700"
                                             }`}
                                     >
                                         <div className="flex items-center gap-3">
@@ -829,61 +716,59 @@ const Documentation = () => {
     };
 
     return (
-        <div className="flex h-screen bg-slate-50">
-            {/* Sidebar */}
-            <div className="w-64 bg-white border-r border-slate-200 flex flex-col">
-                <div className="p-6 border-b border-slate-200">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-                            <Book className="w-6 h-6 text-white" />
+        <>
+            <div className="flex h-screen bg-whiteColor">
+                {/* Sidebar */}
+                <div className="w-56 bg-whiteColor flex flex-col shadow-2xl">
+                    <div className="p-6 border-b border-lightGrayColor">
+                        <div className="flex items-center justify-center gap-3">
+                            <div>
+                                <h1 className="text-xl font-bold text-slate-900">XaminityIQ</h1>
+                            </div>
                         </div>
-                        <div>
-                            <h1 className="text-xl font-bold text-slate-900">Documentation</h1>
-                            <p className="text-xs text-slate-500">v{docData.project.version}</p>
+                    </div>
+
+                    <nav className="flex-1 overflow-y-auto p-2">
+                        <div className="space-y-1">
+                            {(
+                                [
+                                    { id: "overview", label: "Overview", icon: Grid },
+                                    { id: "architecture", label: "Architecture", icon: Layers },
+                                    { id: "file-structure", label: "File Structure", icon: Folder },
+                                    { id: "roles", label: "User Roles", icon: Users },
+                                    { id: "apis", label: "API Reference", icon: Code },
+                                    { id: "error-codes", label: "Error Codes", icon: AlertCircle },
+                                ] as MenuItem[]
+                            ).map((item) => {
+                                const Icon = item.icon;
+                                return (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => setActiveSection(item.id)}
+                                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all cursor-pointer ${activeSection === item.id
+                                            ? "bg-tertiary text-primary font-medium"
+                                            : "text-slate-700 hover:bg-lightGrayColor"
+                                            }`}
+                                    >
+                                        <Icon className="w-5 h-5" />
+                                        <span>{item.label}</span>
+                                    </button>
+                                );
+                            })}
                         </div>
+                    </nav>
+
+                    <div className="p-4 border-t border-slate-200 text-xs text-slate-500 text-center">
+                        Version: 1.1.1
                     </div>
                 </div>
 
-                <nav className="flex-1 overflow-y-auto p-4">
-                    <div className="space-y-1">
-                        {(
-                            [
-                                { id: "overview", label: "Overview", icon: Grid },
-                                { id: "architecture", label: "Architecture", icon: Layers },
-                                { id: "file-structure", label: "File Structure", icon: Folder },
-                                { id: "roles", label: "User Roles", icon: Users },
-                                { id: "apis", label: "API Reference", icon: Code },
-                                { id: "error-codes", label: "Error Codes", icon: AlertCircle },
-                            ] as MenuItem[]
-                        ).map((item) => {
-                            const Icon = item.icon;
-                            return (
-                                <button
-                                    key={item.id}
-                                    onClick={() => setActiveSection(item.id)}
-                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeSection === item.id
-                                            ? "bg-blue-50 text-blue-700 font-medium"
-                                            : "text-slate-700 hover:bg-slate-100"
-                                        }`}
-                                >
-                                    <Icon className="w-5 h-5" />
-                                    <span>{item.label}</span>
-                                </button>
-                            );
-                        })}
-                    </div>
-                </nav>
-
-                <div className="p-4 border-t border-slate-200 text-xs text-slate-500 text-center">
-                    Last updated: {docData.project.lastUpdated}
+                {/* Main Content */}
+                <div className="flex-1 overflow-y-auto">
+                    <div className="w-full mx-auto p-8">{renderContent()}</div>
                 </div>
             </div>
-
-            {/* Main Content */}
-            <div className="flex-1 overflow-y-auto">
-                <div className="w-full mx-auto p-8">{renderContent()}</div>
-            </div>
-        </div>
+        </>
     );
 };
 
