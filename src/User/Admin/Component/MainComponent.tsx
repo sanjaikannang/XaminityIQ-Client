@@ -1,20 +1,11 @@
 import { Route, Routes } from 'react-router-dom';
 import StudentDashboard from '../Dashboard/StudentDashboard';
 import FacultyDashboard from '../Dashboard/FacultyDashboard';
-import ExamDashboard from '../Dashboard/ExamDashboard';
-import MasterDataDashboard from '../Dashboard/MasterDataDashboard';
 import AdminDashboard from '../Dashboard/AdminDashboard';
 import CreateStudent from './StudentDashboard/components/CreateStudent/CreateStudent';
 import StudentDetail from './StudentDashboard/components/StudentDetail/StudentDetail';
 import CreateFaculty from './FacultyDashboard/components/CreateFaculty/CreateFaculty';
 import FacultyDetail from './FacultyDashboard/components/FacultyDetail/FacultyDetail';
-import CreateExam from './ExamDashboard/components/CreateExam/CreateExam';
-import Exam from './ExamDashboard/components/ExamUI/Exam';
-import ViewBatch from './MasterDataDashboard/components/Batch/ViewBatch';
-import ViewCourse from './MasterDataDashboard/components/Course/ViewCourse';
-import ViewBranch from './MasterDataDashboard/components/Branch/ViewBranch';
-import ViewSection from './MasterDataDashboard/components/Section/ViewSection';
-import AllExam from './ExamDashboard/components/Exam/AllExam';
 
 const MainComponent = () => {
 
@@ -34,20 +25,6 @@ const MainComponent = () => {
                         <Route path="faculty" element={<FacultyDashboard />} />
                         <Route path="faculty/create-faculty" element={<CreateFaculty />} />
                         <Route path="faculty/:id" element={<FacultyDetail />} />
-
-                        {/* Exam Screens */}
-                        <Route path="exam" element={<ExamDashboard />} />
-                        <Route path="exam/all-exam" element={<AllExam />} />
-                        <Route path="exam/create-exam" element={<CreateExam />} />
-                        <Route path="exam/exam-ui" element={<Exam />} />
-
-                        {/* MasterData Screens */}
-                        <Route path="data" element={<MasterDataDashboard />} />
-                        <Route path="data/view-batch" element={<ViewBatch />} />
-                        <Route path="data/view-course" element={<ViewCourse />} />
-                        <Route path="data/view-branch" element={<ViewBranch />} />
-                        <Route path="data/view-section" element={<ViewSection />} />
-
                     </Routes>
                 </div>
             </div>

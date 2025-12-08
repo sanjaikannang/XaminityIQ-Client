@@ -1,12 +1,10 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 import {
-    FileText,
     GraduationCap,
     LayoutDashboard,
     LogOut,
     Users,
-    Database
 } from 'lucide-react';
 import { useDispatch } from "react-redux";
 import { logoutAPI } from "../../../../Services/Auth/authAPI";
@@ -36,8 +34,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) =>
         { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
         { name: 'Student', href: '/admin/student', icon: GraduationCap },
         { name: 'Faculty', href: '/admin/faculty', icon: Users },
-        { name: 'Exam', href: '/admin/exam', icon: FileText },
-        { name: 'Master Data', href: '/admin/data', icon: Database },
     ];
 
     const isActive = (path: string) => {

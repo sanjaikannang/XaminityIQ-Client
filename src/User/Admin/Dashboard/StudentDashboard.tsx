@@ -1,4 +1,4 @@
-import { Eye, Plus, Trash2, Users } from 'lucide-react';
+import { Eye, Trash2, Users } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { RootState } from '../../../State/store';
@@ -264,9 +264,8 @@ const StudentDashboard = () => {
             <button
               onClick={handleCreateStudent}
               className="bg-primary text-whiteColor px-4 py-1 rounded-md cursor-pointer flex items-center gap-2"
-            >
-              <Plus size={18} />
-              Create
+            >              
+              Add Student
             </button>          
           </div>
         </div>
