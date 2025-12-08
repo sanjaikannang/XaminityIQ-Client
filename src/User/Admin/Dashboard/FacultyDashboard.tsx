@@ -1,4 +1,4 @@
-import { Eye, Plus, Trash2, Users } from "lucide-react"
+import { Eye, Trash2, Users } from "lucide-react"
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -271,8 +271,7 @@ const FacultyDashboard = () => {
               onClick={handleCreateFaculty}
               className="bg-primary text-whiteColor px-4 py-1 rounded-md cursor-pointer flex items-center gap-2"
             >
-              <Plus size={18} />
-              Create
+              Add Faculty
             </button>
           </div>
         </div>
