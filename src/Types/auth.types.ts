@@ -21,13 +21,11 @@ export interface LoginResponse {
             accessToken: string;
             refreshToken: string;
         };
-        sessionId: string;
     };
 }
 
 export interface RefreshTokenRequest {
-    refreshToken: string;
-    sessionId: string;
+    refreshToken: string;    
 }
 
 export interface RefreshTokenResponse {

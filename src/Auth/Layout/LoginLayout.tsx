@@ -63,8 +63,7 @@ const LoginLayout: React.FC = () => {
                 // Store tokens and user data
                 tokenManager.setTokens(
                     response.data.tokens.accessToken,
-                    response.data.tokens.refreshToken,
-                    response.data.sessionId
+                    response.data.tokens.refreshToken,                    
                 );
                 tokenManager.setUser(
                     response.data.user

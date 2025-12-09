@@ -20,20 +20,14 @@ export const tokenManager = {
         return localStorage.getItem('refreshToken');
     },
 
-    getSessionId: (): string | null => {
-        return localStorage.getItem('sessionId');
-    },
-
-    setTokens: (accessToken: string, refreshToken: string, sessionId: string) => {
+    setTokens: (accessToken: string, refreshToken: string) => {
         localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
-        localStorage.setItem('sessionId', sessionId);
+        localStorage.setItem('refreshToken', refreshToken);        
     },
 
     clearTokens: () => {
         localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('sessionId');
+        localStorage.removeItem('refreshToken');        
         localStorage.removeItem('user');
     },
 
@@ -98,22 +92,20 @@ api.interceptors.response.use(
             isRefreshing = true;
 
             try {
-                const refreshToken = tokenManager.getRefreshToken();
-                const sessionId = tokenManager.getSessionId();
+                const refreshToken = tokenManager.getRefreshToken();                
 
-                if (!refreshToken || !sessionId) {
+                if (!refreshToken) {
                     throw new Error('No refresh token available');
                 }
 
                 const response = await axios.post(`${API_BASE_URL}/auth/refresh-token`, {
-                    refreshToken,
-                    sessionId,
+                    refreshToken,                    
                 });
 
                 if (response.data.success) {
                     const { accessToken, refreshToken: newRefreshToken } = response.data.data;
 
-                    tokenManager.setTokens(accessToken, newRefreshToken, sessionId);
+                    tokenManager.setTokens(accessToken, newRefreshToken);
 
                     // Update the authorization header
                     if (originalRequest.headers) {
