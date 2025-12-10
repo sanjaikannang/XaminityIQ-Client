@@ -30,6 +30,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen }) =>
 
     const navigation: NavigationItem[] = [
         { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+        { name: 'Exam Report', href: '/admin/exam', icon: LayoutDashboard },
     ];
 
     const isActive = (path: string) => {
