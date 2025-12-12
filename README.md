@@ -62,13 +62,9 @@ src/
 │     │      │      │      ├── StatsCard.tsx
 │     │      │      │      └── AnalyticsPanel.tsx
 │     │      │      ├── hooks/
-│     │      │      │      └── useAdminDashboard.ts
 │     │      │      ├── utils/
-│     │      │      │      └── dashboard-helpers.ts
 │     │      │      ├── types/
-│     │      │      │      └── dashboard.types.ts
 │     │      │      ├── validation/
-│     │      │      │      └── dashboard.schema.ts
 │     │      │      └── index.ts
 │     │      │
 │     │      ├── users/
@@ -80,6 +76,7 @@ src/
 │     │      │      ├── hooks/
 │     │      │      ├── utils/
 │     │      │      ├── types/
+│     │      │      ├── validation/
 │     │      │      └── index.ts
 │     │      │
 │     │      └── routes/
@@ -100,8 +97,7 @@ src/
 │     │      ├── Button.tsx
 │     │      ├── Modal.tsx
 │     │      ├── Input.tsx
-│     │      ├── Select.tsx
-│     │      └── Avatar.tsx
+│     │      └── Select.tsx
 │     │
 │     ├── loaders/
 │     └── Spinner.tsx
