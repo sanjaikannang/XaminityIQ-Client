@@ -1,35 +1,3 @@
-# 📘 XaminityIQ – Online Examination Platform
-
-XaminityIQ is a secure and scalable online examination system designed for universities and colleges.  
-It provides role-based access for **Super Admin**, **Faculty**, and **Students**, enabling efficient management of batches, courses, departments, and sections.
-
----
-
-## 🚀 Tech Stack
-
-### **Frontend**
-- React.js (Vite)
-- Redux Toolkit (RTK + RTK Query)
-- Tailwind CSS
-- React Router v6
-- Formik
-- Axios
-- TypeScript
-
----
-
-## ⚙️ Installation
-
-### Clone the project
-```sh
-git clone https://github.com/sanjaikannang/XaminityIQ-Client.git
-
-npm install
-
-create .env file
-
-npm run dev
-
 ## 📁 Project Folder Structure
 
 ```bash
