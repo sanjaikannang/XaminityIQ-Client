@@ -176,4 +176,6 @@ src/
 │     ├── icons/
 │     └── fonts/
 │
-└── index.tsx
+├── global.tsx
+├── app.tsx
+└── root.tsx
