@@ -1,6 +1,6 @@
 import type { AxiosInstance, AxiosRequestConfig } from "axios";
 import axios from "axios";
-import { getItemFromStorage } from "../../utils/utils";
+import { getItemFromStorage } from "../../utils/storage";
 
 export const createAxiosInstance = (baseUrl: string): AxiosInstance => {
     const instance = axios.create({
@@ -32,8 +32,7 @@ export const createAxiosInstance = (baseUrl: string): AxiosInstance => {
                 }
 
                 const token = getItemFromStorage({
-                    key: "access_token",
-                    type: "local",
+                    key: "access_token",                    
                 });
                 if (token) {
                     if (!tokenExpTimeInSeconds) {

@@ -1,7 +1,11 @@
 
 const LoginPage = () => {
   return (
-    <div>LoginPage</div>
+    <>
+      <div className="h-screen flex justify-center items-center">
+        <div>LoginPage</div>
+      </div>
+    </>
   )
 }
 
