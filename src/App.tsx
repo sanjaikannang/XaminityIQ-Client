@@ -1,16 +1,11 @@
-import { Provider } from "react-redux"
-import RootComponent from "./RootComponent"
-import { store } from "./State/store"
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { routes } from "./app/routes/MainRoutes";
 
-function App() {
-
+export default function App() {
+  const router = createBrowserRouter(routes);
   return (
-    <>
-      <Provider store={store}>
-        <RootComponent />
-      </Provider>
-    </>
-  )
+    <div>
+      <RouterProvider router={router} />
+    </div>
+  );
 }
-
-export default App
