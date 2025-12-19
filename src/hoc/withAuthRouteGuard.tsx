@@ -1,11 +1,11 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getItemFromStorage } from "../utils/storage";
 
-export function withAuthRedirection<P extends object>(
+export function withAuthRouteGuard<P extends object>(
     WrappedComponent: React.ComponentType<P>
 ): React.FC<P> {
-    const ComponentWithAuthRedirection: React.FC<P> = (props) => {
+    const ComponentWithAuthRouteGuard: React.FC<P> = (props) => {
         const navigate = useNavigate();
 
         useEffect(() => {
@@ -18,6 +18,7 @@ export function withAuthRedirection<P extends object>(
             const isAuthenticated = checkAuthentication();
 
             if (isAuthenticated) {
+                // User IS authenticated, redirect them to their dashboard
                 const userRole = getItemFromStorage({ key: "user_role" });
 
                 switch (userRole) {
@@ -39,8 +40,8 @@ export function withAuthRedirection<P extends object>(
         return <WrappedComponent {...props} />;
     };
 
-    ComponentWithAuthRedirection.displayName = `withAuthRedirection(${WrappedComponent.displayName || WrappedComponent.name || "Component"
+    ComponentWithAuthRouteGuard.displayName = `withAuthRouteGuard(${WrappedComponent.displayName || WrappedComponent.name || "Component"
         })`;
 
-    return ComponentWithAuthRedirection;
+    return ComponentWithAuthRouteGuard;
 }
