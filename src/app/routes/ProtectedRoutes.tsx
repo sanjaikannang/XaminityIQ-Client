@@ -1,6 +1,6 @@
 import type { RouteObject } from "react-router-dom";
 import { RootLayout } from "../../layouts/root/RootLayout";
-import { withAuthRedirection } from "../../hoc/with-auth-redirection";
+import { withAuthRedirection } from "../../hoc/withAuthRedirection";
 import FacultyDashboardPage from "../../features/faculty/dashboard/pages/FacultyDashboardPage";
 import StudentDashboardPage from "../../features/student/dashboard/pages/StudentDashboardPage";
 import SuperAdminDashboardPage from "../../features/super-admin/dashboard/pages/SuperAdminDashboardPage";
