@@ -51,20 +51,20 @@ export function Table<TData, TValue>({
         <>
             <div className="w-full">
                 {/* Search and Filter Bar */}
-                <div className="flex items-center justify-end gap-4 px-4 py-4 bg-whiteColor border border-gray-300 border-b-0 rounded-t-xl">
+                <div className="flex items-center justify-end gap-4 px-4 py-4 bg-whiteColor border border-borderLight border-b-0 rounded-t-xl">
                     <div className="flex items-center gap-3">
                         {/* Search Input */}
                         {onSearch && (
                             <div className="relative">
                                 <Search
-                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-borderLight"
                                     size={16}
                                 />
                                 <input
                                     id="search"
                                     type="text"
                                     placeholder="Search"
-                                    className="pl-9 w-60 px-3 py-2 border border-gray-300 rounded-xl focus:outline-none"
+                                    className="pl-9 w-60 px-3 py-2 border border-borderLight rounded-xl focus:outline-none"
                                     value={searchTerm}
                                     onChange={handleSearch}
                                 />
@@ -75,26 +75,26 @@ export function Table<TData, TValue>({
 
                 {/* Table Section - Show Skeleton when Loading */}
                 {isLoading ? (
-                    <div className="overflow-hidden border border-gray-300 border-t">
+                    <div className="overflow-hidden border border-borderLight border-t">
                         <table className="w-full border-collapse">
-                            <thead className="bg-gray-100">
+                            <thead className="bg-borderLight">
                                 <tr>
                                     {columns.map((_, i) => (
                                         <th
                                             key={i}
-                                            className="px-4 py-3 text-left text-sm font-medium text-gray-700"
+                                            className="px-4 py-3 text-left text-sm font-medium text-borderLight"
                                         >
-                                            <div className="h-4 w-24 rounded bg-gray-200 animate-pulse" />
+                                            <div className="h-4 w-24 rounded bg-borderLight animate-pulse" />
                                         </th>
                                     ))}
                                 </tr>
                             </thead>
                             <tbody>
                                 {Array.from({ length: pageLimit }).map((_, rowIndex) => (
-                                    <tr key={rowIndex} className="bg-whiteColor border-b border-gray-200">
+                                    <tr key={rowIndex} className="bg-whiteColor border-b border-borderLight">
                                         {columns.map((_, colIndex) => (
                                             <td key={colIndex} className="px-4 py-3">
-                                                <div className="h-4 w-full rounded bg-gray-200 animate-pulse" />
+                                                <div className="h-4 w-full rounded bg-borderLight animate-pulse" />
                                             </td>
                                         ))}
                                     </tr>
@@ -103,14 +103,14 @@ export function Table<TData, TValue>({
                         </table>
                     </div>
                 ) : (
-                    <div className="overflow-hidden border border-gray-300 border-t">
+                    <div className="overflow-hidden border border-borderLight border-t">
                         <table className="w-full border-collapse">
-                            <thead className="bg-gray-100">
+                            <thead className="bg-borderLight">
                                 <tr>
                                     {columns.map((column, index) => (
                                         <th
                                             key={index}
-                                            className="px-4 py-4 text-left text-sm font-medium text-gray-700"
+                                            className="px-4 py-4 text-left text-sm font-medium text-borderLight"
                                         >
                                             {typeof column.header === "function"
                                                 ? column.header()
@@ -125,7 +125,7 @@ export function Table<TData, TValue>({
                                         <tr
                                             key={rowIndex}
                                             onClick={() => onRowClick?.(row)}
-                                            className={`border-t border-gray-200 ${onRowClick ? "cursor-pointer hover:bg-gray-50" : "bg-whiteColor"
+                                            className={`border-t border-borderLight ${onRowClick ? "cursor-pointer hover:bg-borderLight" : "bg-whiteColor"
                                                 }`}
                                         >
                                             {columns.map((column, colIndex) => {
@@ -133,7 +133,7 @@ export function Table<TData, TValue>({
                                                     ? (row as any)[column.accessorKey]
                                                     : null;
                                                 return (
-                                                    <td key={colIndex} className="px-4 py-4 text-sm text-gray-700">
+                                                    <td key={colIndex} className="px-4 py-4 text-sm text-borderLight">
                                                         {column.cell
                                                             ? column.cell({
                                                                 row: { original: row },
@@ -149,7 +149,7 @@ export function Table<TData, TValue>({
                                     <tr>
                                         <td
                                             colSpan={columns.length}
-                                            className="h-24 text-center text-sm text-gray-500"
+                                            className="h-24 text-center text-sm text-borderLight"
                                         >
                                             No results.
                                         </td>
@@ -162,29 +162,29 @@ export function Table<TData, TValue>({
 
                 {/* Pagination Section - Show Skeleton when Loading */}
                 {isLoading ? (
-                    <div className="flex justify-end px-4 py-4 bg-whiteColor border-b border-r border-l border-gray-300 rounded-b-xl">
+                    <div className="flex justify-end px-4 py-4 bg-whiteColor border-b border-r border-l border-borderLight rounded-b-xl">
                         <div className="flex items-center gap-2">
-                            <div className="h-8 w-10 rounded bg-gray-200 animate-pulse flex items-center justify-center">
-                                <ChevronLeft className="text-gray-300" size={16} />
+                            <div className="h-8 w-10 rounded bg-borderLight animate-pulse flex items-center justify-center">
+                                <ChevronLeft className="text-borderLight" size={16} />
                             </div>
 
                             <div className="flex items-center gap-0.5">
-                                <div className="h-7 w-7 rounded bg-gray-200 animate-pulse" />
-                                <div className="h-7 w-7 rounded bg-gray-200 animate-pulse" />
-                                <span className="text-gray-300 px-1">...</span>
-                                <div className="h-7 w-7 rounded bg-gray-200 animate-pulse" />
+                                <div className="h-7 w-7 rounded bg-borderLight animate-pulse" />
+                                <div className="h-7 w-7 rounded bg-borderLight animate-pulse" />
+                                <span className="text-borderLight px-1">...</span>
+                                <div className="h-7 w-7 rounded bg-borderLight animate-pulse" />
                             </div>
 
-                            <div className="h-8 w-10 rounded bg-gray-200 animate-pulse flex items-center justify-center">
-                                <ChevronRight className="text-gray-300" size={16} />
+                            <div className="h-8 w-10 rounded bg-borderLight animate-pulse flex items-center justify-center">
+                                <ChevronRight className="text-borderLight" size={16} />
                             </div>
                         </div>
                     </div>
                 ) : (
-                    <div className="flex justify-end px-4 py-4 bg-whiteColor border-b border-r border-l border-gray-300 rounded-b-xl">
+                    <div className="flex justify-end px-4 py-4 bg-whiteColor border-b border-r border-l border-borderLight rounded-b-xl">
                         <div className="flex items-center gap-2">
                             <button
-                                className="h-8 px-4 text-sm font-medium rounded-xl cursor-pointer border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="h-8 px-4 text-sm font-medium rounded-xl cursor-pointer border border-borderLight hover:bg-borderLight disabled:opacity-50 disabled:cursor-not-allowed"
                                 onClick={() => onPageChange(pageNumber - 1)}
                                 disabled={!canGoPrevious}
                             >
@@ -199,8 +199,8 @@ export function Table<TData, TValue>({
                                             key={pageNum}
                                             onClick={() => onPageChange(pageNum)}
                                             className={`h-7 w-7 text-sm font-medium rounded-xl transition-colors cursor-pointer ${pageNumber === pageNum
-                                                ? "text-gray-600 bg-gray-100"
-                                                : "text-gray-600 hover:bg-gray-100"
+                                                ? "text-borderLight bg-borderLight"
+                                                : "text-borderLight hover:bg-borderLight"
                                                 }`}
                                         >
                                             {pageNum}
@@ -209,12 +209,12 @@ export function Table<TData, TValue>({
                                 })}
                                 {totalPages > 5 && (
                                     <>
-                                        <span className="text-gray-400 px-1">...</span>
+                                        <span className="text-borderLight px-1">...</span>
                                         <button
                                             onClick={() => onPageChange(totalPages)}
                                             className={`h-7 w-7 text-sm font-medium rounded-xl transition-colors cursor-pointer ${pageNumber === totalPages
-                                                ? "text-gray-600 bg-gray-100"
-                                                : "text-gray-600 hover:bg-gray-100"
+                                                ? "text-borderLight bg-borderLight"
+                                                : "text-borderLight hover:bg-borderLight"
                                                 }`}
                                         >
                                             {totalPages}
@@ -224,7 +224,7 @@ export function Table<TData, TValue>({
                             </div>
 
                             <button
-                                className="h-8 px-4 text-sm font-medium rounded-xl cursor-pointer border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="h-8 px-4 text-sm font-medium rounded-xl cursor-pointer border border-borderLight hover:bg-borderLight disabled:opacity-50 disabled:cursor-not-allowed"
                                 onClick={() => onPageChange(pageNumber + 1)}
                                 disabled={!canGoNext}
                             >

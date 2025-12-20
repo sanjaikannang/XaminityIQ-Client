@@ -82,7 +82,7 @@ const Select: React.FC<SelectProps> = ({
                 {label && (
                     <label
                         htmlFor={id}
-                        className="block text-sm font-medium text-gray-700 mb-2"
+                        className="block text-sm font-medium text-borderLight mb-2"
                     >
                         {label}
                         {required && <span className="text-red-600 ml-1">*</span>}
@@ -99,38 +99,38 @@ const Select: React.FC<SelectProps> = ({
                         onBlur={handleBlur}
                         disabled={disabled || loading}
                         className={`
-                        w-full ${Icon ? 'pl-10' : 'pl-3'} pr-10 py-2 border ${hasError ? 'border-red-500' : 'border-gray-300'
+                        w-full ${Icon ? 'pl-10' : 'pl-3'} pr-10 py-2 border ${hasError ? 'border-red-500' : 'border-borderLight'
                             } rounded-lg
                         transition-all duration-200
-                        text-gray-900 bg-white text-left
+                        text-borderLight bg-white text-left
                         focus:outline-none
-                        ${disabled || loading ? 'bg-gray-100 cursor-not-allowed opacity-60' : 'cursor-pointer hover:border-gray-400'}
+                        ${disabled || loading ? 'bg-borderLight cursor-not-allowed opacity-60' : 'cursor-pointer hover:border-borderLight'}
                     `}
                     >
                         {Icon && (
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Icon className="h-5 w-5 text-gray-400" />
+                                <Icon className="h-5 w-5 text-borderLight" />
                             </div>
                         )}
-                        <span className={selectedOption ? 'text-gray-900' : 'text-gray-500'}>
+                        <span className={selectedOption ? 'text-borderLight' : 'text-borderLight'}>
                             {loading ? 'Loading...' : (selectedOption?.label || placeholder)}
                         </span>
                     </button>
 
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                         {loading ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent"></div>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-borderLight border-t-transparent"></div>
                         ) : (
                             <ChevronDown
-                                className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                                className={`h-5 w-5 text-borderLight transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
                             />
                         )}
                     </div>
 
                     {isOpen && !loading && (
-                        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
+                        <div className="absolute z-50 w-full mt-1 bg-white border border-borderLight rounded-lg shadow-lg max-h-60 overflow-auto">
                             {options.length === 0 ? (
-                                <div className="px-4 py-2 text-gray-500 text-sm">
+                                <div className="px-4 py-2 text-borderLight text-sm">
                                     No options available
                                 </div>
                             ) : (
@@ -140,9 +140,9 @@ const Select: React.FC<SelectProps> = ({
                                         type="button"
                                         onClick={() => handleOptionClick(option.value)}
                                         className={`
-                                        w-full px-4 py-2 text-left hover:bg-gray-50
+                                        w-full px-4 py-2 text-left hover:bg-borderLight
                                         focus:outline-none transition-colors duration-150
-                                        ${value === option.value ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-700'}
+                                        ${value === option.value ? 'bg-borderLight text-borderLight font-medium' : 'text-borderLight'}
                                         first:rounded-t-lg last:rounded-b-lg
                                     `}
                                     >

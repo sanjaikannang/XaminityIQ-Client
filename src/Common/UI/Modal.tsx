@@ -43,18 +43,18 @@ const Modal: React.FC<ModalProps> = ({
                 {/* Modal */}
                 <div className="flex min-h-full items-center justify-center px-4">
                     <div
-                        className={`relative transform overflow-hidden rounded-lg bg-whiteColor text-left shadow-xl transition-all w-full border border-gray-300 ${sizeClasses[size]}`}
+                        className={`relative transform overflow-hidden rounded-lg bg-whiteColor text-left shadow-xl transition-all w-full border border-borderLight ${sizeClasses[size]}`}
                     >
                         {/* Header */}
-                        <div className="flex items-center justify-between p-3 border-b border-gray-200">
-                            <h3 className="text-lg font-semibold text-gray-900">
+                        <div className="flex items-center justify-between p-3 border-b border-borderLight">
+                            <h3 className="text-lg font-semibold text-borderLight">
                                 {title}
                             </h3>
                             <button
                                 onClick={onClose}
-                                className="rounded-md p-2 hover:bg-gray-100 focus:outline-none cursor-pointer"
+                                className="rounded-md p-2 hover:bg-borderLight focus:outline-none cursor-pointer"
                             >
-                                <X className="h-4 w-4 text-gray-500" />
+                                <X className="h-4 w-4 text-borderLight" />
                             </button>
                         </div>
 
