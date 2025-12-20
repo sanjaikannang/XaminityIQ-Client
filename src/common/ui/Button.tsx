@@ -30,7 +30,7 @@ const Button: React.FC<ButtonProps> = ({
     const baseStyles = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed';
 
     const variantStyles = {
-        primary: 'bg-blue-600 text-whiteColor hover:bg-blue-700 border border-blue-600',
+        primary: 'bg-primary text-whiteColor cursor-pointer',
         secondary: 'bg-borderLight text-whiteColor hover:bg-borderLight border border-borderLight',
         outline: 'bg-white text-textTertiary border border-borderLight hover:borderLight',
         danger: 'bg-red-600 text-whiteColor hover:bg-red-700 border border-red-600',

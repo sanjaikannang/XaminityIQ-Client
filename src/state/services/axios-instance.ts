@@ -1,6 +1,6 @@
-import type { AxiosInstance, AxiosRequestConfig } from "axios";
 import axios from "axios";
 import { getItemFromStorage } from "../../utils/storage";
+import type { AxiosInstance, AxiosRequestConfig } from "axios";
 
 export const createAxiosInstance = (baseUrl: string): AxiosInstance => {
     const instance = axios.create({

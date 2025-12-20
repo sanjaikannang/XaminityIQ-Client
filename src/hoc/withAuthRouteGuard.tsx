@@ -20,6 +20,7 @@ export function withAuthRouteGuard<P extends object>(
             if (isAuthenticated) {
                 // User IS authenticated, redirect them to their dashboard
                 const userRole = getItemFromStorage({ key: "user_role" });
+                console.log("userRole...", userRole);
 
                 switch (userRole) {
                     case "super-admin":
@@ -32,7 +33,7 @@ export function withAuthRouteGuard<P extends object>(
                         navigate("/student/dashboard", { replace: true });
                         break;
                     default:
-                        navigate("/dashboard", { replace: true });
+                        navigate("/", { replace: true });
                 }
             }
         }, [navigate]);

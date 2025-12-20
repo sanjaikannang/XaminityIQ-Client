@@ -4,7 +4,7 @@ import LoginPage from "../../features/auth/login/pages/LoginPage";
 import { withAuthRouteGuard } from "../../hoc/withAuthRouteGuard";
 import ResetPassword from "../../features/auth/reset-password/pages/ResetPassword";
 
-const ProtectedAuthLayout = withAuthRouteGuard(AuthLayout);
+const ProtectedAuthLayout = (AuthLayout);
 
 export const authRoutes: RouteObject[] = [
     {
