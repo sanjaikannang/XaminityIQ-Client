@@ -1,6 +1,6 @@
 import { api } from "../../../api";
 import { apiInstance } from "../api-instance";
-import { LoginRequest, LoginResponse, RefreshTokenRequest, RefreshTokenResponse } from "../../../types/auth.types";
+import { LoginRequest, LoginResponse, RefreshTokenRequest, RefreshTokenResponse } from "../../../types/auth-types";
 
 export const authApiService = apiInstance.injectEndpoints({
     endpoints: (build) => ({
