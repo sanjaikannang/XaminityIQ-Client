@@ -3,9 +3,12 @@ import { Formik, Form } from 'formik';
 import { Mail, Lock } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import Button from "../../../../common/ui/Button";
+import { UserRole } from "../../../../utils/enum";
 import InputField from "../../../../common/ui/Input";
 import Login from "../../../../assets/images/Login.png";
+import { setItemInStorage } from "../../../../utils/storage";
 import { loginValidationSchema } from "../formik/login.schema";
+import { navigateByUserRole } from "../../../../utils/navigation";
 import { useLoginMutation } from "../../../../state/services/endpoints/auth";
 
 interface LoginFormValues {
@@ -29,14 +32,28 @@ const LoginPage = () => {
     try {
       const response = await login(values).unwrap();
 
-      // Store tokens and user data with consistent keys
       if (response.data.tokens) {
-        localStorage.setItem('accessToken', response.data.tokens.accessToken);
-        localStorage.setItem('refreshToken', response.data.tokens.refreshToken);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        if (response.data.tokens) {
+          setItemInStorage({
+            key: 'accessToken',
+            value: response.data.tokens.accessToken,
+          });
 
-        // Also store the user role for the auth guard
-        localStorage.setItem('userRole', response.data.user.role);
+          setItemInStorage({
+            key: 'refreshToken',
+            value: response.data.tokens.refreshToken,
+          });
+
+          setItemInStorage({
+            key: 'user',
+            value: response.data.user,
+          });
+
+          setItemInStorage({
+            key: 'userRole',
+            value: response.data.user.role,
+          });
+        }
       }
 
       toast.success(response.message || 'Login successful!');
@@ -44,7 +61,8 @@ const LoginPage = () => {
       if (response.data.user.isFirstLogin) {
         navigate('/reset-password');
       } else {
-        navigate('/super-admin/dashboard');
+        const userRole = response.data.user.role as UserRole;
+        navigateByUserRole(userRole, navigate);
       }
 
     } catch (error: any) {
