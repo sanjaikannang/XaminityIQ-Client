@@ -1,3 +1,3 @@
 export const auth = {
-    login: () => "/login",    
+    login: () => "/auth/login",
 };

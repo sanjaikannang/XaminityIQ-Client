@@ -1,29 +1,20 @@
 import type { RouteObject } from "react-router-dom";
+import { withAuthGuard } from "../../hoc/withAuthGuard";
 import { RootLayout } from "../../layouts/root/RootLayout";
 import { withScreenGuard } from "../../hoc/withScreenGuard";
-import { withProtectedRoute } from "../../hoc/withProtectedRoute";
-import FacultyDashboardPage from "../../features/faculty/dashboard/pages/FacultyDashboardPage";
-import StudentDashboardPage from "../../features/student/dashboard/pages/StudentDashboardPage";
-import SuperAdminDashboardPage from "../../features/super-admin/dashboard/pages/SuperAdminDashboardPage";
+import { facultyRoutes } from "../../features/faculty/routes/facultyRoutes";
+import { studentRoutes } from "../../features/student/routes/studentRoutes";
+import { superAdminRoutes } from "../../features/super-admin/routes/superAdminRoutes";
 
-const ProtectedRootLayout = withProtectedRoute(withScreenGuard(RootLayout));
+const ProtectedRootLayout = withAuthGuard(withScreenGuard(RootLayout));
 
 export const protectedRoutes: RouteObject[] = [
     {
         element: <ProtectedRootLayout />,
         children: [
-            {
-                path: "/super-admin/dashboard",
-                element: <SuperAdminDashboardPage />,
-            },
-            {
-                path: "/faculty/dashboard",
-                element: <FacultyDashboardPage />,
-            },
-            {
-                path: "/student/dashboard",
-                element: <StudentDashboardPage />,
-            },
+            ...superAdminRoutes,
+            ...facultyRoutes,
+            ...studentRoutes,
         ],
     },
 ];

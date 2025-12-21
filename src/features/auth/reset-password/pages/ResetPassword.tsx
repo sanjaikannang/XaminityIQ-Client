@@ -20,8 +20,18 @@ const ResetPassword = () => {
 
                     {/* Right Column - Login Form */}
                     <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
-                        <div className="w-full max-w-lg text-center">
-                            Reset Password Form Goes Here
+                        <div className="w-full max-w-lg">
+                            <div className="mb-8 text-center">
+                                <h2 className="text-3xl font-semibold text-gray-900 mb-2">Reset Password</h2>
+                            </div>
+
+                            {/* Additional Info */}
+                            <div className="mt-6 text-center">
+                                <p className="text-xs text-gray-500">
+                                    Secure exams with advanced proctoring by{' '}
+                                    <span className="text-primary font-semibold">XaminityIQ</span>
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>

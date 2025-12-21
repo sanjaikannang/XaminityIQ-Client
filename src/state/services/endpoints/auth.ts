@@ -1,17 +1,10 @@
 import { api } from "../../../api";
 import { apiInstance } from "../api-instance";
-
-interface UserResponse {
-
-}
-
-interface LoginRequest {
-
-}
+import { LoginRequest, LoginResponse } from "../../../types/auth-types";
 
 export const authApiService = apiInstance.injectEndpoints({
     endpoints: (build) => ({
-        login: build.mutation<UserResponse, LoginRequest>({
+        login: build.mutation<LoginResponse, LoginRequest>({
             query: (credentials) => {
                 return {
                     url: api.auth.login(),
@@ -19,10 +12,10 @@ export const authApiService = apiInstance.injectEndpoints({
                     data: credentials,
                 };
             },
-        }),
+        }),        
     }),
 });
 
 export const {
-    useLoginMutation,
+    useLoginMutation,    
 } = authApiService;
