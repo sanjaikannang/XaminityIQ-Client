@@ -76,7 +76,7 @@ const InputField: React.FC<InputFieldProps> = ({
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-borderLight transition duration-200"
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer hover:text-borderLight transition duration-200"
                         >
                             {showPassword ? (
                                 <EyeOff className="h-5 w-5 text-borderLight" />
