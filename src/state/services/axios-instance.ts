@@ -5,7 +5,7 @@ import { getItemFromStorage, setItemInStorage, removeItemFromStorage } from "../
 export const createAxiosInstance = (baseUrl: string): AxiosInstance => {
     const instance = axios.create({
         baseURL: baseUrl,
-        timeout: 10000,
+        timeout: 120000,
         headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
