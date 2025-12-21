@@ -20,16 +20,3 @@ export interface LoginResponse {
         }
     };
 }
-
-export interface RefreshTokenRequest {
-    refreshToken: string;
-}
-
-export interface RefreshTokenResponse {
-    success: boolean;
-    message: string;
-    data: {
-        accessToken: string;
-        refreshToken: string;
-    }
-}

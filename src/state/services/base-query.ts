@@ -1,7 +1,7 @@
-import { type BaseQueryFn } from "@reduxjs/toolkit/query";
-import type { AxiosRequestConfig, AxiosError } from "axios";
 import { createAxiosInstance } from "./axios-instance";
 import { getItemFromStorage } from "../../utils/storage";
+import { type BaseQueryFn } from "@reduxjs/toolkit/query";
+import type { AxiosRequestConfig, AxiosError } from "axios";
 
 export interface AxiosBaseQueryArgs {
     url: string;

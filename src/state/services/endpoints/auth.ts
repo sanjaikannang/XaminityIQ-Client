@@ -1,6 +1,6 @@
 import { api } from "../../../api";
 import { apiInstance } from "../api-instance";
-import { LoginRequest, LoginResponse, RefreshTokenRequest, RefreshTokenResponse } from "../../../types/auth-types";
+import { LoginRequest, LoginResponse } from "../../../types/auth-types";
 
 export const authApiService = apiInstance.injectEndpoints({
     endpoints: (build) => ({
@@ -12,20 +12,10 @@ export const authApiService = apiInstance.injectEndpoints({
                     data: credentials,
                 };
             },
-        }),
-        refreshToken: build.mutation<RefreshTokenResponse, RefreshTokenRequest>({
-            query: (credentials) => {
-                return {
-                    url: api.auth.refreshToken(),
-                    method: "POST",
-                    data: credentials,
-                };
-            },
-        }),
+        }),        
     }),
 });
 
 export const {
-    useLoginMutation,
-    useRefreshTokenMutation
+    useLoginMutation,    
 } = authApiService;
