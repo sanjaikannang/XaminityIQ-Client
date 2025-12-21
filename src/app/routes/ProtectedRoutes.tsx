@@ -1,12 +1,12 @@
 import type { RouteObject } from "react-router-dom";
 import { RootLayout } from "../../layouts/root/RootLayout";
 import { withScreenGuard } from "../../hoc/withScreenGuard";
-import { withProtectedRoute } from "../../hoc/withProtectedRoute";
+import { withAuthRouteGuard } from "../../hoc/withAuthRouteGuard";
 import FacultyDashboardPage from "../../features/faculty/dashboard/pages/FacultyDashboardPage";
 import StudentDashboardPage from "../../features/student/dashboard/pages/StudentDashboardPage";
 import SuperAdminDashboardPage from "../../features/super-admin/dashboard/pages/SuperAdminDashboardPage";
 
-const ProtectedRootLayout = withProtectedRoute(withScreenGuard(RootLayout));
+const ProtectedRootLayout = withAuthRouteGuard(withScreenGuard(RootLayout));
 
 export const protectedRoutes: RouteObject[] = [
     {

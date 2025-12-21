@@ -31,10 +31,10 @@ const Button: React.FC<ButtonProps> = ({
 
     const variantStyles = {
         primary: 'bg-primary text-whiteColor cursor-pointer',
-        secondary: 'bg-borderLight text-whiteColor hover:bg-borderLight border border-borderLight',
-        outline: 'bg-white text-textTertiary border border-borderLight hover:borderLight',
-        danger: 'bg-red-600 text-whiteColor hover:bg-red-700 border border-red-600',
-        ghost: 'bg-transparent text-textTertiary hover:bg-borderLight border border-transparent'
+        secondary: 'bg-borderLight text-whiteColor hover:bg-borderLight border border-borderLight cursor-pointer',
+        outline: 'bg-white text-textTertiary border border-borderLight hover:borderLight cursor-pointer',
+        danger: 'bg-red-600 text-whiteColor cursor-pointer',
+        ghost: 'bg-transparent text-textTertiary hover:bg-borderLight border border-transparent cursor-pointer'
     };
 
     const sizeStyles = {

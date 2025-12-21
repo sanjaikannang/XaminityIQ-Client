@@ -8,6 +8,3 @@ export const apiInstance = createApi({
     endpoints: () => ({}),
     tagTypes: [],
 });
-
-
-

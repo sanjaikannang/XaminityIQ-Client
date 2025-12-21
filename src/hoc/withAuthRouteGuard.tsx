@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { UserRole } from "../utils/enum";
 import { useNavigate } from "react-router-dom";
 import { getItemFromStorage } from "../utils/storage";
 
@@ -10,8 +11,8 @@ export function withAuthRouteGuard<P extends object>(
 
         useEffect(() => {
             const checkAuthentication = (): boolean => {
-                const accessToken = getItemFromStorage({ key: "access_token" });
-                const refreshToken = getItemFromStorage({ key: "refresh_token" });
+                const accessToken = getItemFromStorage({ key: "accessToken" });
+                const refreshToken = getItemFromStorage({ key: "refreshToken" });
                 return !!(accessToken && refreshToken);
             };
 
@@ -19,21 +20,20 @@ export function withAuthRouteGuard<P extends object>(
 
             if (isAuthenticated) {
                 // User IS authenticated, redirect them to their dashboard
-                const userRole = getItemFromStorage({ key: "user_role" });
-                console.log("userRole...", userRole);
+                const userRole = getItemFromStorage({ key: "userRole" });
 
                 switch (userRole) {
-                    case "super-admin":
+                    case UserRole.ADMIN:
                         navigate("/super-admin/dashboard", { replace: true });
                         break;
-                    case "faculty":
+                    case UserRole.FACULTY:
                         navigate("/faculty/dashboard", { replace: true });
                         break;
-                    case "student":
+                    case UserRole.STUDENT:
                         navigate("/student/dashboard", { replace: true });
                         break;
                     default:
-                        navigate("/", { replace: true });
+                        navigate("/login", { replace: true });
                 }
             }
         }, [navigate]);

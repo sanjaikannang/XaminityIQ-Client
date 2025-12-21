@@ -29,7 +29,7 @@ export const axiosBaseQuery = (
     return async ({ url, method = "GET", data, params, headers }) => {
         try {
             // Get token from localStorage or your preferred storage
-            const token = getItemFromStorage({ key: "access_token" });
+            const token = getItemFromStorage({ key: "accessToken" });
 
             // Prepare headers with token
             let finalHeaders: Record<string, string> = Object.fromEntries(

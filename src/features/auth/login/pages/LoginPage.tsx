@@ -29,17 +29,18 @@ const LoginPage = () => {
     try {
       const response = await login(values).unwrap();
 
-      // Store tokens and user data in localStorage
+      // Store tokens and user data with consistent keys
       if (response.data.tokens) {
         localStorage.setItem('accessToken', response.data.tokens.accessToken);
         localStorage.setItem('refreshToken', response.data.tokens.refreshToken);
         localStorage.setItem('user', JSON.stringify(response.data.user));
+
+        // Also store the user role for the auth guard
+        localStorage.setItem('userRole', response.data.user.role);
       }
 
-      // Show success message
       toast.success(response.message || 'Login successful!');
 
-      // Check if first login and navigate accordingly
       if (response.data.user.isFirstLogin) {
         navigate('/reset-password');
       } else {
@@ -48,7 +49,7 @@ const LoginPage = () => {
 
     } catch (error: any) {
       console.log('Login error:', error);
-      toast.error(error.data.message);
+      toast.error(error.data?.message || 'Login failed');
     } finally {
       setSubmitting(false);
     }
@@ -130,7 +131,7 @@ const LoginPage = () => {
                           disabled={isSubmitting || isLoading}
                           fullWidth
                         >
-                          {isSubmitting || isLoading ? 'Logging in...' : 'Login'}
+                          {isSubmitting || isLoading ? '' : 'Login'}
                         </Button>
                       </div>
                     </div>

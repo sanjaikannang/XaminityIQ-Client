@@ -13,26 +13,29 @@ export const createAxiosInstance = (baseUrl: string): AxiosInstance => {
     });
     let tokenExpTimeInSeconds = 0;
     const graceTime = 5;
+
+    // URLs that don't require authentication
     const publicEndpoints = [
-        /^cognitodetails\//,
-        /^\d{12}\/users\/set-password$/,
-        /^organizations\/onboarding$/,
+        '/auth/login',
+        '/auth/refresh-token',
+        '/auth/reset-password'
     ];
+
+    const isPublicEndpoint = (url: string): boolean => {
+        return publicEndpoints.some(endpoint => url.includes(endpoint));
+    };
 
     // Add access token to every request
     instance.interceptors.request.use(
         async (config) => {
             try {
-                const urlPath = (config.url || "").replace(/^\/+/, "");
-
-                const isPublic = publicEndpoints.some((regex) => regex.test(urlPath));
-
-                if (isPublic) {
+                // Skip token check for public endpoints
+                if (config.url && isPublicEndpoint(config.url)) {
                     return config;
                 }
 
                 const token = getItemFromStorage({
-                    key: "access_token",                    
+                    key: "accessToken",
                 });
                 if (token) {
                     if (!tokenExpTimeInSeconds) {
