@@ -1,12 +1,15 @@
 import { ReactNode } from "react";
-import { Outlet, useLocation, Link } from "react-router-dom";
-import { LogOut, Home, Users, Settings, type LucideIcon } from "lucide-react";
+import { logout } from "../../utils/logout";
+import { getItemFromStorage } from "../../utils/storage";
+import { Outlet, useLocation, Link, useNavigate } from "react-router-dom";
+import { LogOut, Home, type LucideIcon, GraduationCap } from "lucide-react";
 
 interface NavigationItem {
     id: string;
     label: string;
     path: string;
     icon: LucideIcon;
+    matchPattern?: string;
 }
 
 const navigationItems: NavigationItem[] = [
@@ -17,16 +20,11 @@ const navigationItems: NavigationItem[] = [
         icon: Home,
     },
     {
-        id: "users",
-        label: "Users",
-        path: "/super-admin/users",
-        icon: Users,
-    },
-    {
-        id: "settings",
-        label: "Settings",
-        path: "/super-admin/settings",
-        icon: Settings,
+        id: "academics",
+        label: "Academics",
+        path: "/super-admin/academics/batches",
+        icon: GraduationCap,
+        matchPattern: "/super-admin/academics",
     }
 ];
 
@@ -36,17 +34,33 @@ export interface RootLayoutContext {
 
 export function RootLayout() {
     const location = useLocation();
+    const navigate = useNavigate();
 
-    const isActiveRoute = (path: string): boolean => {
-        return location.pathname === path;
+    const isActiveRoute = (item: NavigationItem): boolean => {
+        // If matchPattern is defined, check if current path starts with it
+        if (item.matchPattern) {
+            return location.pathname.startsWith(item.matchPattern);
+        }
+        // Otherwise, check for exact match
+        return location.pathname === item.path;
     };
+
+    const handleLogout = () => {
+        logout(navigate);
+    };
+
+    const userData = getItemFromStorage({ key: "user" }) as {
+        email: string;
+        role: string;
+    };
+
+    const roleInitial = userData.role?.charAt(0).toUpperCase();
 
     return (
         <>
             <div className="flex h-screen bg-bgSecondary">
                 {/* Sidebar */}
                 <aside className="w-56 bg-whiteColor border-r border-borderLight flex flex-col shadow-xl">
-                    {/* Sidebar Header */}
                     <div className="h-16 flex items-center justify-center px-4 border-b border-borderLight flex-shrink-0">
                         <h1 className="font-bold text-xl text-center text-textPrimary">
                             XaminityIQ
@@ -57,7 +71,7 @@ export function RootLayout() {
                     <nav className="flex-1 p-1.5 space-y-1.5 overflow-y-auto no-scrollbar">
                         {navigationItems.map((item) => {
                             const Icon = item.icon;
-                            const isActive = isActiveRoute(item.path);
+                            const isActive = isActiveRoute(item);
 
                             return (
                                 <Link
@@ -77,7 +91,9 @@ export function RootLayout() {
 
                     {/* Sidebar Footer */}
                     <div className="py-2 border-t border-borderLight flex-shrink-0">
-                        <button className="flex items-center justify-center gap-3 px-4 py-3 w-full text-textSecondary cursor-pointer transition-colors hover:bg-bgTertiary">
+                        <button
+                            onClick={handleLogout}
+                            className="flex items-center justify-center gap-3 px-4 py-3 w-full text-textSecondary cursor-pointer transition-colors">
                             <LogOut className="w-5 h-5" />
                             <span>Logout</span>
                         </button>
@@ -86,22 +102,26 @@ export function RootLayout() {
 
                 {/* Main Content Area */}
                 <div className="flex-1 flex flex-col">
-                    {/* Top Navbar */}
                     <header className="h-16 bg-whiteColor border-b border-borderLight flex items-center justify-end px-6 flex-shrink-0 shadow-sm">
                         <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-whiteColor font-semibold">
-                                    A
-                                </div>
-                                <span className="text-sm font-medium text-textSecondary">
-                                    Admin User
+                            <div className="flex flex-col text-right">
+                                <span className="text-xs font-medium text-textSecondary">
+                                    {userData.email}
+                                </span>
+                                <span className="text-xs text-textSecondary">
+                                    {userData.role}
                                 </span>
                             </div>
+
+                            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-whiteColor font-semibold">
+                                {roleInitial}
+                            </div>
                         </div>
+
                     </header>
 
                     {/* Main Content - Scrollable */}
-                    <main className="flex-1 overflow-y-auto p-6 no-scrollbar">
+                    <main className="flex-1 overflow-y-auto no-scrollbar">
                         <Outlet />
                     </main>
                 </div>
