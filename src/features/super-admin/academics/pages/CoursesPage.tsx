@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-import Modal from "../../../../common/ui/Modal";
 import Button from "../../../../common/ui/Button";
 import { useNavigate, useParams } from "react-router-dom";
 import { Container } from "../../../../common/ui/Container";
@@ -7,6 +6,7 @@ import { PageHeader } from "../../../../common/ui/PageHeader";
 import { CourseData } from "../../../../types/academics-types";
 import { ColumnDef, Table } from "../../../../common/ui/Table";
 import { useGetCoursesQuery } from "../../../../state/services/endpoints/academics";
+import Modal from "../../../../common/ui/Modal";
 
 const CoursesPage = () => {
     const navigate = useNavigate();

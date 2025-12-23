@@ -1,12 +1,12 @@
 import { useParams } from "react-router-dom";
 import { useState, useCallback } from "react";
-import Modal from "../../../../common/ui/Modal";
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
 import { DepartmentData } from "../../../../types/academics-types";
 import { ColumnDef, Table } from "../../../../common/ui/Table";
 import { useGetDepartmentsQuery } from "../../../../state/services/endpoints/academics";
+import Modal from "../../../../common/ui/Modal";
 
 const DepartmentsPage = () => {
     const { courseId } = useParams<{ courseId: string }>();
