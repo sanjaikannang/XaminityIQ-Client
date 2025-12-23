@@ -52,7 +52,7 @@ const BatchesPage = () => {
         {
             accessorKey: "createdAt",
             header: "Created At",
-            cell: ({ getValue }) => {
+            cell: ({ getValue }: { getValue: () => string }) => {
                 const date = new Date(getValue());
                 return date.toLocaleDateString("en-US", {
                     year: "numeric",
