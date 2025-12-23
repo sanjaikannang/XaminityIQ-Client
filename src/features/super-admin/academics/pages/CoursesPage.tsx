@@ -35,9 +35,9 @@ const CoursesPage = () => {
     }, []);
 
     const handleRowClick = useCallback((row: CourseData) => {
-        // Navigate to course details or wherever you need
-        navigate(`/super-admin/academics/courses/${row._id}/departments`);
-    }, [navigate, batchId]);
+        // Navigate to departments page using batchCourseId
+        navigate(`/super-admin/academics/courses/${row.batchCourseId}/departments`);
+    }, [navigate]);
 
     const columns: ColumnDef<CourseData, any>[] = [
         {
