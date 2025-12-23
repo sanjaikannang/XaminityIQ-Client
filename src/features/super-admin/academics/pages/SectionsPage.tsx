@@ -1,18 +1,18 @@
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
 
-const SuperAdminDashboardPage = () => {
+const SectionsPage = () => {
 
     return (
         <>
-            <PageHeader>Dashboard</PageHeader>
+            <PageHeader>Sections</PageHeader>
             <Container>
                 <div className="flex justify-center items-center h-screen">
-                    <h1 className="text-xl">Super Admin Dashboard Page</h1>
+                    <h1 className="text-xl">Sections Page</h1>
                 </div>
             </Container>
         </>
     );
 };
 
-export default SuperAdminDashboardPage;
+export default SectionsPage;
