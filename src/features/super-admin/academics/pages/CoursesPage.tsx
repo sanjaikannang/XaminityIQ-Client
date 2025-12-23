@@ -1,4 +1,6 @@
 import { useState, useCallback } from "react";
+import Modal from "../../../../common/ui/Modal";
+import Button from "../../../../common/ui/Button";
 import { useNavigate, useParams } from "react-router-dom";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
@@ -12,6 +14,7 @@ const CoursesPage = () => {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [searchTerm, setSearchTerm] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const { data, isLoading, isFetching } = useGetCoursesQuery({
         batchId: batchId!,
@@ -38,6 +41,14 @@ const CoursesPage = () => {
         // Navigate to departments page using batchCourseId
         navigate(`/super-admin/academics/courses/${row.batchCourseId}/departments`);
     }, [navigate]);
+
+    const handleOpenModal = useCallback(() => {
+        setIsModalOpen(true);
+    }, []);
+
+    const handleCloseModal = useCallback(() => {
+        setIsModalOpen(false);
+    }, []);
 
     const columns: ColumnDef<CourseData, any>[] = [
         {
@@ -86,6 +97,17 @@ const CoursesPage = () => {
         <>
             <PageHeader>Courses</PageHeader>
             <Container>
+                <div className="flex justify-end">
+                    <Button
+                        type="submit"
+                        variant="primary"
+                        size="md"
+                        onClick={handleOpenModal}
+                    >
+                        Add Course
+                    </Button>
+                </div>
+
                 <div className="py-6">
                     <Table
                         columns={columns}
@@ -102,6 +124,20 @@ const CoursesPage = () => {
                     />
                 </div>
             </Container>
+
+            <Modal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                title="Add New Course"
+                size="md"
+            >
+                <div className="space-y-4">
+                    <p className="text-textSecondary">
+                        Add your Course form here
+                    </p>
+                    {/* Add your form components here */}
+                </div>
+            </Modal>
         </>
     );
 };

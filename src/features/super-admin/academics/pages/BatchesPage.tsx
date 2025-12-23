@@ -1,5 +1,7 @@
-import { useNavigate } from "react-router-dom";
 import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import Modal from "../../../../common/ui/Modal";
+import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
 import { BatchData } from "../../../../types/academics-types";
@@ -11,6 +13,7 @@ const BatchesPage = () => {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [searchTerm, setSearchTerm] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const { data, isLoading, isFetching } = useGetBatchesQuery({
         page,
@@ -35,6 +38,14 @@ const BatchesPage = () => {
     const handleRowClick = useCallback((row: BatchData) => {
         navigate(`/super-admin/academics/batches/${row._id}/courses`);
     }, [navigate]);
+
+    const handleOpenModal = useCallback(() => {
+        setIsModalOpen(true);
+    }, []);
+
+    const handleCloseModal = useCallback(() => {
+        setIsModalOpen(false);
+    }, []);
 
     const columns: ColumnDef<BatchData, any>[] = [
         {
@@ -67,6 +78,17 @@ const BatchesPage = () => {
         <>
             <PageHeader>Batches</PageHeader>
             <Container>
+                <div className="flex justify-end">
+                    <Button
+                        type="submit"
+                        variant="primary"
+                        size="md"
+                        onClick={handleOpenModal}
+                    >
+                        Add Batch
+                    </Button>
+                </div>
+
                 <div className="py-6">
                     <Table
                         columns={columns}
@@ -83,6 +105,20 @@ const BatchesPage = () => {
                     />
                 </div>
             </Container>
+
+            <Modal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                title="Add New Batch"
+                size="md"
+            >
+                <div className="space-y-4">
+                    <p className="text-textSecondary">
+                        Add your batch form here
+                    </p>
+                    {/* Add your form components here */}
+                </div>
+            </Modal>
         </>
     );
 };
