@@ -3,7 +3,7 @@ import { useState, useCallback } from "react";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
 import { BatchData } from "../../../../types/academics-types";
-import { Table, ColumnDef } from "../../../../common/ui/Table";
+import { ColumnDef, Table } from "../../../../common/ui/Table";
 import { useGetBatchesQuery } from "../../../../state/services/endpoints/academics";
 
 const BatchesPage = () => {
