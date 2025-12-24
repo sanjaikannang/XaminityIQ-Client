@@ -1,16 +1,143 @@
+import { useState, useCallback } from "react";
+import Button from "../../../../common/ui/Button";
+import { useNavigate, useParams } from "react-router-dom";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
+import { CourseData } from "../../../../types/academics-types";
+import { ColumnDef, Table } from "../../../../common/ui/Table";
+import { useGetCoursesQuery } from "../../../../state/services/endpoints/academics";
+import Modal from "../../../../common/ui/Modal";
 
 const CoursesPage = () => {
+    const navigate = useNavigate();
+    const { batchId } = useParams<{ batchId: string }>();
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const { data, isLoading, isFetching } = useGetCoursesQuery({
+        batchId: batchId!,
+        page,
+        limit: pageSize,
+        ...(searchTerm && { search: searchTerm }),
+    });
+
+    const handleSearch = useCallback((search: string) => {
+        setSearchTerm(search);
+        setPage(1);
+    }, []);
+
+    const handlePageChange = useCallback((newPage: number) => {
+        setPage(newPage);
+    }, []);
+
+    const handlePageSizeChange = useCallback((newPageSize: number) => {
+        setPageSize(newPageSize);
+        setPage(1);
+    }, []);
+
+    const handleRowClick = useCallback((row: CourseData) => {
+        // Navigate to departments page using batchCourseId
+        navigate(`/super-admin/academics/courses/${row.batchCourseId}/departments`);
+    }, [navigate]);
+
+    const handleOpenModal = useCallback(() => {
+        setIsModalOpen(true);
+    }, []);
+
+    const handleCloseModal = useCallback(() => {
+        setIsModalOpen(false);
+    }, []);
+
+    const columns: ColumnDef<CourseData, any>[] = [
+        {
+            accessorKey: "courseCode",
+            header: "Course Code",
+        },
+        {
+            accessorKey: "courseName",
+            header: "Course Name",
+        },
+        {
+            accessorKey: "streamCode",
+            header: "Stream Code",
+        },
+        {
+            accessorKey: "streamName",
+            header: "Stream Name",
+        },
+        {
+            accessorKey: "level",
+            header: "Level",
+        },
+        {
+            accessorKey: "duration",
+            header: "Duration",
+        },
+        {
+            accessorKey: "semesters",
+            header: "Semesters",
+        },
+        {
+            accessorKey: "createdAt",
+            header: "Created At",
+            cell: ({ getValue }: { getValue: () => string }) => {
+                const date = new Date(getValue());
+                return date.toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                });
+            },
+        },
+    ];
 
     return (
         <>
             <PageHeader>Courses</PageHeader>
             <Container>
-                <div className="flex justify-center items-center h-screen">
-                    <h1 className="text-xl">Courses Page</h1>
+                <div className="flex justify-end">
+                    <Button
+                        type="submit"
+                        variant="primary"
+                        size="md"
+                        onClick={handleOpenModal}
+                    >
+                        Add Course
+                    </Button>
+                </div>
+
+                <div className="py-6">
+                    <Table
+                        columns={columns}
+                        data={data?.data || []}
+                        onRowClick={handleRowClick}
+                        totalCount={data?.pagination?.totalItems || 0}
+                        pageNumber={page}
+                        pageLimit={pageSize}
+                        totalPages={data?.pagination?.totalPages || 1}
+                        onPageChange={handlePageChange}
+                        onPageSizeChange={handlePageSizeChange}
+                        isLoading={isLoading || isFetching}
+                        onSearch={handleSearch}
+                    />
                 </div>
             </Container>
+
+            <Modal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                title="Add New Course"
+                size="md"
+            >
+                <div className="space-y-4">
+                    <p className="text-textSecondary">
+                        Add your Course form here
+                    </p>
+                    {/* Add your form components here */}
+                </div>
+            </Modal>
         </>
     );
 };
