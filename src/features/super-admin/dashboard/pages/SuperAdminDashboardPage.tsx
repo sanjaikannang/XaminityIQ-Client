@@ -2,7 +2,6 @@ import { useState, useCallback } from "react";
 import Modal from "../../../../common/ui/Modal";
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
-import { PageHeader } from "../../../../common/ui/PageHeader";
 import { ColumnDef, Table } from "../../../../common/ui/Table";
 import { useGetCoursesWithDepartmentsQuery } from "../../../../state/services/endpoints/academics";
 
@@ -63,16 +62,20 @@ const SuperAdminDashboardPage = () => {
 
     const columns: ColumnDef<CourseWithDepartments, any>[] = [
         {
+            accessorKey: "streamCode",
+            header: "Stream Code",
+        },
+        {
             accessorKey: "streamName",
             header: "Stream",
         },
         {
-            accessorKey: "courseName",
-            header: "Course Name",
-        },
-        {
             accessorKey: "courseCode",
             header: "Course Code",
+        },
+        {
+            accessorKey: "courseName",
+            header: "Course",
         },
         {
             accessorKey: "level",
@@ -87,11 +90,10 @@ const SuperAdminDashboardPage = () => {
             header: "Semesters",
         },
         {
-            // id: "departments",
             header: "Departments",
             cell: ({ row }: { row: { original: CourseWithDepartments } }) => (
                 <Button
-                    variant="secondary"
+                    variant="primary"
                     size="sm"
                     onClick={(e) => {
                         e.stopPropagation();
@@ -105,8 +107,7 @@ const SuperAdminDashboardPage = () => {
     ];
 
     return (
-        <>
-            <PageHeader>Courses & Departments</PageHeader>
+        <>          
             <Container>
                 <div className="py-6">
                     <Table
@@ -128,37 +129,31 @@ const SuperAdminDashboardPage = () => {
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
                 title={`Departments - ${selectedCourse?.courseName || ''}`}
-                size="lg"
+                size="md"
             >
                 {selectedCourse && (
-                    <div className="space-y-4">                      
-                        <div>
-                            <h3 className="text-lg font-semibold mb-3">
-                                Departments
-                            </h3>
-                            <div className="space-y-2">
+                    <div className="space-y-4">
+                        <div>                        
+                            <div className="flex flex-wrap gap-3">
                                 {selectedCourse.departments.map((dept) => (
                                     <div
                                         key={dept._id}
-                                        className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors"
+                                        className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors w-fit"
                                     >
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <div className="font-medium">{dept.deptName}</div>
-                                                <div className="text-sm text-gray-500">
-                                                    Code: {dept.deptCode}
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <div className="font-medium whitespace-nowrap">
+                                            {dept.deptName}
+                                        </div>                                        
                                     </div>
                                 ))}
+
                                 {selectedCourse.departments.length === 0 && (
-                                    <div className="text-center py-8 text-gray-500">
+                                    <div className="w-full text-center py-8 text-gray-500">
                                         No departments available for this course
                                     </div>
                                 )}
                             </div>
-                        </div>                        
+
+                        </div>
                     </div>
                 )}
             </Modal>
