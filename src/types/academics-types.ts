@@ -89,3 +89,23 @@ export interface CreateBatchResponse {
     success: boolean;
     message: string;
 }
+
+export interface CourseDepartment {
+    _id: string;
+    deptCode: string;
+    deptName: string;
+}
+
+export interface CourseWithDepartments {
+    _id: string;
+    streamCode: string;
+    streamName: string;
+    courseCode: string;
+    courseName: string;
+    level: string;
+    duration: string;
+    semesters: number;
+    departments: CourseDepartment[];
+}
+
+export type GetCoursesWithDepartmentsResponse = BaseApiResponse<CourseWithDepartments>;

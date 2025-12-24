@@ -9,6 +9,7 @@ import {
     GetDepartmentsParams,
     CreateBatchRequest,
     CreateBatchResponse,
+    GetCoursesWithDepartmentsResponse,
 } from "../../../types/academics-types";
 
 export const academicsApiService = apiInstance.injectEndpoints({
@@ -55,6 +56,18 @@ export const academicsApiService = apiInstance.injectEndpoints({
                 },
             }),
         }),
+        getCoursesWithDepartments: build.query<GetCoursesWithDepartmentsResponse, BasePaginationParams>({
+            query: (params) => ({
+                url: api.academics.getCoursesWithDepartments(),
+                method: "GET",
+                params: {
+                    page: params.page || 1,
+                    limit: params.limit || 10,
+                    ...(params.search && { search: params.search }),
+                },
+            }),
+            providesTags: ['courses-with-departments'],
+        }),
     }),
 });
 
@@ -66,4 +79,6 @@ export const {
     useLazyGetCoursesQuery,
     useGetDepartmentsQuery,
     useLazyGetDepartmentsQuery,
+    useGetCoursesWithDepartmentsQuery,
+    useLazyGetCoursesWithDepartmentsQuery,
 } = academicsApiService;
