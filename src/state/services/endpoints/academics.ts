@@ -7,6 +7,8 @@ import {
     BasePaginationParams,
     GetCoursesParams,
     GetDepartmentsParams,
+    CreateBatchRequest,
+    CreateBatchResponse,
 } from "../../../types/academics-types";
 
 export const academicsApiService = apiInstance.injectEndpoints({
@@ -21,6 +23,15 @@ export const academicsApiService = apiInstance.injectEndpoints({
                     ...(params.search && { search: params.search }),
                 },
             }),
+            providesTags: ['batches'],
+        }),
+        createBatch: build.mutation<CreateBatchResponse, CreateBatchRequest>({
+            query: (data) => ({
+                url: api.academics.createBatch(),
+                method: "POST",
+                data,
+            }),
+            invalidatesTags: ['batches'],
         }),
         getCourses: build.query<GetAllCoursesForBatchResponse, GetCoursesParams>({
             query: ({ batchId, ...params }) => ({
@@ -50,6 +61,7 @@ export const academicsApiService = apiInstance.injectEndpoints({
 export const {
     useGetBatchesQuery,
     useLazyGetBatchesQuery,
+    useCreateBatchMutation,
     useGetCoursesQuery,
     useLazyGetCoursesQuery,
     useGetDepartmentsQuery,

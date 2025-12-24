@@ -77,3 +77,15 @@ export interface GetDepartmentsParams extends BasePaginationParams {
 export interface GetSectionsParams extends BasePaginationParams {
     batchDepartmentId: string;
 }
+
+// Create Batch Types
+export interface CreateBatchRequest {
+    batchName: string;
+    startYear: string;
+    endYear: string;
+}
+
+export interface CreateBatchResponse {
+    success: boolean;
+    message: string;
+}
