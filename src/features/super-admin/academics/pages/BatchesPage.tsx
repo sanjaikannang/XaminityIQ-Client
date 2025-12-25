@@ -116,6 +116,7 @@ const BatchesPage = () => {
                         onPageChange={handlePageChange}
                         onPageSizeChange={handlePageSizeChange}
                         isLoading={isLoading || isFetching}
+                        tableTitle="Batches"
                         onSearch={handleSearch}
                     />
                 </div>

@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { useState, useCallback } from "react";
 import Button from "../../../../common/ui/Button";
 import { useNavigate, useParams } from "react-router-dom";
@@ -5,8 +6,13 @@ import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
 import { CourseData } from "../../../../types/academics-types";
 import { ColumnDef, Table } from "../../../../common/ui/Table";
-import { useGetCoursesQuery } from "../../../../state/services/endpoints/academics";
+import {
+    useGetCoursesQuery,
+    useGetAvailableCoursesQuery,
+    useMapCourseToBatchMutation
+} from "../../../../state/services/endpoints/academics";
 import Modal from "../../../../common/ui/Modal";
+import CreateCourseForm, { CreateCourseFormValues } from "../components/CreateCourseForm";
 
 const CoursesPage = () => {
     const navigate = useNavigate();
@@ -23,6 +29,13 @@ const CoursesPage = () => {
         ...(searchTerm && { search: searchTerm }),
     });
 
+    const { data: availableCoursesData, isLoading: isLoadingAvailableCourses } = useGetAvailableCoursesQuery(
+        batchId!,
+        { skip: !isModalOpen }
+    );
+
+    const [mapCourseToBatch, { isLoading: isMapping }] = useMapCourseToBatchMutation();
+
     const handleSearch = useCallback((search: string) => {
         setSearchTerm(search);
         setPage(1);
@@ -38,7 +51,6 @@ const CoursesPage = () => {
     }, []);
 
     const handleRowClick = useCallback((row: CourseData) => {
-        // Navigate to departments page using batchCourseId
         navigate(`/super-admin/academics/courses/${row.batchCourseId}/departments`);
     }, [navigate]);
 
@@ -49,6 +61,19 @@ const CoursesPage = () => {
     const handleCloseModal = useCallback(() => {
         setIsModalOpen(false);
     }, []);
+
+    const handleMapCourse = useCallback(async (values: CreateCourseFormValues) => {
+        try {
+            const response = await mapCourseToBatch({
+                batchId: batchId!,
+                courseId: values.courseId,
+            }).unwrap();
+            handleCloseModal();
+            toast.success(response.message || 'Course added successfully!');
+        } catch (error: any) {
+            throw error;
+        }
+    }, [mapCourseToBatch, batchId, handleCloseModal]);
 
     const columns: ColumnDef<CourseData, any>[] = [
         {
@@ -120,6 +145,7 @@ const CoursesPage = () => {
                         onPageChange={handlePageChange}
                         onPageSizeChange={handlePageSizeChange}
                         isLoading={isLoading || isFetching}
+                        tableTitle="Courses"
                         onSearch={handleSearch}
                     />
                 </div>
@@ -128,15 +154,16 @@ const CoursesPage = () => {
             <Modal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
-                title="Add New Course"
+                title="Add Course to Batch"
                 size="md"
             >
-                <div className="space-y-4">
-                    <p className="text-textSecondary">
-                        Add your Course form here
-                    </p>
-                    {/* Add your form components here */}
-                </div>
+                <CreateCourseForm
+                    availableCourses={availableCoursesData?.data || []}
+                    onSubmit={handleMapCourse}
+                    onCancel={handleCloseModal}
+                    isLoading={isMapping}
+                    isLoadingCourses={isLoadingAvailableCourses}
+                />
             </Modal>
         </>
     );

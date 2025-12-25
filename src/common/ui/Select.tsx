@@ -71,9 +71,7 @@ const Select: React.FC<SelectProps> = ({
     };
 
     const handleBlur = (e: React.FocusEvent<HTMLButtonElement>) => {
-        if (onBlur) {
-            onBlur(e);
-        }
+        onBlur?.(e);
     };
 
     return (
@@ -82,10 +80,13 @@ const Select: React.FC<SelectProps> = ({
                 {label && (
                     <label
                         htmlFor={id}
-                        className="block text-sm font-medium text-borderLight mb-2"
+                        className="block text-sm font-medium mb-2"
+                        style={{ color: 'var(--color-textSecondary)' }}
                     >
                         {label}
-                        {required && <span className="text-red-600 ml-1">*</span>}
+                        {required && (
+                            <span className="ml-1" style={{ color: 'var(--color-error)' }}>*</span>
+                        )}
                     </label>
                 )}
 
@@ -98,53 +99,82 @@ const Select: React.FC<SelectProps> = ({
                         onClick={handleToggle}
                         onBlur={handleBlur}
                         disabled={disabled || loading}
-                        className={`
-                        w-full ${Icon ? 'pl-10' : 'pl-3'} pr-10 py-2 border ${hasError ? 'border-red-500' : 'border-borderLight'
-                            } rounded-lg
-                        transition-all duration-200
-                        text-borderLight bg-white text-left
-                        focus:outline-none
-                        ${disabled || loading ? 'bg-borderLight cursor-not-allowed opacity-60' : 'cursor-pointer hover:border-borderLight'}
-                    `}
+                        className={`w-full ${Icon ? 'pl-10' : 'pl-3'} pr-10 py-2 rounded-lg text-left transition-all duration-200`}
+                        style={{
+                            backgroundColor: disabled || loading
+                                ? 'var(--color-bgTertiary)'
+                                : 'var(--color-bgPrimary)',
+                            border: `1px solid ${hasError ? 'var(--color-error)' : 'var(--color-borderLight)'}`,
+                            color: 'var(--color-textPrimary)',
+                            cursor: disabled || loading ? 'not-allowed' : 'pointer',
+                            opacity: disabled || loading ? 0.6 : 1
+                        }}
                     >
                         {Icon && (
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Icon className="h-5 w-5 text-borderLight" />
+                                <Icon
+                                    className="h-5 w-5"
+                                />
                             </div>
                         )}
-                        <span className={selectedOption ? 'text-borderLight' : 'text-borderLight'}>
+
+                        <span style={{ color: 'var(--color-textSecondary)' }}>
                             {loading ? 'Loading...' : (selectedOption?.label || placeholder)}
                         </span>
                     </button>
 
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                         {loading ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-borderLight border-t-transparent"></div>
+                            <div
+                                className="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent"
+                                style={{ borderColor: 'var(--color-borderDark)' }}
+                            />
                         ) : (
                             <ChevronDown
-                                className={`h-5 w-5 text-borderLight transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                                className={`h-5 w-5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                                style={{ color: 'var(--color-textSecondary)' }}
                             />
                         )}
                     </div>
 
                     {isOpen && !loading && (
-                        <div className="absolute z-50 w-full mt-1 bg-white border border-borderLight rounded-lg shadow-lg max-h-60 overflow-auto">
+                        <div
+                            className="absolute z-50 w-full mt-1 rounded-lg shadow-lg max-h-24 overflow-auto no-scrollbar"
+                            style={{
+                                backgroundColor: 'var(--color-bgPrimary)',
+                                border: '1px solid var(--color-borderLight)'
+                            }}
+                        >
                             {options.length === 0 ? (
-                                <div className="px-4 py-2 text-borderLight text-sm">
+                                <div
+                                    className="px-4 py-2 text-sm"
+                                    style={{ color: 'var(--color-textTertiary)' }}
+                                >
                                     No options available
                                 </div>
                             ) : (
-                                options.map((option) => (
+                                options.map(option => (
                                     <button
                                         key={option.value}
                                         type="button"
                                         onClick={() => handleOptionClick(option.value)}
-                                        className={`
-                                        w-full px-4 py-2 text-left hover:bg-borderLight
-                                        focus:outline-none transition-colors duration-150
-                                        ${value === option.value ? 'bg-borderLight text-borderLight font-medium' : 'text-borderLight'}
-                                        first:rounded-t-lg last:rounded-b-lg
-                                    `}
+                                        className="w-full px-4 py-2 text-left cursor-pointer transition-colors duration-150 first:rounded-t-lg last:rounded-b-lg"
+                                        style={{
+                                            backgroundColor:
+                                                value === option.value
+                                                    ? 'var(--color-bgSecondary)'
+                                                    : 'transparent',
+                                            color: 'var(--color-textPrimary)'
+                                        }}
+                                        onMouseEnter={e =>
+                                            (e.currentTarget.style.backgroundColor = 'var(--color-bgSecondary)')
+                                        }
+                                        onMouseLeave={e =>
+                                        (e.currentTarget.style.backgroundColor =
+                                            value === option.value
+                                                ? 'var(--color-bgSecondary)'
+                                                : 'transparent')
+                                        }
                                     >
                                         {option.label}
                                     </button>
@@ -155,7 +185,12 @@ const Select: React.FC<SelectProps> = ({
                 </div>
 
                 {hasError && (
-                    <p className="text-xs text-red-600 mt-1">{error}</p>
+                    <p
+                        className="text-xs mt-1"
+                        style={{ color: 'var(--color-error)' }}
+                    >
+                        {error}
+                    </p>
                 )}
             </div>
         </>

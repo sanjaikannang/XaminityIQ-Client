@@ -90,6 +90,31 @@ export interface CreateBatchResponse {
     message: string;
 }
 
+// Available Courses Types
+export interface CourseInfo {
+    _id: string;
+    courseCode: string;
+    courseName: string;
+}
+
+export interface GetAvailableCoursesResponse {
+    success: boolean;
+    message: string;
+    data?: CourseInfo[];
+}
+
+// Map Course to Batch Types
+export interface MapCourseToBatchRequest {
+    batchId: string;
+    courseId: string;
+}
+
+export interface MapCourseToBatchResponse {
+    message: string;
+    batchCourseId: string;
+}
+
+// Courses with Departments Types
 export interface CourseDepartment {
     _id: string;
     deptCode: string;

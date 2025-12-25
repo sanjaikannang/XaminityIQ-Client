@@ -109,6 +109,7 @@ const DepartmentsPage = () => {
                         onPageChange={handlePageChange}
                         onPageSizeChange={handlePageSizeChange}
                         isLoading={isLoading || isFetching}
+                        tableTitle="Departments"
                         onSearch={handleSearch}
                     />
                 </div>
