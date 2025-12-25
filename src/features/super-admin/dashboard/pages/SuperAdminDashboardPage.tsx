@@ -120,6 +120,7 @@ const SuperAdminDashboardPage = () => {
                         onPageChange={handlePageChange}
                         onPageSizeChange={handlePageSizeChange}
                         isLoading={isLoading || isFetching}
+                        tableTitle="Courses & Departments"
                         onSearch={handleSearch}
                     />
                 </div>
