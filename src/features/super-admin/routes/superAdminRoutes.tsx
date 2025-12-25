@@ -3,8 +3,11 @@ import type { RouteObject } from "react-router-dom";
 import { RoleGuard } from "../../../hoc/withRoleGuard";
 import BatchesPage from "../academics/pages/BatchesPage";
 import CoursesPage from "../academics/pages/CoursesPage";
+import StudentsPage from "../students/pages/StudentsPage";
+import FacultiesPage from "../faculties/pages/FacultiesPage";
 import DepartmentsPage from "../academics/pages/DepartmentsPage";
 import SuperAdminDashboardPage from "../dashboard/pages/SuperAdminDashboardPage";
+import ExamsPage from "../exams/pages/ExamsPage";
 
 export const superAdminRoutes: RouteObject[] = [
     {
@@ -39,5 +42,32 @@ export const superAdminRoutes: RouteObject[] = [
                 <DepartmentsPage />
             </RoleGuard>
         ),
-    }    
+    },
+    // ===== Students =====
+    {
+        path: "/super-admin/students",
+        element: (
+            <RoleGuard allowedRoles={[UserRole.ADMIN]}>
+                <StudentsPage />
+            </RoleGuard>
+        ),
+    },
+    // ===== Faculties =====
+    {
+        path: "/super-admin/faculties",
+        element: (
+            <RoleGuard allowedRoles={[UserRole.ADMIN]}>
+                <FacultiesPage />
+            </RoleGuard>
+        ),
+    },
+    // ===== Exams =====
+    {
+        path: "/super-admin/exams",
+        element: (
+            <RoleGuard allowedRoles={[UserRole.ADMIN]}>
+                <ExamsPage />
+            </RoleGuard>
+        ),
+    },
 ];

@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { logout } from "../../utils/logout";
 import { getItemFromStorage } from "../../utils/storage";
 import { Outlet, useLocation, Link, useNavigate } from "react-router-dom";
-import { LogOut, Home, type LucideIcon, GraduationCap } from "lucide-react";
+import { LogOut, Home, type LucideIcon, GraduationCap, Users, UserCog, ClipboardCheck } from "lucide-react";
 
 interface NavigationItem {
     id: string;
@@ -25,6 +25,27 @@ const navigationItems: NavigationItem[] = [
         path: "/super-admin/academics/batches",
         icon: GraduationCap,
         matchPattern: "/super-admin/academics",
+    },
+    {
+        id: "students",
+        label: "Students",
+        path: "/super-admin/students",
+        icon: Users,
+        matchPattern: "/super-admin/students",
+    },
+    {
+        id: "faculties",
+        label: "Faculties",
+        path: "/super-admin/faculties",
+        icon: UserCog,
+        matchPattern: "/super-admin/faculties",
+    },
+    {
+        id: "exams",
+        label: "Exams",
+        path: "/super-admin/exams",
+        icon: ClipboardCheck,
+        matchPattern: "/super-admin/exams",
     }
 ];
 
