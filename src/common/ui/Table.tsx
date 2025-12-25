@@ -21,6 +21,7 @@ interface TableProps<TData, TValue> {
     onPageChange: (page: number) => void;
     onPageSizeChange: (pageSize: number) => void;
     isLoading: boolean;
+    tableTitle: string;
     onSearch?: (searchTerm: string) => void;
     onFilterApply?: (filters: Record<string, any>) => void;
 }
@@ -34,6 +35,7 @@ export function Table<TData, TValue>({
     totalPages,
     onPageChange,
     isLoading,
+    tableTitle,
     onSearch,
 }: TableProps<TData, TValue>) {
     const [searchTerm, setSearchTerm] = useState("");
@@ -51,7 +53,10 @@ export function Table<TData, TValue>({
         <>
             <div className="w-full">
                 {/* Search and Filter Bar */}
-                <div className="flex items-center justify-end gap-4 px-4 py-4 bg-whiteColor border border-borderLight border-b-0 rounded-t-xl">
+                <div className="flex items-center justify-between gap-4 px-4 py-4 bg-whiteColor border border-borderLight border-b-0 rounded-t-xl">
+                    <div>
+                        <div className="font-medium text-2xl">{tableTitle}</div>
+                    </div>
                     <div className="flex items-center gap-3">
                         {/* Search Input */}
                         {onSearch && (

@@ -1,12 +1,14 @@
+import toast from "react-hot-toast";
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import Modal from "../../../../common/ui/Modal";
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
 import { BatchData } from "../../../../types/academics-types";
 import { ColumnDef, Table } from "../../../../common/ui/Table";
-import { useGetBatchesQuery } from "../../../../state/services/endpoints/academics";
-import Modal from "../../../../common/ui/Modal";
+import CreateBatchForm, { CreateBatchFormValues } from "../components/CreateBatchForm";
+import { useGetBatchesQuery, useCreateBatchMutation } from "../../../../state/services/endpoints/academics";
 
 const BatchesPage = () => {
     const navigate = useNavigate();
@@ -21,9 +23,11 @@ const BatchesPage = () => {
         ...(searchTerm && { search: searchTerm }),
     });
 
+    const [createBatch, { isLoading: isCreating }] = useCreateBatchMutation();
+
     const handleSearch = useCallback((search: string) => {
         setSearchTerm(search);
-        setPage(1); // Reset to first page on search
+        setPage(1);
     }, []);
 
     const handlePageChange = useCallback((newPage: number) => {
@@ -32,7 +36,7 @@ const BatchesPage = () => {
 
     const handlePageSizeChange = useCallback((newPageSize: number) => {
         setPageSize(newPageSize);
-        setPage(1); // Reset to first page when page size changes
+        setPage(1);
     }, []);
 
     const handleRowClick = useCallback((row: BatchData) => {
@@ -46,6 +50,17 @@ const BatchesPage = () => {
     const handleCloseModal = useCallback(() => {
         setIsModalOpen(false);
     }, []);
+
+    const handleCreateBatch = useCallback(async (values: CreateBatchFormValues) => {
+        try {
+            const response = await createBatch(values).unwrap();
+            handleCloseModal();
+            toast.success(response.message || 'Batch created successfully!');
+            handleCloseModal();
+        } catch (error) {
+            throw error;
+        }
+    }, [createBatch, handleCloseModal]);
 
     const columns: ColumnDef<BatchData, any>[] = [
         {
@@ -85,7 +100,7 @@ const BatchesPage = () => {
                         size="md"
                         onClick={handleOpenModal}
                     >
-                        Add Batch
+                        Create Batch
                     </Button>
                 </div>
 
@@ -101,6 +116,7 @@ const BatchesPage = () => {
                         onPageChange={handlePageChange}
                         onPageSizeChange={handlePageSizeChange}
                         isLoading={isLoading || isFetching}
+                        tableTitle="Batches"
                         onSearch={handleSearch}
                     />
                 </div>
@@ -109,15 +125,14 @@ const BatchesPage = () => {
             <Modal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
-                title="Add New Batch"
+                title="Create New Batch"
                 size="md"
             >
-                <div className="space-y-4">
-                    <p className="text-textSecondary">
-                        Add your batch form here
-                    </p>
-                    {/* Add your form components here */}
-                </div>
+                <CreateBatchForm
+                    onSubmit={handleCreateBatch}
+                    onCancel={handleCloseModal}
+                    isLoading={isCreating}
+                />
             </Modal>
         </>
     );

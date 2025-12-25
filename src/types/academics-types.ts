@@ -77,3 +77,86 @@ export interface GetDepartmentsParams extends BasePaginationParams {
 export interface GetSectionsParams extends BasePaginationParams {
     batchDepartmentId: string;
 }
+
+// Create Batch Types
+export interface CreateBatchRequest {
+    batchName: string;
+    startYear: string;
+    endYear: string;
+}
+
+export interface CreateBatchResponse {
+    success: boolean;
+    message: string;
+}
+
+// Available Courses Types
+export interface CourseInfo {
+    _id: string;
+    courseCode: string;
+    courseName: string;
+}
+
+export interface GetAvailableCoursesResponse {
+    success: boolean;
+    message: string;
+    data?: CourseInfo[];
+}
+
+// Map Course to Batch Types
+export interface MapCourseToBatchRequest {
+    batchId: string;
+    courseId: string;
+}
+
+export interface MapCourseToBatchResponse {
+    message: string;
+    batchCourseId: string;
+}
+
+// Courses with Departments Types
+export interface CourseDepartment {
+    _id: string;
+    deptCode: string;
+    deptName: string;
+}
+
+export interface CourseWithDepartments {
+    _id: string;
+    streamCode: string;
+    streamName: string;
+    courseCode: string;
+    courseName: string;
+    level: string;
+    duration: string;
+    semesters: number;
+    departments: CourseDepartment[];
+}
+
+export type GetCoursesWithDepartmentsResponse = BaseApiResponse<CourseWithDepartments>;
+
+// Available Departments Types
+export interface DepartmentInfo {
+    _id: string;
+    deptCode: string;
+    deptName: string;
+}
+
+export interface GetAvailableDepartmentsResponse {
+    success: boolean;
+    message: string;
+    data?: DepartmentInfo[];
+}
+
+// Add Department to Batch Course Types
+export interface AddDepartmentToBatchCourseRequest {
+    batchCourseId: string;
+    deptId: string;
+    totalSeats: number;
+    sectionCapacity?: number;
+}
+
+export interface AddDepartmentToBatchCourseResponse {
+    message: string;
+    batchDeptId: string;
+}

@@ -43,7 +43,7 @@ const Modal: React.FC<ModalProps> = ({
                 {/* Modal */}
                 <div className="flex min-h-full items-center justify-center px-4">
                     <div
-                        className={`relative transform overflow-hidden rounded-lg bg-bgPrimary text-left shadow-xl transition-all w-full border border-borderLight ${sizeClasses[size]}`}
+                        className={`relative transform overflow-hidden rounded-xl bg-bgPrimary text-left shadow-xl transition-all w-full border border-borderLight ${sizeClasses[size]}`}
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between p-3 border-b border-borderLight">
