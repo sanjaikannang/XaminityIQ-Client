@@ -51,7 +51,7 @@ const CoursesPage = () => {
     }, []);
 
     const handleRowClick = useCallback((row: CourseData) => {
-        navigate(`/super-admin/academics/courses/${row.batchCourseId}/departments`);
+        navigate(`/super-admin/academics/courses/${row.batchCourseId}/departments?courseId=${row._id}`);        
     }, [navigate]);
 
     const handleOpenModal = useCallback(() => {

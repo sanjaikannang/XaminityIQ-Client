@@ -1,26 +1,42 @@
-import { useParams } from "react-router-dom";
+import toast from "react-hot-toast";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useState, useCallback } from "react";
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
 import { DepartmentData } from "../../../../types/academics-types";
 import { ColumnDef, Table } from "../../../../common/ui/Table";
-import { useGetDepartmentsQuery } from "../../../../state/services/endpoints/academics";
+import {
+    useGetDepartmentsQuery,
+    useGetAvailableDepartmentsQuery,
+    useAddDepartmentToBatchCourseMutation
+} from "../../../../state/services/endpoints/academics";
 import Modal from "../../../../common/ui/Modal";
+import CreateDepartmentForm, { CreateDepartmentFormValues } from "../components/CreateDepartmentForm";
 
 const DepartmentsPage = () => {
-    const { courseId } = useParams<{ courseId: string }>();
+    const { courseId: batchCourseId } = useParams<{ courseId: string }>();
+    const [searchParams] = useSearchParams();
+    const courseId = searchParams.get('courseId'); // Get the actual courseId from query params
+
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [searchTerm, setSearchTerm] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const { data, isLoading, isFetching } = useGetDepartmentsQuery({
-        batchCourseId: courseId!,
+        batchCourseId: batchCourseId!,
         page,
         limit: pageSize,
         ...(searchTerm && { search: searchTerm }),
     });
+
+    const { data: availableDepartmentsData, isLoading: isLoadingAvailableDepartments } = useGetAvailableDepartmentsQuery(
+        courseId!,
+        { skip: !isModalOpen || !courseId }
+    );
+
+    const [addDepartmentToBatchCourse, { isLoading: isAdding }] = useAddDepartmentToBatchCourseMutation();
 
     const handleSearch = useCallback((search: string) => {
         setSearchTerm(search);
@@ -43,6 +59,21 @@ const DepartmentsPage = () => {
     const handleCloseModal = useCallback(() => {
         setIsModalOpen(false);
     }, []);
+
+    const handleAddDepartment = useCallback(async (values: CreateDepartmentFormValues) => {
+        try {
+            const response = await addDepartmentToBatchCourse({
+                batchCourseId: batchCourseId!,
+                deptId: values.deptId,
+                totalSeats: Number(values.totalSeats),
+                ...(values.sectionCapacity && { sectionCapacity: Number(values.sectionCapacity) }),
+            }).unwrap();
+            handleCloseModal();
+            toast.success(response.message || 'Department added successfully!');
+        } catch (error: any) {
+            throw error;
+        }
+    }, [addDepartmentToBatchCourse, batchCourseId, handleCloseModal]);
 
     const columns: ColumnDef<DepartmentData, any>[] = [
         {
@@ -118,15 +149,16 @@ const DepartmentsPage = () => {
             <Modal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
-                title="Add New Dept"
+                title="Add Department to Course"
                 size="md"
             >
-                <div className="space-y-4">
-                    <p className="text-textSecondary">
-                        Add your Dept form here
-                    </p>
-                    {/* Add your form components here */}
-                </div>
+                <CreateDepartmentForm
+                    availableDepartments={availableDepartmentsData?.data || []}
+                    onSubmit={handleAddDepartment}
+                    onCancel={handleCloseModal}
+                    isLoading={isAdding}
+                    isLoadingDepartments={isLoadingAvailableDepartments}
+                />
             </Modal>
         </>
     );

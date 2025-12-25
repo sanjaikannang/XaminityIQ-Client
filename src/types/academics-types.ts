@@ -134,3 +134,29 @@ export interface CourseWithDepartments {
 }
 
 export type GetCoursesWithDepartmentsResponse = BaseApiResponse<CourseWithDepartments>;
+
+// Available Departments Types
+export interface DepartmentInfo {
+    _id: string;
+    deptCode: string;
+    deptName: string;
+}
+
+export interface GetAvailableDepartmentsResponse {
+    success: boolean;
+    message: string;
+    data?: DepartmentInfo[];
+}
+
+// Add Department to Batch Course Types
+export interface AddDepartmentToBatchCourseRequest {
+    batchCourseId: string;
+    deptId: string;
+    totalSeats: number;
+    sectionCapacity?: number;
+}
+
+export interface AddDepartmentToBatchCourseResponse {
+    message: string;
+    batchDeptId: string;
+}

@@ -13,6 +13,9 @@ import {
     GetAvailableCoursesResponse,
     MapCourseToBatchRequest,
     MapCourseToBatchResponse,
+    GetAvailableDepartmentsResponse,
+    AddDepartmentToBatchCourseRequest,
+    AddDepartmentToBatchCourseResponse,
 } from "../../../types/academics-types";
 
 export const academicsApiService = apiInstance.injectEndpoints({
@@ -73,6 +76,25 @@ export const academicsApiService = apiInstance.injectEndpoints({
                     ...(params.search && { search: params.search }),
                 },
             }),
+            providesTags: ['departments'],
+        }),
+        getAvailableDepartments: build.query<GetAvailableDepartmentsResponse, string>({
+            query: (courseId) => ({
+                url: api.academics.getAvailableDepartments(courseId),
+                method: "GET",
+            }),
+        }),
+        addDepartmentToBatchCourse: build.mutation<AddDepartmentToBatchCourseResponse, AddDepartmentToBatchCourseRequest>({
+            query: ({ batchCourseId, deptId, totalSeats, sectionCapacity }) => ({
+                url: api.academics.addDepartmentToBatchCourse(batchCourseId),
+                method: "POST",
+                data: {
+                    deptId,
+                    totalSeats,
+                    ...(sectionCapacity && { sectionCapacity }),
+                },
+            }),
+            invalidatesTags: ['departments'],
         }),
         getCoursesWithDepartments: build.query<GetCoursesWithDepartmentsResponse, BasePaginationParams>({
             query: (params) => ({
@@ -100,6 +122,9 @@ export const {
     useMapCourseToBatchMutation,
     useGetDepartmentsQuery,
     useLazyGetDepartmentsQuery,
+    useGetAvailableDepartmentsQuery,
+    useLazyGetAvailableDepartmentsQuery,
+    useAddDepartmentToBatchCourseMutation,
     useGetCoursesWithDepartmentsQuery,
     useLazyGetCoursesWithDepartmentsQuery,
 } = academicsApiService;

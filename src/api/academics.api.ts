@@ -4,6 +4,8 @@ export const academics = {
     getAvailableCourses: (batchId: string) => `/admin/batches/${batchId}/available-courses`,
     mapCourseToBatch: (batchId: string) => `/admin/batches/${batchId}/courses`,
     getDepartments: (batchCourseId: string) => `/admin/batch-courses/${batchCourseId}/departments`,
+    getAvailableDepartments: (courseId: string) => `/admin/courses/${courseId}/departments`,
+    addDepartmentToBatchCourse: (batchCourseId: string) => `/admin/batch-courses/${batchCourseId}/departments`,
     createBatch: () => `/admin/batches`,
     getCoursesWithDepartments: () => "/admin/courses-with-departments",
 };
