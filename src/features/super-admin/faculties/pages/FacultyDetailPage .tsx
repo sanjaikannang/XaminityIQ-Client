@@ -1,8 +1,11 @@
+import Button from "../../../../common/ui/Button";
+import Timeline from "../../../../common/ui/Timeline";
 import { useParams, useNavigate } from "react-router-dom";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
-import Button from "../../../../common/ui/Button";
+import FacultyDetailSkeleton from "../components/FacultyDetailSkeleton";
 import { useGetFacultyByIdQuery } from "../../../../state/services/endpoints/faculty";
+import { Calendar, Flag, GraduationCap, MapPin, Phone, User, Users, Briefcase } from "lucide-react";
 
 const FacultyDetailPage = () => {
     const { id } = useParams<{ id: string }>();
@@ -14,9 +17,16 @@ const FacultyDetailPage = () => {
             <>
                 <PageHeader>Faculty Details</PageHeader>
                 <Container>
-                    <div className="flex justify-center items-center h-96">
-                        <div className="text-lg">Loading...</div>
+                    <div className="mb-6">
+                        <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => navigate("/super-admin/faculties")}
+                        >
+                            ← Back to Faculty
+                        </Button>
                     </div>
+                    <FacultyDetailSkeleton />
                 </Container>
             </>
         );
@@ -42,9 +52,9 @@ const FacultyDetailPage = () => {
         <>
             <PageHeader>Faculty Details</PageHeader>
             <Container>
-                <div className="mb-4">
+                <div className="mb-6">
                     <Button
-                        variant="secondary"
+                        variant="primary"
                         size="sm"
                         onClick={() => navigate("/super-admin/faculties")}
                     >
@@ -52,260 +62,314 @@ const FacultyDetailPage = () => {
                     </Button>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
-                    {/* Personal Details Section */}
-                    <div className="border-b pb-6">
-                        <div className="flex items-start gap-6">
-                            <img
-                                src={faculty.personalDetails.profilePhotoUrl}
-                                alt={fullName}
-                                className="w-32 h-32 rounded-lg object-cover"
-                                onError={(e) => {
-                                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&size=128&background=random`;
-                                }}
-                            />
-                            <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <h2 className="text-2xl font-bold">{fullName}</h2>
-                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${faculty.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-                                        {faculty.isActive ? "Active" : "Inactive"}
-                                    </span>
+                <div className="space-y-6 mb-6">
+                    {/* Section 1: Profile Header with Status Badge */}
+                    <div className="bg-whiteColor rounded-xl border border-borderDefault p-4">
+                        <div className="flex gap-8 items-start">
+                            <div className="relative">
+                                <img
+                                    src={faculty.personalDetails.profilePhotoUrl}
+                                    alt={fullName}
+                                    className="w-40 h-40 rounded-xl object-contain border-4 border-primaryLighter"
+                                    onError={(e) => {
+                                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&size=128&background=029de3`;
+                                    }}
+                                />
+                            </div>
+
+                            <div className="flex-1 self-center">
+                                <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-primaryLighter flex items-center justify-center flex-shrink-0">
+                                            <User className="w-5 h-5 text-primary" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-textTertiary">Employee  ID</p>
+                                            <p className="text-sm font-semibold text-textPrimary">{faculty.employmentDetails.employeeId}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-primaryLighter flex items-center justify-center flex-shrink-0">
+                                            <Calendar className="w-5 h-5 text-primary" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-textTertiary">Date of Birth</p>
+                                            <p className="text-sm font-semibold text-textPrimary">
+                                                {new Date(faculty.personalDetails.dateOfBirth).toLocaleDateString("en-US", {
+                                                    year: "numeric",
+                                                    month: "short",
+                                                    day: "numeric",
+                                                })}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-primaryLighter flex items-center justify-center flex-shrink-0">
+                                            <Flag className="w-5 h-5 text-primary" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-textTertiary">Nationality</p>
+                                            <p className="text-sm font-semibold text-textPrimary">{faculty.personalDetails.nationality}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-primaryLighter flex items-center justify-center flex-shrink-0">
+                                            <Flag className="w-5 h-5 text-primary" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-textTertiary">Status</p>
+                                            <p className="text-sm font-semibold text-textPrimary">{faculty.isActive ? "Active" : "Inactive"}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-primaryLighter flex items-center justify-center flex-shrink-0">
+                                            <User className="w-5 h-5 text-primary" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-textTertiary">Gender</p>
+                                            <p className="text-sm font-semibold text-textPrimary">{faculty.personalDetails.gender}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-primaryLighter flex items-center justify-center flex-shrink-0">
+                                            <Users className="w-5 h-5 text-primary" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-textTertiary">Marital Status</p>
+                                            <p className="text-sm font-semibold text-textPrimary">{faculty.personalDetails.maritalStatus}</p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4 text-sm">
-                                    <div>
-                                        <span className="font-semibold">Faculty ID:</span> {faculty.facultyId}
-                                    </div>
-                                    <div>
-                                        <span className="font-semibold">Gender:</span> {faculty.personalDetails.gender}
-                                    </div>
-                                    <div>
-                                        <span className="font-semibold">Date of Birth:</span>{" "}
-                                        {new Date(faculty.personalDetails.dateOfBirth).toLocaleDateString("en-US", {
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Section 2: Employment & Contact Details */}
+                    <div className="grid grid-cols-2 gap-6">
+                        {/* Employment Details */}
+                        <div className="bg-whiteColor rounded-xl border border-borderDefault p-4">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                    <Briefcase className="w-5 h-5 text-primary" />
+                                </div>
+                                <h2 className="text-xl font-bold text-textPrimary">Employment Details</h2>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-start py-3 border-b border-borderLight">
+                                    <span className="text-sm text-textSecondary">Faculty ID</span>
+                                    <span className="text-sm font-semibold text-textPrimary">{faculty.facultyId}</span>
+                                </div>
+                                <div className="flex justify-between items-start py-3 border-b border-borderLight">
+                                    <span className="text-sm text-textSecondary">Designation</span>
+                                    <span className="text-sm font-semibold text-textPrimary">{faculty.employmentDetails.designation}</span>
+                                </div>
+                                <div className="flex justify-between items-start py-3 border-b border-borderLight">
+                                    <span className="text-sm text-textSecondary">Department</span>
+                                    <span className="text-sm font-semibold text-textPrimary">{faculty.employmentDetails.departmentName}</span>
+                                </div>
+                                <div className="flex justify-between items-start py-3 border-b border-borderLight">
+                                    <span className="text-sm text-textSecondary">Employment Type</span>
+                                    <span className="text-sm font-semibold text-textPrimary">{faculty.employmentDetails.employmentType}</span>
+                                </div>
+                                <div className="flex justify-between items-start py-3 border-b border-borderLight">
+                                    <span className="text-sm text-textSecondary">Date of Joining</span>
+                                    <span className="text-sm font-semibold text-textPrimary">
+                                        {new Date(faculty.employmentDetails.dateOfJoining).toLocaleDateString("en-US", {
                                             year: "numeric",
-                                            month: "long",
+                                            month: "short",
                                             day: "numeric",
                                         })}
+                                    </span>
+                                </div>
+                                {faculty.employmentDetails.dateOfLeaving && (
+                                    <div className="flex justify-between items-start py-3 border-b border-borderLight">
+                                        <span className="text-sm text-textSecondary">Date of Leaving</span>
+                                        <span className="text-sm font-semibold text-textPrimary">
+                                            {new Date(faculty.employmentDetails.dateOfLeaving).toLocaleDateString("en-US", {
+                                                year: "numeric",
+                                                month: "short",
+                                                day: "numeric",
+                                            })}
+                                        </span>
                                     </div>
+                                )}
+                                <div className="flex justify-between items-start py-3 border-b border-borderLight">
+                                    <span className="text-sm text-textSecondary">Total Experience</span>
+                                    <span className="text-sm font-semibold text-textPrimary">{faculty.employmentDetails.totalExperienceYears} years</span>
+                                </div>
+                                <div className="flex justify-between items-start py-3 border-b border-borderLight">
+                                    <span className="text-sm text-textSecondary">Qualification</span>
+                                    <span className="text-sm font-semibold text-textPrimary">{faculty.employmentDetails.highestQualification}</span>
+                                </div>
+                                {faculty.employmentDetails.basicSalary && (
+                                    <div className="flex justify-between items-start py-3 border-b border-borderLight">
+                                        <span className="text-sm text-textSecondary">Basic Salary</span>
+                                        <span className="text-sm font-semibold text-textPrimary">₹{faculty.employmentDetails.basicSalary.toLocaleString()}</span>
+                                    </div>
+                                )}
+                                {faculty.employmentDetails.remarks && (
+                                    <div className="pt-3">
+                                        <p className="text-xs text-textTertiary italic">{faculty.employmentDetails.remarks}</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Contact Details */}
+                        <div className="bg-whiteColor rounded-xl border border-borderDefault p-4">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                    <Phone className="w-5 h-5 text-primary" />
+                                </div>
+                                <h2 className="text-xl font-bold text-textPrimary">Contact Details</h2>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-start py-3 border-b border-borderLight">
+                                    <span className="text-sm text-textSecondary">Personal Email</span>
+                                    <span className="text-sm font-semibold text-textPrimary">{faculty.contactDetails.personalEmail}</span>
+                                </div>
+                                <div className="flex justify-between items-start py-3 border-b border-borderLight">
+                                    <span className="text-sm text-textSecondary">Faculty Email</span>
+                                    <span className="text-sm font-semibold text-textPrimary">{faculty.contactDetails.facultyEmail}</span>
+                                </div>
+                                <div className="flex justify-between items-start py-3 border-b border-borderLight">
+                                    <span className="text-sm text-textSecondary">Phone Number</span>
+                                    <span className="text-sm font-semibold text-textPrimary">{faculty.contactDetails.phoneNumber}</span>
+                                </div>
+                                {faculty.contactDetails.alternatePhoneNumber && (
+                                    <div className="flex justify-between items-start py-3">
+                                        <span className="text-sm text-textSecondary">Alternate Phone</span>
+                                        <span className="text-sm font-semibold text-textPrimary">{faculty.contactDetails.alternatePhoneNumber}</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="bg-bgSecondary border border-borderDefault rounded-xl p-3 mt-3">
+                                <p className="text-sm font-semibold text-textSecondary mb-3">Emergency Contact</p>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between">
+                                        <span className="text-sm text-textTertiary">Name</span>
+                                        <span className="text-sm font-semibold text-textPrimary">{faculty.contactDetails.emergencyContact.name}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-sm text-textTertiary">Relation</span>
+                                        <span className="text-sm font-semibold text-textPrimary">{faculty.contactDetails.emergencyContact.relation}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-sm text-textTertiary">Phone</span>
+                                        <span className="text-sm font-semibold text-textPrimary">{faculty.contactDetails.emergencyContact.phoneNumber}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Section 3: Education History & Address */}
+                    <div className="grid grid-cols-2 gap-6">
+                        {/* Education History with Timeline */}
+                        <div className="bg-whiteColor rounded-xl border border-borderDefault p-4">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                    <GraduationCap className="w-5 h-5 text-primary" />
+                                </div>
+                                <h2 className="text-xl font-bold text-textPrimary">Education History</h2>
+                            </div>
+
+                            <div className="mt-6">
+                                {faculty.educationHistory.map((edu, index) => (
+                                    <Timeline
+                                        key={index}
+                                        type="education"
+                                        data={edu}
+                                        isLast={index === faculty.educationHistory.length - 1}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Address Details */}
+                        <div className="bg-whiteColor rounded-xl border border-borderDefault p-4">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                    <MapPin className="w-5 h-5 text-primary" />
+                                </div>
+                                <h2 className="text-xl font-bold text-textPrimary">Address Details</h2>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <MapPin className="w-4 h-4 text-primary" />
+                                        <h3 className="text-sm font-semibold text-textPrimary">Current Address</h3>
+                                    </div>
+                                    <div className="bg-bgSecondary rounded-xl p-4 border border-borderDefault">
+                                        <p className="text-sm text-textSecondary leading-relaxed">
+                                            {faculty.addressDetails.currentAddress.addressLine1}
+                                            {faculty.addressDetails.currentAddress.addressLine2 && `, ${faculty.addressDetails.currentAddress.addressLine2}`}
+                                            <br />
+                                            {faculty.addressDetails.currentAddress.city},
+                                            <br />
+                                            {faculty.addressDetails.currentAddress.state} - {faculty.addressDetails.currentAddress.pincode}
+                                            <br />
+                                            {faculty.addressDetails.currentAddress.country}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {!faculty.addressDetails.sameAsCurrent && faculty.addressDetails.permanentAddress ? (
                                     <div>
-                                        <span className="font-semibold">Marital Status:</span> {faculty.personalDetails.maritalStatus}
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <MapPin className="w-4 h-4 text-primary" />
+                                            <h3 className="text-sm font-semibold text-textPrimary">Permanent Address</h3>
+                                        </div>
+                                        <div className="bg-bgSecondary rounded-xl p-4 border border-borderDefault">
+                                            <p className="text-sm text-textSecondary leading-relaxed">
+                                                {faculty.addressDetails.permanentAddress.addressLine1}
+                                                {faculty.addressDetails.permanentAddress.addressLine2 && `, ${faculty.addressDetails.permanentAddress.addressLine2}`}
+                                                <br />
+                                                {faculty.addressDetails.permanentAddress.city},
+                                                <br />
+                                                {faculty.addressDetails.permanentAddress.state} - {faculty.addressDetails.permanentAddress.pincode}
+                                                <br />
+                                                {faculty.addressDetails.permanentAddress.country}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span className="font-semibold">Nationality:</span> {faculty.personalDetails.nationality}
+                                ) : (
+                                    <div className="bg-primaryLighter rounded-xl p-4 border border-primary/20">
+                                        <p className="text-sm text-primary font-medium">
+                                            Permanent address is same as current address
+                                        </p>
                                     </div>
-                                    {faculty.personalDetails.religion && (
-                                        <div>
-                                            <span className="font-semibold">Religion:</span> {faculty.personalDetails.religion}
-                                        </div>
-                                    )}
-                                </div>
+                                )}
                             </div>
                         </div>
                     </div>
 
-                    {/* Employment Details Section */}
-                    <div className="border-b pb-6">
-                        <h3 className="text-xl font-bold mb-4">Employment Details</h3>
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                                <span className="font-semibold">Employee ID:</span> {faculty.employmentDetails.employeeId}
+                    {/* Section 4: Work Experience */}
+                    <div className="bg-whiteColor rounded-xl border border-borderDefault p-4">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                <Briefcase className="w-5 h-5 text-primary" />
                             </div>
-                            <div>
-                                <span className="font-semibold">Designation:</span> {faculty.employmentDetails.designation}
-                            </div>
-                            <div>
-                                <span className="font-semibold">Department:</span> {faculty.employmentDetails.departmentName}
-                            </div>
-                            <div>
-                                <span className="font-semibold">Employment Type:</span> {faculty.employmentDetails.employmentType}
-                            </div>
-                            <div>
-                                <span className="font-semibold">Date of Joining:</span>{" "}
-                                {new Date(faculty.employmentDetails.dateOfJoining).toLocaleDateString("en-US", {
-                                    year: "numeric",
-                                    month: "long",
-                                    day: "numeric",
-                                })}
-                            </div>
-                            {faculty.employmentDetails.dateOfLeaving && (
-                                <div>
-                                    <span className="font-semibold">Date of Leaving:</span>{" "}
-                                    {new Date(faculty.employmentDetails.dateOfLeaving).toLocaleDateString("en-US", {
-                                        year: "numeric",
-                                        month: "long",
-                                        day: "numeric",
-                                    })}
-                                </div>
-                            )}
-                            <div>
-                                <span className="font-semibold">Total Experience:</span> {faculty.employmentDetails.totalExperienceYears} years
-                            </div>
-                            <div>
-                                <span className="font-semibold">Highest Qualification:</span> {faculty.employmentDetails.highestQualification}
-                            </div>
-                            <div>
-                                <span className="font-semibold">Status:</span>{" "}
-                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${faculty.employmentDetails.status.toLowerCase() === "active"
-                                        ? "bg-green-100 text-green-800"
-                                        : "bg-red-100 text-red-800"
-                                    }`}>
-                                    {faculty.employmentDetails.status}
-                                </span>
-                            </div>
-                            {faculty.employmentDetails.basicSalary && (
-                                <div>
-                                    <span className="font-semibold">Basic Salary:</span> ₹{faculty.employmentDetails.basicSalary.toLocaleString()}
-                                </div>
-                            )}
-                            {faculty.employmentDetails.remarks && (
-                                <div className="col-span-2">
-                                    <span className="font-semibold">Remarks:</span> {faculty.employmentDetails.remarks}
-                                </div>
-                            )}
+                            <h2 className="text-xl font-bold text-textPrimary">Work Experience</h2>
                         </div>
-                    </div>
 
-                    {/* Contact Details Section */}
-                    <div className="border-b pb-6">
-                        <h3 className="text-xl font-bold mb-4">Contact Details</h3>
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                                <span className="font-semibold">Personal Email:</span> {faculty.contactDetails.personalEmail}
-                            </div>
-                            <div>
-                                <span className="font-semibold">Faculty Email:</span> {faculty.contactDetails.facultyEmail}
-                            </div>
-                            <div>
-                                <span className="font-semibold">Phone Number:</span> {faculty.contactDetails.phoneNumber}
-                            </div>
-                            {faculty.contactDetails.alternatePhoneNumber && (
-                                <div>
-                                    <span className="font-semibold">Alternate Phone:</span> {faculty.contactDetails.alternatePhoneNumber}
-                                </div>
-                            )}
-                        </div>
-                        <div className="mt-4">
-                            <h4 className="font-semibold mb-2">Emergency Contact</h4>
-                            <div className="grid grid-cols-3 gap-4 text-sm">
-                                <div>
-                                    <span className="font-semibold">Name:</span> {faculty.contactDetails.emergencyContact.name}
-                                </div>
-                                <div>
-                                    <span className="font-semibold">Relation:</span> {faculty.contactDetails.emergencyContact.relation}
-                                </div>
-                                <div>
-                                    <span className="font-semibold">Phone:</span> {faculty.contactDetails.emergencyContact.phoneNumber}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Address Details Section */}
-                    <div className="border-b pb-6">
-                        <h3 className="text-xl font-bold mb-4">Address Details</h3>
-                        <div className="space-y-4">
-                            <div>
-                                <h4 className="font-semibold mb-2">Current Address</h4>
-                                <p className="text-sm">
-                                    {faculty.addressDetails.currentAddress.addressLine1}
-                                    {faculty.addressDetails.currentAddress.addressLine2 && `, ${faculty.addressDetails.currentAddress.addressLine2}`}
-                                    <br />
-                                    {faculty.addressDetails.currentAddress.city}, {faculty.addressDetails.currentAddress.state} - {faculty.addressDetails.currentAddress.pincode}
-                                    <br />
-                                    {faculty.addressDetails.currentAddress.country}
-                                </p>
-                            </div>
-                            {!faculty.addressDetails.sameAsCurrent && faculty.addressDetails.permanentAddress && (
-                                <div>
-                                    <h4 className="font-semibold mb-2">Permanent Address</h4>
-                                    <p className="text-sm">
-                                        {faculty.addressDetails.permanentAddress.addressLine1}
-                                        {faculty.addressDetails.permanentAddress.addressLine2 && `, ${faculty.addressDetails.permanentAddress.addressLine2}`}
-                                        <br />
-                                        {faculty.addressDetails.permanentAddress.city}, {faculty.addressDetails.permanentAddress.state} - {faculty.addressDetails.permanentAddress.pincode}
-                                        <br />
-                                        {faculty.addressDetails.permanentAddress.country}
-                                    </p>
-                                </div>
-                            )}
-                            {faculty.addressDetails.sameAsCurrent && (
-                                <div>
-                                    <p className="text-sm text-gray-600 italic">Permanent address is same as current address</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Education History Section */}
-                    <div className="border-b pb-6">
-                        <h3 className="text-xl font-bold mb-4">Education History</h3>
-                        <div className="space-y-4">
-                            {faculty.educationHistory.map((edu, index) => (
-                                <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                                    <h4 className="font-semibold mb-2">{edu.level} - {edu.qualification}</h4>
-                                    <div className="grid grid-cols-2 gap-2 text-sm">
-                                        <div>
-                                            <span className="font-semibold">Board/University:</span> {edu.boardOrUniversity}
-                                        </div>
-                                        <div>
-                                            <span className="font-semibold">Institution:</span> {edu.institutionName}
-                                        </div>
-                                        <div>
-                                            <span className="font-semibold">Year of Passing:</span> {edu.yearOfPassing}
-                                        </div>
-                                        <div>
-                                            <span className="font-semibold">Percentage/CGPA:</span> {edu.percentageOrCGPA}
-                                        </div>
-                                        {edu.specialization && (
-                                            <div className="col-span-2">
-                                                <span className="font-semibold">Specialization:</span> {edu.specialization}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Work Experience Section */}
-                    <div>
-                        <h3 className="text-xl font-bold mb-4">Work Experience</h3>
-                        <div className="space-y-4">
+                        <div className="mt-6">
                             {faculty.workExperience.map((work, index) => (
-                                <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <h4 className="font-semibold">{work.role} at {work.organization}</h4>
-                                        {work.isCurrent && (
-                                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                Current
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2 text-sm">
-                                        {work.department && (
-                                            <div>
-                                                <span className="font-semibold">Department:</span> {work.department}
-                                            </div>
-                                        )}
-                                        <div>
-                                            <span className="font-semibold">Duration:</span>{" "}
-                                            {new Date(work.fromDate).toLocaleDateString("en-US", { year: "numeric", month: "short" })} -{" "}
-                                            {work.isCurrent ? "Present" : new Date(work.toDate).toLocaleDateString("en-US", { year: "numeric", month: "short" })}
-                                        </div>
-                                        <div>
-                                            <span className="font-semibold">Experience:</span> {work.experienceYears} years
-                                        </div>
-                                        {work.jobDescription && (
-                                            <div className="col-span-2">
-                                                <span className="font-semibold">Job Description:</span> {work.jobDescription}
-                                            </div>
-                                        )}
-                                        {work.reasonForLeaving && !work.isCurrent && (
-                                            <div className="col-span-2">
-                                                <span className="font-semibold">Reason for Leaving:</span> {work.reasonForLeaving}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
+                                <Timeline
+                                    key={index}
+                                    type="work"
+                                    data={work}
+                                    isLast={index === faculty.workExperience.length - 1}
+                                />
                             ))}
                         </div>
                     </div>

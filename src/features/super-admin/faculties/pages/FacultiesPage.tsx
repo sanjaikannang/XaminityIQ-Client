@@ -1,5 +1,7 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import Modal from "../../../../common/ui/Modal";
+import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
 import { FacultyData } from "../../../../types/faculty-types";
@@ -11,6 +13,7 @@ const FacultiesPage = () => {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [searchTerm, setSearchTerm] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const { data, isLoading, isFetching } = useGetAllFacultyQuery({
         page,
@@ -35,6 +38,14 @@ const FacultiesPage = () => {
     const handleRowClick = useCallback((row: FacultyData) => {
         navigate(`/super-admin/faculties/${row.id}`);
     }, [navigate]);
+
+    const handleOpenModal = useCallback(() => {
+        setIsModalOpen(true);
+    }, []);
+
+    const handleCloseModal = useCallback(() => {
+        setIsModalOpen(false);
+    }, []);
 
     const columns: ColumnDef<FacultyData, any>[] = [
         {
@@ -112,6 +123,17 @@ const FacultiesPage = () => {
     return (
         <>
             <PageHeader>Faculty</PageHeader>
+            <div className="flex justify-end">
+                <Button
+                    type="submit"
+                    variant="primary"
+                    size="md"
+                    onClick={handleOpenModal}
+                >
+                    Add Faculty
+                </Button>
+            </div>
+
             <Container>
                 <div className="py-6">
                     <Table
@@ -130,6 +152,15 @@ const FacultiesPage = () => {
                     />
                 </div>
             </Container>
+
+            <Modal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                title="Add New Faculty"
+                size="md"
+            >
+                <div></div>
+            </Modal>
         </>
     );
 };
