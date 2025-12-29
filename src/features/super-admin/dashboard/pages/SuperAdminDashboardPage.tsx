@@ -4,6 +4,9 @@ import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { ColumnDef, Table } from "../../../../common/ui/Table";
 import { useGetCoursesWithDepartmentsQuery } from "../../../../state/services/endpoints/academics";
+import StatsCard from "../components/StatsCard";
+import { GraduationCap, TrendingUp, Users } from "lucide-react";
+import Metrics from "../components/Metrics";
 
 interface Department {
     _id: string;
@@ -22,6 +25,58 @@ interface CourseWithDepartments {
     semesters: number;
     departments: Department[];
 }
+
+const mockData = {
+    students: {
+        total: 1250,
+        active: 1100,
+        alumni: 850,
+        suspended: 15,
+        newAdmissions: 45,
+        trend: 8.5,
+    },
+    faculty: {
+        total: 85,
+        active: 82,
+        trend: 2.4,
+    },
+    academic: {
+        totalBatches: 24,
+        totalCourses: 156,
+        totalDepartments: 8,
+        totalSections: 48,
+    },
+    exams: {
+        completed: 342,
+        ongoing: 12,
+        upcoming: 28,
+    },
+    users: {
+        total: 1385,
+        active: 1205,
+        firstTimeLogin: 35,
+        passwordReset: 18,
+    },
+    monthlyAdmissions: [
+        { month: "Jan", count: 32 },
+        { month: "Feb", count: 28 },
+        { month: "Mar", count: 45 },
+        { month: "Apr", count: 52 },
+        { month: "May", count: 38 },
+        { month: "Jun", count: 65 },
+        { month: "Jul", count: 78 },
+        { month: "Aug", count: 92 },
+        { month: "Sep", count: 45 },
+    ],
+    departmentDistribution: [
+        { name: "Computer Science", value: 320 },
+        { name: "Engineering", value: 280 },
+        { name: "Business", value: 210 },
+        { name: "Arts", value: 150 },
+        { name: "Science", value: 180 },
+        { name: "Medicine", value: 110 },
+    ],
+};
 
 const SuperAdminDashboardPage = () => {
     const [page, setPage] = useState(1);
@@ -107,8 +162,50 @@ const SuperAdminDashboardPage = () => {
     ];
 
     return (
-        <>          
+        <>
             <Container>
+                <div>
+                    {/* Header */}
+                    <div className="mb-6 mt-6">
+                        <h1 className="text-3xl font-medium">Admin Dashboard</h1>
+                    </div>
+
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <StatsCard
+                            title="Total Students"
+                            value={mockData.students.total}
+                            icon={<Users className="w-6 h-6 text-whiteColor" />}
+                            trend={mockData.students.trend}
+                            color="bg-blue-500"
+                        />
+                        <StatsCard
+                            title="Active Students"
+                            value={mockData.students.active}
+                            icon={<GraduationCap className="w-6 h-6 text-whiteColor" />}
+                            color="bg-green-500"
+                        />
+                        <StatsCard
+                            title="Total Faculty"
+                            value={mockData.faculty.total}
+                            icon={<Users className="w-6 h-6 text-whiteColor" />}
+                            trend={mockData.faculty.trend}
+                            color="bg-purple-500"
+                        />
+                        <StatsCard
+                            title="New Admissions"
+                            value={mockData.students.newAdmissions}
+                            icon={<TrendingUp className="w-6 h-6 text-whiteColor" />}
+                            color="bg-orange-500"
+                        />
+                    </div>
+
+                    {/* Metrics */}
+                    <div>
+                        <Metrics />
+                    </div>
+                </div>
+
                 <div className="py-6">
                     <Table
                         columns={columns}
@@ -134,7 +231,7 @@ const SuperAdminDashboardPage = () => {
             >
                 {selectedCourse && (
                     <div className="space-y-4">
-                        <div>                        
+                        <div>
                             <div className="flex flex-wrap gap-3">
                                 {selectedCourse.departments.map((dept) => (
                                     <div
@@ -143,7 +240,7 @@ const SuperAdminDashboardPage = () => {
                                     >
                                         <div className="font-medium whitespace-nowrap">
                                             {dept.deptName}
-                                        </div>                                        
+                                        </div>
                                     </div>
                                 ))}
 
