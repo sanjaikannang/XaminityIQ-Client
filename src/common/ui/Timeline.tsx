@@ -33,12 +33,12 @@ interface TimelineProps {
 
 const Timeline = ({ type, data, isLast }: TimelineProps) => {
     // Type guard to check if data is Education
-    const isEducation = (data: Education | WorkExperience): data is Education => {
+    const isEducation = (_data: Education | WorkExperience): _data is Education => {
         return type === 'education'
     }
 
     // Type guard to check if data is WorkExperience
-    const isWork = (data: Education | WorkExperience): data is WorkExperience => {
+    const isWork = (_data: Education | WorkExperience): _data is WorkExperience => {
         return type === 'work'
     }
 
