@@ -3,6 +3,7 @@ import type { RouteObject } from "react-router-dom";
 import { RoleGuard } from "../../../hoc/withRoleGuard";
 import StudentDashboardPage from "../dashboard/pages/StudentDashboardPage";
 import ExamsPage from "../exam/pages/ExamsPage";
+import StudentExamRoomPage from "../exam/pages/StudentExamRoomPage";
 
 export const studentRoutes: RouteObject[] = [
     // ===== Dashboard =====
@@ -23,4 +24,12 @@ export const studentRoutes: RouteObject[] = [
             </RoleGuard>
         ),
     },
+    {
+        path: "/student/exam-room/:examId",
+        element: (
+            <RoleGuard allowedRoles={[UserRole.STUDENT]}>
+                <StudentExamRoomPage />
+            </RoleGuard>
+        ),
+    }
 ];
