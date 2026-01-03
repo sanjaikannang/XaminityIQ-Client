@@ -4,7 +4,8 @@ import {
     GetFacultyExamsResponse,
     GetStudentExamsResponse,
     JoinExamRequest,
-    JoinExamResponse,
+    JoinFacultyExamResponse,
+    JoinStudentExamResponse,
 } from "../../../types/exam-types";
 
 export const examApiService = apiInstance.injectEndpoints({
@@ -25,11 +26,19 @@ export const examApiService = apiInstance.injectEndpoints({
             providesTags: ["StudentExams"],
         }),
 
-        joinExam: build.mutation<JoinExamResponse, JoinExamRequest & { role: string }>({
-            query: ({ examId, role }) => ({
-                url: api.exam.joinExam(role),
+        joinFacultyExam: build.mutation<JoinFacultyExamResponse, JoinExamRequest>({
+            query: (data) => ({
+                url: api.exam.joinFacultyExam,
                 method: "POST",
-                body: { examId },
+                data,
+            }),
+        }),
+
+        joinStudentExam: build.mutation<JoinStudentExamResponse, JoinExamRequest>({
+            query: (data) => ({
+                url: api.exam.joinStudentExam,
+                method: "POST",
+                data,
             }),
         }),
     }),
@@ -38,5 +47,6 @@ export const examApiService = apiInstance.injectEndpoints({
 export const {
     useGetFacultyExamsQuery,
     useGetStudentExamsQuery,
-    useJoinExamMutation,
+    useJoinFacultyExamMutation,
+    useJoinStudentExamMutation,
 } = examApiService;

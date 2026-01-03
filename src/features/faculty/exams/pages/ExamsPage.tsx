@@ -1,15 +1,13 @@
-import { useState } from "react";
+
 import { Container } from "../../../../common/ui/Container";
+import { useGetFacultyExamsQuery, useJoinFacultyExamMutation } from "../../../../state/services/endpoints/exam";
 import { FacultyExam } from "../../../../types/exam-types";
 import { useNavigate } from "react-router-dom";
-import { useGetFacultyExamsQuery, useJoinExamMutation } from "../../../../state/services/endpoints/exam";
 
 const ExamsPage = () => {
     const navigate = useNavigate();
     const { data, isLoading, error, refetch } = useGetFacultyExamsQuery();
-    const [joinExam] = useJoinExamMutation();
-
-    const [isJoining, setIsJoining] = useState(false);
+    const [joinExam, { isLoading: isJoining }] = useJoinFacultyExamMutation();
 
     const handleJoinExam = async (exam: FacultyExam) => {
         if (!exam.roomCreated) {
@@ -17,25 +15,26 @@ const ExamsPage = () => {
             return;
         }
 
-        setIsJoining(true);
+        console.log("Attempting to join exam with ID:", exam.examId);
+
         try {
             const response = await joinExam({
                 examId: exam.examId,
-                role: "faculty",
             }).unwrap();
+
+            console.log("Join exam response:", response);
 
             navigate(`/faculty/exam-room/${exam.examId}`, {
                 state: {
-                    examName: exam.examName,
-                    roomCode: response.roomCode,
-                    authToken: response.authToken,
-                    totalStudents: exam.totalStudents,
+                    roomId: response.data.roomId,
+                    authToken: response.data.authToken,
+                    examName: response.data.examName,
+                    totalStudents: response.data.totalStudents,
                 },
             });
         } catch (err: any) {
-            alert(err?.data?.message || "Failed to join exam. Please try again.");
-        } finally {
-            setIsJoining(false);
+            console.error("Join exam error:", err);
+            alert(err?.data?.message || err?.message || "Failed to join exam. Please try again.");
         }
     };
 

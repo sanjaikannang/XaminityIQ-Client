@@ -41,14 +41,24 @@ export interface JoinExamRequest {
     examId: string;
 }
 
-export interface JoinExamResponse {
+export interface JoinFacultyExamResponse {
     success: boolean;
     message: string;
-    roomCode: string;
-    authToken: string;
+    data: {
+        roomId: string;
+        authToken: string;
+        examName: string;
+        totalStudents: number;
+    };
 }
 
-export interface MediaPermissions {
-    audio: boolean;
-    video: boolean;
+export interface JoinStudentExamResponse {
+    success: boolean;
+    message: string;
+    data: {
+        roomId: string;
+        authToken: string;
+        examName: string;
+        duration: number;
+    };
 }

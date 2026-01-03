@@ -1,7 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { selectLocalPeer, selectPeers, selectIsConnectedToRoom } from "@100mslive/hms-video-store";
-import { HMSRoomProvider, useHMSActions, useHMSStore } from "@100mslive/react-sdk";
+import {
+    selectLocalPeer,
+    selectPeers,
+    selectIsConnectedToRoom,
+    selectHMSMessages,
+} from "@100mslive/hms-video-store";
+import {
+    HMSRoomProvider,
+    useHMSActions,
+    useHMSStore,
+} from "@100mslive/react-sdk";
+import type { HMSMessage } from "@100mslive/hms-video-store";
 
 const StudentExamRoomContent = () => {
     const hmsActions = useHMSActions();
@@ -11,20 +21,19 @@ const StudentExamRoomContent = () => {
     const localPeer = useHMSStore(selectLocalPeer);
     const peers = useHMSStore(selectPeers);
     const isConnected = useHMSStore(selectIsConnectedToRoom);
+    const storeMessages = useHMSStore(selectHMSMessages) as HMSMessage[];
 
-    const [isMuted, setIsMuted] = useState(false);
-    const [isVideoOff, setIsVideoOff] = useState(false);
-    const [messages, setMessages] = useState<Array<{ sender: string; message: string; timestamp: Date }>>([]);
     const [messageInput, setMessageInput] = useState("");
     const [showChat, setShowChat] = useState(false);
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const chatEndRef = useRef<HTMLDivElement>(null);
 
-    const { examName, roomCode, authToken } = location.state || {};
+    const { examName, roomId, authToken } = location.state || {};
 
+    // Join room on mount
     useEffect(() => {
-        if (!roomCode || !authToken) {
+        if (!roomId || !authToken) {
             alert("Invalid exam session");
             navigate("/student/exams");
             return;
@@ -33,7 +42,7 @@ const StudentExamRoomContent = () => {
         const joinRoom = async () => {
             try {
                 await hmsActions.join({
-                    userName: localPeer?.name || "Student",
+                    userName: "Student",
                     authToken: authToken,
                     settings: {
                         isAudioMuted: false,
@@ -52,42 +61,39 @@ const StudentExamRoomContent = () => {
         return () => {
             hmsActions.leave();
         };
-    }, []);
+    }, [roomId, authToken, hmsActions, navigate]);
 
+    // Attach local video and ensure audio/video are enabled
     useEffect(() => {
         if (localPeer?.videoTrack && videoRef.current) {
-            hmsActions.attachVideo(localPeer.videoTrack.id, videoRef.current);
+            const videoTrack = localPeer.videoTrack;
+            if (typeof videoTrack === "object" && "id" in videoTrack) {
+                hmsActions.attachVideo(videoTrack.id, videoRef.current);
+            }
         }
-    }, [localPeer?.videoTrack]);
+    }, [localPeer?.videoTrack, hmsActions]);
 
+    // Ensure audio and video are enabled on mount
+    useEffect(() => {
+        if (localPeer) {
+            hmsActions.setLocalAudioEnabled(true);
+            hmsActions.setLocalVideoEnabled(true);
+        }
+    }, [localPeer, hmsActions]);
+
+    // Auto scroll chat
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
+    }, [storeMessages]);
 
-    const toggleAudio = async () => {
-        await hmsActions.setLocalAudioEnabled(isMuted);
-        setIsMuted(!isMuted);
-    };
-
-    const toggleVideo = async () => {
-        await hmsActions.setLocalVideoEnabled(isVideoOff);
-        setIsVideoOff(!isVideoOff);
-    };
-
-    const sendMessage = () => {
+    const sendMessage = async () => {
         if (messageInput.trim()) {
-            // Send message to faculty only
-            hmsActions.sendBroadcastMessage(messageInput, ["faculty"]);
-
-            setMessages([
-                ...messages,
-                {
-                    sender: "You",
-                    message: messageInput,
-                    timestamp: new Date(),
-                },
-            ]);
-            setMessageInput("");
+            try {
+                await hmsActions.sendBroadcastMessage(messageInput);
+                setMessageInput("");
+            } catch (error) {
+                console.error("Failed to send message:", error);
+            }
         }
     };
 
@@ -98,7 +104,11 @@ const StudentExamRoomContent = () => {
         }
     };
 
-    const facultyPeers = peers.filter((peer) => peer.roleName?.toLowerCase() === "faculty");
+    const facultyPeers = peers.filter(
+        (peer) =>
+            peer.roleName?.toLowerCase() === "proctor" ||
+            peer.roleName?.toLowerCase() === "faculty"
+    );
 
     return (
         <div className="h-screen bg-gray-900 flex flex-col">
@@ -125,47 +135,101 @@ const StudentExamRoomContent = () => {
                     {/* Your Video */}
                     <div className="mb-4">
                         <h2 className="text-white text-lg mb-2">Your Video</h2>
-                        <div className="relative bg-gray-800 rounded-lg overflow-hidden" style={{ height: "300px" }}>
+                        <div
+                            className="relative bg-gray-800 rounded-lg overflow-hidden"
+                            style={{ height: "300px" }}
+                        >
                             <video
                                 ref={videoRef}
                                 autoPlay
                                 muted
                                 playsInline
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-cover mirror"
+                                style={{ transform: "scaleX(-1)" }}
                             />
                             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-3">
-                                <button
+                                {/* <button
                                     onClick={toggleAudio}
-                                    className={`p-3 rounded-full ${isMuted ? "bg-red-600" : "bg-gray-700"
+                                    className={`p-3 rounded-full ${isAudioMuted ? "bg-red-600" : "bg-gray-700"
                                         } text-white hover:opacity-80 transition-opacity`}
                                 >
-                                    {isMuted ? (
-                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                                    {isAudioMuted ? (
+                                        <svg
+                                            className="w-6 h-6"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+                                            />
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"
+                                            />
                                         </svg>
                                     ) : (
-                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                        <svg
+                                            className="w-6 h-6"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                                            />
                                         </svg>
                                     )}
-                                </button>
-                                <button
+                                </button> */}
+                                {/* <button
                                     onClick={toggleVideo}
                                     className={`p-3 rounded-full ${isVideoOff ? "bg-red-600" : "bg-gray-700"
                                         } text-white hover:opacity-80 transition-opacity`}
                                 >
                                     {isVideoOff ? (
-                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3l18 18" />
+                                        <svg
+                                            className="w-6 h-6"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                                            />
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M3 3l18 18"
+                                            />
                                         </svg>
                                     ) : (
-                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                        <svg
+                                            className="w-6 h-6"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                                            />
                                         </svg>
                                     )}
-                                </button>
+                                </button> */}
                             </div>
                         </div>
                     </div>
@@ -192,19 +256,31 @@ const StudentExamRoomContent = () => {
                                 onClick={() => setShowChat(false)}
                                 className="text-gray-400 hover:text-white"
                             >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                <svg
+                                    className="w-6 h-6"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M6 18L18 6M6 6l12 12"
+                                    />
                                 </svg>
                             </button>
                         </div>
 
                         <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                            {messages.map((msg, idx) => (
-                                <div key={idx} className="bg-gray-700 rounded-lg p-3">
+                            {storeMessages.map((msg: HMSMessage) => (
+                                <div key={msg.id} className="bg-gray-700 rounded-lg p-3">
                                     <div className="flex justify-between items-start mb-1">
-                                        <span className="text-blue-400 text-sm font-medium">{msg.sender}</span>
+                                        <span className="text-blue-400 text-sm font-medium">
+                                            {msg.senderName === localPeer?.name ? "You" : msg.senderName}
+                                        </span>
                                         <span className="text-gray-500 text-xs">
-                                            {msg.timestamp.toLocaleTimeString()}
+                                            {msg.time.toLocaleTimeString()}
                                         </span>
                                     </div>
                                     <p className="text-white text-sm">{msg.message}</p>
@@ -241,8 +317,18 @@ const StudentExamRoomContent = () => {
                     onClick={() => setShowChat(true)}
                     className="fixed bottom-6 right-6 p-4 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors"
                 >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                        />
                     </svg>
                 </button>
             )}

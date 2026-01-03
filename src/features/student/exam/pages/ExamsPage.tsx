@@ -2,47 +2,54 @@ import { useState } from "react";
 import { Container } from "../../../../common/ui/Container";
 import { StudentExam } from "../../../../types/exam-types";
 import { useNavigate } from "react-router-dom";
-import { useGetStudentExamsQuery, useJoinExamMutation } from "../../../../state/services/endpoints/exam";
+import { useGetStudentExamsQuery, useJoinStudentExamMutation } from "../../../../state/services/endpoints/exam";
 import { MediaPermissionModal } from "../components/MediaPermissionModal";
 
 const ExamsPage = () => {
     const navigate = useNavigate();
     const { data, isLoading, error, refetch } = useGetStudentExamsQuery();
-    const [joinExam] = useJoinExamMutation();
+    const [joinExam, { isLoading: isJoining }] = useJoinStudentExamMutation();
 
     const [selectedExam, setSelectedExam] = useState<StudentExam | null>(null);
     const [showPermissionModal, setShowPermissionModal] = useState(false);
-    const [isJoining, setIsJoining] = useState(false);
 
     const handleJoinExam = (exam: StudentExam) => {
-        if (!exam.canJoin) {
-            alert("You cannot join this exam at the moment.");
-            return;
-        }
+        // if (!exam.canJoin) {
+        //     alert("You cannot join this exam at the moment.");
+        //     return;
+        // }
+
+        console.log("Selected exam for joining:", exam);
         setSelectedExam(exam);
         setShowPermissionModal(true);
     };
 
     const handlePermissionGranted = async () => {
-        if (!selectedExam) return;
+        if (!selectedExam) {
+            console.error("No exam selected");
+            return;
+        }
 
-        setIsJoining(true);
+        console.log("Attempting to join exam with ID:", selectedExam.examId);
+
         try {
             const response = await joinExam({
                 examId: selectedExam.examId,
-                role: "student",
             }).unwrap();
+
+            console.log("Join exam response:", response);
 
             navigate(`/student/exam-room/${selectedExam.examId}`, {
                 state: {
-                    examName: selectedExam.examName,
-                    roomCode: response.roomCode,
-                    authToken: response.authToken,
+                    roomId: response.data.roomId,
+                    authToken: response.data.authToken,
+                    examName: response.data.examName,
+                    duration: response.data.duration,
                 },
             });
         } catch (err: any) {
-            alert(err?.data?.message || "Failed to join exam. Please try again.");
-            setIsJoining(false);
+            console.error("Join exam error:", err);
+            alert(err?.data?.message || err?.message || "Failed to join exam. Please try again.");
             setShowPermissionModal(false);
         }
     };
@@ -110,12 +117,6 @@ const ExamsPage = () => {
                 <div className="py-6">
                     <div className="flex justify-between items-center mb-6">
                         <h1 className="text-3xl font-bold text-gray-800">My Exams</h1>
-                        <button
-                            onClick={() => refetch()}
-                            className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        >
-                            Refresh
-                        </button>
                     </div>
 
                     {exams.length === 0 ? (
@@ -239,13 +240,14 @@ const ExamsPage = () => {
 
                                             <button
                                                 onClick={() => handleJoinExam(exam)}
-                                                disabled={!exam.canJoin || isJoining}
+                                                // disabled={!exam.canJoin || isJoining}
                                                 className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${exam.canJoin && !isJoining
-                                                    ? "bg-blue-600 text-white hover:bg-blue-700"
-                                                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                                                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
                                                     }`}
                                             >
-                                                {exam.canJoin ? "Join Exam" : "Cannot Join"}
+                                                {/* {isJoining ? "Joining..." : exam.canJoin ? "Join Exam" : "Cannot Join"} */}
+                                                Join Exam
                                             </button>
                                         </div>
                                     </div>
