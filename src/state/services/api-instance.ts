@@ -16,6 +16,7 @@ export const apiInstance = createApi({
         "faculty", 
         "faculty-detail",
         "FacultyExams",
-        "StudentExams"
+        "StudentExams",
+        "JoinRequests"
     ],
 });

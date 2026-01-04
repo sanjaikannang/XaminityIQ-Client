@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
     selectPeers,
     selectIsConnectedToRoom,
@@ -12,11 +12,19 @@ import {
     useHMSStore,
 } from "@100mslive/react-sdk";
 import type { HMSMessage } from "@100mslive/hms-video-store";
+import {
+    useGetPendingJoinRequestsQuery,
+    useApproveJoinRequestMutation,
+    useRejectJoinRequestMutation,
+    useRemoveStudentMutation,
+} from "../../../../state/services/endpoints/exam";
+import toast from "react-hot-toast";
 
 const FacultyExamRoomContent = () => {
     const hmsActions = useHMSActions();
     const location = useLocation();
     const navigate = useNavigate();
+    const { examId } = useParams<{ examId: string }>();
 
     const localPeer = useHMSStore(selectLocalPeer);
     const peers = useHMSStore(selectPeers);
@@ -27,16 +35,46 @@ const FacultyExamRoomContent = () => {
     const [showChat, setShowChat] = useState(false);
     const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
     const [broadcastMode, setBroadcastMode] = useState(true);
+    const [showJoinRequests, setShowJoinRequests] = useState(false);
+    const [showRemoveModal, setShowRemoveModal] = useState(false);
+    const [studentToRemove, setStudentToRemove] = useState<{ id: string; name: string } | null>(null);
+    const [removalReason, setRemovalReason] = useState("");
+    const [timeRemaining, setTimeRemaining] = useState<string>("");
+    const [isWarningShown, setIsWarningShown] = useState(false);
 
     const chatEndRef = useRef<HTMLDivElement>(null);
     const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
 
-    const { examName, roomId, authToken, totalStudents } = location.state || {};
+    const { examName, roomId, authToken, totalStudents, examDate, endTime } = location.state || {};
+
+    // Fetch pending join requests with polling
+    const { data: joinRequestsData, refetch: refetchJoinRequests } = useGetPendingJoinRequestsQuery(
+        examId!,
+        {
+            pollingInterval: 3000, // Poll every 3 seconds
+        }
+    );
+
+    const [approveRequest, { isLoading: isApproving }] = useApproveJoinRequestMutation();
+    const [rejectRequest, { isLoading: isRejecting }] = useRejectJoinRequestMutation();
+    const [removeStudent, { isLoading: isRemoving }] = useRemoveStudentMutation();
+
+    const pendingRequests = joinRequestsData?.data || [];
+
+    // Calculate exam end time
+    const getExamEndTime = () => {
+        if (!examDate || !endTime) return null;
+
+        const examDateObj = new Date(examDate);
+        const [endHour, endMin] = endTime.split(':').map(Number);
+        examDateObj.setHours(endHour, endMin, 0, 0);
+        return examDateObj;
+    };
 
     // Join room on mount
     useEffect(() => {
         if (!roomId || !authToken) {
-            alert("Invalid exam session");
+            toast.error("Invalid exam session");
             navigate("/faculty/exams");
             return;
         }
@@ -51,9 +89,10 @@ const FacultyExamRoomContent = () => {
                         isVideoMuted: true,
                     },
                 });
+                toast.success("Joined exam monitoring room");
             } catch (error) {
                 console.error("Failed to join room:", error);
-                alert("Failed to join exam room");
+                toast.error("Failed to join exam room");
                 navigate("/faculty/exams");
             }
         };
@@ -63,7 +102,45 @@ const FacultyExamRoomContent = () => {
         return () => {
             hmsActions.leave();
         };
-    }, [roomId, authToken, hmsActions, navigate]);
+    }, [roomId, authToken]);
+
+    // Monitor exam time and auto-disconnect
+    useEffect(() => {
+        const examEndTime = getExamEndTime();
+        if (!examEndTime) return;
+
+        const checkTime = () => {
+            const now = new Date();
+            const timeDiff = examEndTime.getTime() - now.getTime();
+
+            // Calculate time remaining
+            const minutesRemaining = Math.floor(timeDiff / 60000);
+            const secondsRemaining = Math.floor((timeDiff % 60000) / 1000);
+
+            if (timeDiff <= 0) {
+                // Exam time has ended
+                toast.error("Exam time has ended. Disconnecting all participants...");
+                handleEndExam();
+                return;
+            }
+
+            // Show warning at 5 minutes
+            if (minutesRemaining === 5 && !isWarningShown) {
+                toast.warning("5 minutes remaining in the exam!");
+                setIsWarningShown(true);
+            }
+
+            // Update display
+            if (minutesRemaining < 10) {
+                setTimeRemaining(`${minutesRemaining}:${secondsRemaining.toString().padStart(2, '0')}`);
+            }
+        };
+
+        const interval = setInterval(checkTime, 1000);
+        checkTime(); // Initial check
+
+        return () => clearInterval(interval);
+    }, [examDate, endTime, isWarningShown]);
 
     // Attach videos for all student peers
     useEffect(() => {
@@ -82,6 +159,18 @@ const FacultyExamRoomContent = () => {
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [storeMessages]);
+
+    // Show notification when new join request arrives
+    useEffect(() => {
+        if (pendingRequests.length > 0) {
+            // Only show if requests panel is not already open
+            if (!showJoinRequests) {
+                toast.error(`${pendingRequests.length} student(s) waiting to join`, {
+                    duration: 3000,
+                });
+            }
+        }
+    }, [pendingRequests.length]);
 
     const toggleAudio = async () => {
         const audioTrack = localPeer?.audioTrack;
@@ -104,19 +193,84 @@ const FacultyExamRoomContent = () => {
             try {
                 if (broadcastMode) {
                     await hmsActions.sendBroadcastMessage(messageInput);
+                    toast.success("Message sent to all students");
                 } else if (selectedStudent) {
                     await hmsActions.sendDirectMessage(messageInput, selectedStudent);
+                    toast.success("Message sent to student");
                 }
                 setMessageInput("");
             } catch (error) {
                 console.error("Failed to send message:", error);
+                toast.error("Failed to send message");
             }
         }
+    };
+
+    const handleApproveRequest = async (requestId: string, studentName: string) => {
+        try {
+            await approveRequest({ requestId }).unwrap();
+            toast.success(`Approved ${studentName}'s request to join`);
+            refetchJoinRequests();
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Failed to approve request");
+        }
+    };
+
+    const handleRejectRequest = async (requestId: string, studentName: string) => {
+        const reason = window.prompt(`Enter reason for rejecting ${studentName}'s request:`);
+        if (!reason) return;
+
+        try {
+            await rejectRequest({ requestId, reason }).unwrap();
+            toast.success(`Rejected ${studentName}'s request`);
+            refetchJoinRequests();
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Failed to reject request");
+        }
+    };
+
+    const handleOpenRemoveModal = (studentId: string, studentName: string) => {
+        setStudentToRemove({ id: studentId, name: studentName });
+        setRemovalReason("");
+        setShowRemoveModal(true);
+    };
+
+    const handleConfirmRemove = async () => {
+        if (!studentToRemove || !removalReason.trim()) {
+            toast.error("Please provide a reason for removal");
+            return;
+        }
+
+        try {
+            await removeStudent({
+                examId: examId!,
+                studentId: studentToRemove.id,
+                reason: removalReason,
+            }).unwrap();
+
+            toast.success(`${studentToRemove.name} has been removed from the exam`);
+
+            // Also remove from 100ms room
+            // Note: You may need to implement this in your 100ms service
+            // await hmsActions.removePeer(studentToRemove.id, removalReason);
+
+            setShowRemoveModal(false);
+            setStudentToRemove(null);
+            setRemovalReason("");
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Failed to remove student");
+        }
+    };
+
+    const handleEndExam = async () => {
+        await hmsActions.leave();
+        navigate("/faculty/exams");
     };
 
     const handleLeaveExam = async () => {
         if (window.confirm("Are you sure you want to leave the monitoring session?")) {
             await hmsActions.leave();
+            toast.error("You have left the exam monitoring session");
             navigate("/faculty/exams");
         }
     };
@@ -144,27 +298,61 @@ const FacultyExamRoomContent = () => {
                         {examName} - Proctor View
                     </h1>
                     <p className="text-gray-400 text-sm">
-                        {isConnected
-                            ? `Monitoring ${studentPeers.length} / ${totalStudents} students`
-                            : "Connecting..."}
+                        {isConnected ? (
+                            <>
+                                Monitoring {studentPeers.length} / {totalStudents} students
+                                {timeRemaining && (
+                                    <span className="ml-3 text-yellow-400">
+                                        Time Remaining: {timeRemaining}
+                                    </span>
+                                )}
+                            </>
+                        ) : (
+                            "Connecting..."
+                        )}
                     </p>
                 </div>
                 <div className="flex gap-3 items-center">
+                    {/* Join Requests Button with Badge */}
+                    <button
+                        onClick={() => setShowJoinRequests(!showJoinRequests)}
+                        className="relative p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                    >
+                        <svg
+                            className="w-6 h-6"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+                            />
+                        </svg>
+                        {pendingRequests.length > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                {pendingRequests.length}
+                            </span>
+                        )}
+                    </button>
+
                     <button
                         onClick={toggleAudio}
-                        className={`p-2 rounded-lg ${
-                            isAudioMuted ? "bg-red-600" : "bg-gray-700"
-                        } text-white hover:opacity-80 transition-opacity`}
+                        className={`p-2 rounded-lg ${isAudioMuted ? "bg-red-600" : "bg-gray-700"
+                            } text-white hover:opacity-80 transition-opacity`}
+                        title={isAudioMuted ? "Unmute" : "Mute"}
                     >
                         {isAudioMuted ? "Unmute" : "Mute"}
                     </button>
                     <button
                         onClick={toggleVideo}
-                        className={`p-2 rounded-lg ${
-                            isVideoOff ? "bg-gray-700" : "bg-blue-600"
-                        } text-white hover:opacity-80 transition-opacity`}
+                        className={`p-2 rounded-lg ${isVideoOff ? "bg-gray-700" : "bg-blue-600"
+                            } text-white hover:opacity-80 transition-opacity`}
+                        title={isVideoOff ? "Turn On Camera" : "Turn Off Camera"}
                     >
-                        {isVideoOff ? "Turn On Camera" : "Turn Off Camera"}
+                        {isVideoOff ? "Camera Off" : "Camera On"}
                     </button>
                     <button
                         onClick={handleLeaveExam}
@@ -177,9 +365,74 @@ const FacultyExamRoomContent = () => {
 
             {/* Main Content */}
             <div className="flex-1 flex overflow-hidden">
+                {/* Join Requests Panel */}
+                {showJoinRequests && (
+                    <div className="w-80 bg-gray-800 border-r border-gray-700 flex flex-col">
+                        <div className="p-4 border-b border-gray-700">
+                            <h2 className="text-white font-semibold">Join Requests</h2>
+                            <p className="text-gray-400 text-sm mt-1">
+                                {pendingRequests.length} pending
+                            </p>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                            {pendingRequests.length === 0 ? (
+                                <div className="text-center text-gray-400 py-8">
+                                    <p className="text-sm">No pending requests</p>
+                                </div>
+                            ) : (
+                                pendingRequests.map((request) => (
+                                    <div
+                                        key={request.requestId}
+                                        className="bg-gray-700 rounded-lg p-4"
+                                    >
+                                        <div className="flex items-center gap-3 mb-3">
+                                            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                                                <span className="text-white font-semibold">
+                                                    {request.studentName.charAt(0).toUpperCase()}
+                                                </span>
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-white font-medium">
+                                                    {request.studentName}
+                                                </p>
+                                                <p className="text-gray-400 text-xs">
+                                                    {request.isRejoin ? "Requesting to rejoin" : "Requesting to join"}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => handleApproveRequest(request.requestId, request.studentName)}
+                                                disabled={isApproving}
+                                                className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium disabled:opacity-50"
+                                            >
+                                                Approve
+                                            </button>
+                                            <button
+                                                onClick={() => handleRejectRequest(request.requestId, request.studentName)}
+                                                disabled={isRejecting}
+                                                className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium disabled:opacity-50"
+                                            >
+                                                Reject
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                )}
+
                 {/* Student Grid */}
                 <div className="flex-1 p-4 overflow-y-auto">
-                    <h2 className="text-white text-lg mb-4">Student Video Grid</h2>
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-white text-lg">Student Video Grid</h2>
+                        <span className="text-gray-400 text-sm">
+                            {studentPeers.length} / {totalStudents} students in room
+                        </span>
+                    </div>
 
                     {studentPeers.length === 0 ? (
                         <div className="flex items-center justify-center h-full">
@@ -210,23 +463,23 @@ const FacultyExamRoomContent = () => {
                             {studentPeers.map((peer) => {
                                 const videoTrack = peer.videoTrack;
                                 const audioTrack = peer.audioTrack;
-                                
-                                const isAudioMuted = audioTrack && 
-                                    typeof audioTrack === "object" && 
+
+                                const isAudioMuted = audioTrack &&
+                                    typeof audioTrack === "object" &&
                                     "enabled" in audioTrack
-                                        ? !(audioTrack as { enabled: boolean }).enabled
-                                        : false;
+                                    ? !(audioTrack as { enabled: boolean }).enabled
+                                    : false;
 
                                 const hasVideo = videoTrack &&
                                     typeof videoTrack === "object" &&
                                     "enabled" in videoTrack
-                                        ? (videoTrack as { enabled: boolean }).enabled
-                                        : false;
+                                    ? (videoTrack as { enabled: boolean }).enabled
+                                    : false;
 
                                 return (
                                     <div
                                         key={peer.id}
-                                        className="relative bg-gray-800 rounded-lg overflow-hidden aspect-video"
+                                        className="relative bg-gray-800 rounded-lg overflow-hidden aspect-video group"
                                     >
                                         {hasVideo ? (
                                             <video
@@ -258,7 +511,7 @@ const FacultyExamRoomContent = () => {
                                                 </span>
                                                 <div className="flex gap-1">
                                                     {isAudioMuted && (
-                                                        <span className="text-red-400">
+                                                        <span className="text-red-400" title="Microphone Off">
                                                             <svg
                                                                 className="w-4 h-4"
                                                                 fill="none"
@@ -284,15 +537,15 @@ const FacultyExamRoomContent = () => {
                                             </div>
                                         </div>
 
-                                        {/* Controls */}
-                                        <div className="absolute top-2 right-2 flex gap-1">
+                                        {/* Controls - Show on hover */}
+                                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button
                                                 onClick={() => {
                                                     setSelectedStudent(peer.id);
                                                     setShowChat(true);
                                                     setBroadcastMode(false);
                                                 }}
-                                                className="p-1 bg-blue-600 rounded hover:bg-blue-700 transition-colors"
+                                                className="p-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
                                                 title="Chat with student"
                                             >
                                                 <svg
@@ -309,166 +562,45 @@ const FacultyExamRoomContent = () => {
                                                     />
                                                 </svg>
                                             </button>
+                                            <button
+                                                onClick={() => handleOpenRemoveModal(peer.id, peer.name || "Student")}
+                                                className="p-2 bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+                                                title="Remove student"
+                                            >
+                                                <svg
+                                                    className="w-4 h-4 text-white"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M6 18L18 6M6 6l12 12"
+                                                    />
+                                                </svg>
+                                            </button>
                                         </div>
+
+                                        {/* Warning indicators */}
+                                        {(!hasVideo || isAudioMuted) && (
+                                            <div className="absolute top-2 left-2">
+                                                <div className="bg-red-500 text-white text-xs px-2 py-1 rounded">
+                                                    Warning
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })}
                         </div>
                     )}
                 </div>
-
-                {/* Chat Panel */}
-                {showChat && (
-                    <div className="w-96 bg-gray-800 border-l border-gray-700 flex flex-col">
-                        <div className="p-4 border-b border-gray-700">
-                            <div className="flex justify-between items-center mb-3">
-                                <h2 className="text-white font-semibold">Communication</h2>
-                                <button
-                                    onClick={() => setShowChat(false)}
-                                    className="text-gray-400 hover:text-white"
-                                >
-                                    <svg
-                                        className="w-6 h-6"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M6 18L18 6M6 6l12 12"
-                                        />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            {/* Mode Toggle */}
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => {
-                                        setBroadcastMode(true);
-                                        setSelectedStudent(null);
-                                    }}
-                                    className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                        broadcastMode
-                                            ? "bg-blue-600 text-white"
-                                            : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                                    }`}
-                                >
-                                    Broadcast All
-                                </button>
-                                <button
-                                    onClick={() => setBroadcastMode(false)}
-                                    className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                        !broadcastMode
-                                            ? "bg-blue-600 text-white"
-                                            : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                                    }`}
-                                >
-                                    Direct Message
-                                </button>
-                            </div>
-
-                            {/* Student Selector */}
-                            {!broadcastMode && (
-                                <select
-                                    value={selectedStudent || ""}
-                                    onChange={(e) => setSelectedStudent(e.target.value)}
-                                    className="w-full mt-3 px-3 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                    <option value="">Select a student</option>
-                                    {studentPeers.map((peer) => (
-                                        <option key={peer.id} value={peer.id}>
-                                            {peer.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            )}
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                            {storeMessages.map((msg: HMSMessage) => {
-                                const isSentByMe = msg.senderName === localPeer?.name;
-                                const recipient = msg.recipientPeer
-                                    ? studentPeers.find((p) => p.id === msg.recipientPeer)?.name
-                                    : null;
-
-                                return (
-                                    <div key={msg.id} className="bg-gray-700 rounded-lg p-3">
-                                        <div className="flex justify-between items-start mb-1">
-                                            <span className="text-blue-400 text-sm font-medium">
-                                                {isSentByMe
-                                                    ? recipient
-                                                        ? `You to ${recipient}`
-                                                        : "You (Broadcast)"
-                                                    : msg.senderName}
-                                            </span>
-                                            <span className="text-gray-500 text-xs">
-                                                {msg.time.toLocaleTimeString()}
-                                            </span>
-                                        </div>
-                                        <p className="text-white text-sm">{msg.message}</p>
-                                    </div>
-                                );
-                            })}
-                            <div ref={chatEndRef} />
-                        </div>
-
-                        <div className="p-4 border-t border-gray-700">
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    value={messageInput}
-                                    onChange={(e) => setMessageInput(e.target.value)}
-                                    onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-                                    placeholder={
-                                        broadcastMode
-                                            ? "Message all students..."
-                                            : selectedStudent
-                                            ? "Message student..."
-                                            : "Select a student first..."
-                                    }
-                                    disabled={!broadcastMode && !selectedStudent}
-                                    className="flex-1 bg-gray-700 text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                />
-                                <button
-                                    onClick={sendMessage}
-                                    disabled={!broadcastMode && !selectedStudent}
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    Send
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
-
-            {/* Chat Toggle Button */}
-            {!showChat && (
-                <button
-                    onClick={() => setShowChat(true)}
-                    className="fixed bottom-6 right-6 p-4 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors"
-                >
-                    <svg
-                        className="w-6 h-6"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                        />
-                    </svg>
-                </button>
-            )}
         </div>
-    );
-};
+    )
+}
 
 const FacultyExamRoomPage = () => {
     return (
@@ -476,6 +608,98 @@ const FacultyExamRoomPage = () => {
             <FacultyExamRoomContent />
         </HMSRoomProvider>
     );
-};
+}
 
-export default FacultyExamRoomPage;
+export default FacultyExamRoomPage
+
+
+{/* Chat Panel */ }
+// {showChat && (
+//                     <div className="w-96 bg-gray-800 border-l border-gray-700 flex flex-col"> */}
+//                         <div className="p-4 border-b border-gray-700">
+//                             <div className="flex justify-between items-center mb-3">
+//                                 <h2 className="text-white font-semibold">Communication</h2>
+//                                 <button
+//                                     onClick={() => setShowChat(false)}
+//                                     className="text-gray-400 hover:text-white"
+//                                 >
+//                                     <svg
+//                                         className="w-6 h-6"
+//                                         fill="none"
+//                                         stroke="currentColor"
+//                                         viewBox="0 0 24 24"
+//                                     >
+//                                         <path
+//                                             strokeLinecap="round"
+//                                             strokeLinejoin="round"
+//                                             strokeWidth={2}
+//                                             d="M6 18L18 6M6 6l12 12"
+//                                         />
+//                                     </svg>
+//                                 </button>
+//                             </div>
+
+//                             {/* Mode Toggle */}
+//                             <div className="flex gap-2">
+//                                 <button
+//                                     onClick={() => {
+//                                         setBroadcastMode(true);
+//                                         setSelectedStudent(null);
+//                                     }}
+//                                     className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${broadcastMode
+//                                             ? "bg-blue-600 text-white"
+//                                             : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+//                                         }`}
+//                                 >
+//                                     Broadcast All
+//                                 </button>
+//                                 <button
+//                                     onClick={() => setBroadcastMode(false)}
+//                                     className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${!broadcastMode
+//                                             ? "bg-blue-600 text-white"
+//                                             : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+//                                         }`}
+//                                 >
+//                                     Direct Message
+//                                 </button>
+//                             </div>
+
+//                             {/* Student Selector */}
+//                             {!broadcastMode && (
+//                                 <select
+//                                     value={selectedStudent || ""}
+//                                     onChange={(e) => setSelectedStudent(e.target.value)}
+//                                     className="w-full mt-3 px-3 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+//                                 >
+//                                     <option value="">Select a student</option>
+//                                     {studentPeers.map((peer) => (
+//                                         <option key={peer.id} value={peer.id}>
+//                                             {peer.name}
+//                                         </option>
+//                                     ))}
+//                                 </select>
+//                             )}
+//                         </div>
+
+//                         <div className="flex-1 overflow-y-auto p-4 space-y-3">
+// {
+    // storeMessages.map((msg: HMSMessage) => {
+    //     const isSentByMe = msg.senderName === localPeer?.name;
+    //     const recipient = msg.recipientPeer
+    //         ? studentPeers.find((p) => p.id === msg.recipientPeer)?.name
+    //         : null;
+
+    //     return (
+    //         <div key={msg.id} className="bg-gray-700 rounded-lg p-3">
+    //             <div className="flex justify-between items-start mb-1">
+    //                 <span className="text-blue-400 text-sm font-medium">
+    //                     {isSentByMe
+    //                         ? recipient
+    //                             ? `You to ${recipient}`
+    //                             : "You (Broadcast)"
+    //                         : msg.senderName}
+    //                 </span>
+    //                 <span className="text-gray-500 text-xs">
+    //                     {msg.time.toLocaleTimeString()}
+    //                 </span>
+    //             </div

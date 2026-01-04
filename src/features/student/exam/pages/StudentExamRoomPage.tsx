@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
     selectLocalPeer,
     selectPeers,
@@ -12,11 +12,14 @@ import {
     useHMSStore,
 } from "@100mslive/react-sdk";
 import type { HMSMessage } from "@100mslive/hms-video-store";
+import { useUpdateStudentLeftStatusMutation } from "../../../../state/services/endpoints/exam";
+import toast from "react-hot-toast";
 
 const StudentExamRoomContent = () => {
     const hmsActions = useHMSActions();
     const location = useLocation();
     const navigate = useNavigate();
+    const { examId } = useParams<{ examId: string }>();
 
     const localPeer = useHMSStore(selectLocalPeer);
     const peers = useHMSStore(selectPeers);
@@ -25,16 +28,31 @@ const StudentExamRoomContent = () => {
 
     const [messageInput, setMessageInput] = useState("");
     const [showChat, setShowChat] = useState(false);
+    const [timeRemaining, setTimeRemaining] = useState<string>("");
+    const [isWarningShown, setIsWarningShown] = useState(false);
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const chatEndRef = useRef<HTMLDivElement>(null);
+    const hasLeftRef = useRef(false);
 
-    const { examName, roomId, authToken } = location.state || {};
+    const [updateLeftStatus] = useUpdateStudentLeftStatusMutation();
+
+    const { examName, roomId, authToken, examDate, endTime } = location.state || {};
+
+    // Calculate exam end time
+    const getExamEndTime = () => {
+        if (!examDate || !endTime) return null;
+
+        const examDateObj = new Date(examDate);
+        const [endHour, endMin] = endTime.split(':').map(Number);
+        examDateObj.setHours(endHour, endMin, 0, 0);
+        return examDateObj;
+    };
 
     // Join room on mount
     useEffect(() => {
         if (!roomId || !authToken) {
-            alert("Invalid exam session");
+            toast.error("Invalid exam session");
             navigate("/student/exams");
             return;
         }
@@ -49,9 +67,10 @@ const StudentExamRoomContent = () => {
                         isVideoMuted: false,
                     },
                 });
+                toast.success("Joined exam room successfully");
             } catch (error) {
                 console.error("Failed to join room:", error);
-                alert("Failed to join exam room");
+                toast.error("Failed to join exam room");
                 navigate("/student/exams");
             }
         };
@@ -59,11 +78,56 @@ const StudentExamRoomContent = () => {
         joinRoom();
 
         return () => {
-            hmsActions.leave();
+            if (isConnected && !hasLeftRef.current) {
+                handleLeaveExam(false);
+            }
         };
-    }, [roomId, authToken, hmsActions, navigate]);
+    }, [roomId, authToken]);
 
-    // Attach local video and ensure audio/video are enabled
+    // Monitor exam time and auto-disconnect
+    useEffect(() => {
+        const examEndTime = getExamEndTime();
+        if (!examEndTime) return;
+
+        const checkTime = () => {
+            const now = new Date();
+            const timeDiff = examEndTime.getTime() - now.getTime();
+
+            // Calculate time remaining
+            const minutesRemaining = Math.floor(timeDiff / 60000);
+            const secondsRemaining = Math.floor((timeDiff % 60000) / 1000);
+
+            if (timeDiff <= 0) {
+                // Exam time has ended
+                toast.error("Exam time has ended. Disconnecting...");
+                handleLeaveExam(true);
+                return;
+            }
+
+            // Show warning at 5 minutes
+            if (minutesRemaining === 5 && !isWarningShown) {
+                toast.error("5 minutes remaining in the exam!");
+                setIsWarningShown(true);
+            }
+
+            // Show warning at 1 minute
+            if (minutesRemaining === 1 && secondsRemaining === 0) {
+                toast.error("1 minute remaining in the exam!");
+            }
+
+            // Update display
+            if (minutesRemaining < 10) {
+                setTimeRemaining(`${minutesRemaining}:${secondsRemaining.toString().padStart(2, '0')}`);
+            }
+        };
+
+        const interval = setInterval(checkTime, 1000);
+        checkTime(); // Initial check
+
+        return () => clearInterval(interval);
+    }, [examDate, endTime, isWarningShown]);
+
+    // Attach local video
     useEffect(() => {
         if (localPeer?.videoTrack && videoRef.current) {
             const videoTrack = localPeer.videoTrack;
@@ -73,7 +137,7 @@ const StudentExamRoomContent = () => {
         }
     }, [localPeer?.videoTrack, hmsActions]);
 
-    // Ensure audio and video are enabled on mount
+    // Ensure audio and video are enabled (students cannot mute themselves)
     useEffect(() => {
         if (localPeer) {
             hmsActions.setLocalAudioEnabled(true);
@@ -86,6 +150,35 @@ const StudentExamRoomContent = () => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [storeMessages]);
 
+    // Handle connection state changes (detect disconnection)
+    useEffect(() => {
+        if (!isConnected && hasLeftRef.current === false && localPeer) {
+            // Student got disconnected unexpectedly
+            toast.error("Connection lost. You need to request to rejoin.");
+            handleDisconnection();
+        }
+    }, [isConnected]);
+
+    const handleDisconnection = async () => {
+        hasLeftRef.current = true;
+
+        try {
+            await updateLeftStatus(examId!).unwrap();
+        } catch (error) {
+            console.error("Error updating left status:", error);
+        }
+
+        // Check if still within exam time
+        const examEndTime = getExamEndTime();
+        if (examEndTime && new Date() < examEndTime) {
+            toast.info("You can request to rejoin the exam");
+            navigate(`/student/exam/${examId}/environment-check`);
+        } else {
+            toast.error("Exam time has ended. Cannot rejoin.");
+            navigate("/student/exams");
+        }
+    };
+
     const sendMessage = async () => {
         if (messageInput.trim()) {
             try {
@@ -93,15 +186,35 @@ const StudentExamRoomContent = () => {
                 setMessageInput("");
             } catch (error) {
                 console.error("Failed to send message:", error);
+                toast.error("Failed to send message");
             }
         }
     };
 
-    const handleLeaveExam = async () => {
-        if (window.confirm("Are you sure you want to leave the exam?")) {
-            await hmsActions.leave();
-            navigate("/student/exams");
+    const handleLeaveExam = async (autoDisconnect: boolean = false) => {
+        if (!autoDisconnect) {
+            const confirmed = window.confirm(
+                "Are you sure you want to leave the exam? You will need faculty approval to rejoin."
+            );
+            if (!confirmed) return;
         }
+
+        hasLeftRef.current = true;
+
+        try {
+            await hmsActions.leave();
+            await updateLeftStatus(examId!).unwrap();
+
+            if (autoDisconnect) {
+                toast.error("Exam session ended");
+            } else {
+                toast.error("You have left the exam");
+            }
+        } catch (error) {
+            console.error("Error leaving exam:", error);
+        }
+
+        navigate("/student/exams");
     };
 
     const facultyPeers = peers.filter(
@@ -110,6 +223,19 @@ const StudentExamRoomContent = () => {
             peer.roleName?.toLowerCase() === "faculty"
     );
 
+    // Check if audio/video are enabled (for display purposes)
+    const isAudioEnabled = localPeer?.audioTrack &&
+        typeof localPeer.audioTrack === "object" &&
+        "enabled" in localPeer.audioTrack
+        ? (localPeer.audioTrack as { enabled: boolean }).enabled
+        : false;
+
+    const isVideoEnabled = localPeer?.videoTrack &&
+        typeof localPeer.videoTrack === "object" &&
+        "enabled" in localPeer.videoTrack
+        ? (localPeer.videoTrack as { enabled: boolean }).enabled
+        : false;
+
     return (
         <div className="h-screen bg-gray-900 flex flex-col">
             {/* Header */}
@@ -117,11 +243,22 @@ const StudentExamRoomContent = () => {
                 <div>
                     <h1 className="text-white text-xl font-semibold">{examName}</h1>
                     <p className="text-gray-400 text-sm">
-                        {isConnected ? "Connected" : "Connecting..."}
+                        {isConnected ? (
+                            <>
+                                Connected
+                                {timeRemaining && (
+                                    <span className="ml-3 text-yellow-400">
+                                        Time Remaining: {timeRemaining}
+                                    </span>
+                                )}
+                            </>
+                        ) : (
+                            "Connecting..."
+                        )}
                     </p>
                 </div>
                 <button
-                    onClick={handleLeaveExam}
+                    onClick={() => handleLeaveExam(false)}
                     className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                 >
                     Leave Exam
@@ -147,102 +284,91 @@ const StudentExamRoomContent = () => {
                                 className="w-full h-full object-cover mirror"
                                 style={{ transform: "scaleX(-1)" }}
                             />
-                            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-3">
-                                {/* <button
-                                    onClick={toggleAudio}
-                                    className={`p-3 rounded-full ${isAudioMuted ? "bg-red-600" : "bg-gray-700"
-                                        } text-white hover:opacity-80 transition-opacity`}
+
+                            {/* Status Indicators */}
+                            <div className="absolute bottom-4 left-4 flex gap-2">
+                                <div
+                                    className={`px-3 py-1 rounded-full text-xs font-medium ${isAudioEnabled
+                                        ? "bg-green-600 text-white"
+                                        : "bg-red-600 text-white"
+                                        }`}
                                 >
-                                    {isAudioMuted ? (
-                                        <svg
-                                            className="w-6 h-6"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
-                                            />
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"
-                                            />
-                                        </svg>
-                                    ) : (
-                                        <svg
-                                            className="w-6 h-6"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
-                                            />
-                                        </svg>
-                                    )}
-                                </button> */}
-                                {/* <button
-                                    onClick={toggleVideo}
-                                    className={`p-3 rounded-full ${isVideoOff ? "bg-red-600" : "bg-gray-700"
-                                        } text-white hover:opacity-80 transition-opacity`}
+                                    {isAudioEnabled ? "Mic On" : "Mic Off"}
+                                </div>
+                                <div
+                                    className={`px-3 py-1 rounded-full text-xs font-medium ${isVideoEnabled
+                                        ? "bg-green-600 text-white"
+                                        : "bg-red-600 text-white"
+                                        }`}
                                 >
-                                    {isVideoOff ? (
-                                        <svg
-                                            className="w-6 h-6"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                                            />
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M3 3l18 18"
-                                            />
-                                        </svg>
-                                    ) : (
-                                        <svg
-                                            className="w-6 h-6"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                                            />
-                                        </svg>
-                                    )}
-                                </button> */}
+                                    {isVideoEnabled ? "Camera On" : "Camera Off"}
+                                </div>
                             </div>
+
+                            {/* Warning message */}
+                            {(!isAudioEnabled || !isVideoEnabled) && (
+                                <div className="absolute top-4 left-4 right-4 bg-red-500 text-white p-3 rounded-lg">
+                                    <p className="text-sm font-medium">
+                                        Warning: Your camera and microphone must remain on during the exam!
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    {/* Faculty Instructions/Messages */}
+                    {/* Proctor Status */}
                     <div className="flex-1 bg-gray-800 rounded-lg p-4 overflow-y-auto">
-                        <h2 className="text-white text-lg mb-2">Proctor Feed</h2>
-                        <div className="text-gray-400 text-sm">
+                        <h2 className="text-white text-lg mb-3">Proctor Information</h2>
+                        <div className="space-y-3">
                             {facultyPeers.length > 0 ? (
-                                <p>{facultyPeers.length} proctor(s) monitoring this exam</p>
+                                <>
+                                    <div className="flex items-center gap-2 text-green-400">
+                                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                        <span className="text-sm font-medium">
+                                            {facultyPeers.length} proctor(s) monitoring
+                                        </span>
+                                    </div>
+                                    {facultyPeers.map((proctor) => (
+                                        <div
+                                            key={proctor.id}
+                                            className="bg-gray-700 rounded-lg p-3"
+                                        >
+                                            <p className="text-white font-medium">{proctor.name}</p>
+                                            <p className="text-gray-400 text-xs">Monitoring</p>
+                                        </div>
+                                    ))}
+                                </>
                             ) : (
-                                <p>Waiting for proctor to join...</p>
+                                <div className="text-gray-400 text-sm">
+                                    <p>Waiting for proctor to join...</p>
+                                    <p className="text-xs mt-2">
+                                        The exam will be monitored by faculty members
+                                    </p>
+                                </div>
                             )}
+                        </div>
+
+                        {/* Exam Guidelines Reminder */}
+                        <div className="mt-6 border-t border-gray-700 pt-4">
+                            <h3 className="text-white font-medium mb-2">Exam Guidelines</h3>
+                            <ul className="text-gray-400 text-sm space-y-2">
+                                <li className="flex items-start gap-2">
+                                    <span className="text-blue-400 mt-1">•</span>
+                                    <span>Keep your camera and microphone on at all times</span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <span className="text-blue-400 mt-1">•</span>
+                                    <span>Stay visible in the camera frame</span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <span className="text-blue-400 mt-1">•</span>
+                                    <span>Do not switch tabs or windows</span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <span className="text-blue-400 mt-1">•</span>
+                                    <span>Contact proctor via chat for any issues</span>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -273,19 +399,38 @@ const StudentExamRoomContent = () => {
                         </div>
 
                         <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                            {storeMessages.map((msg: HMSMessage) => (
-                                <div key={msg.id} className="bg-gray-700 rounded-lg p-3">
-                                    <div className="flex justify-between items-start mb-1">
-                                        <span className="text-blue-400 text-sm font-medium">
-                                            {msg.senderName === localPeer?.name ? "You" : msg.senderName}
-                                        </span>
-                                        <span className="text-gray-500 text-xs">
-                                            {msg.time.toLocaleTimeString()}
-                                        </span>
-                                    </div>
-                                    <p className="text-white text-sm">{msg.message}</p>
+                            {storeMessages.length === 0 ? (
+                                <div className="text-center text-gray-400 text-sm mt-8">
+                                    <p>No messages yet</p>
+                                    <p className="text-xs mt-2">
+                                        Send a message to the proctor if you need help
+                                    </p>
                                 </div>
-                            ))}
+                            ) : (
+                                storeMessages.map((msg: HMSMessage) => {
+                                    const isSentByMe = msg.senderName === localPeer?.name;
+                                    return (
+                                        <div
+                                            key={msg.id}
+                                            className={`rounded-lg p-3 ${isSentByMe
+                                                ? "bg-blue-600 ml-auto"
+                                                : "bg-gray-700"
+                                                }`}
+                                            style={{ maxWidth: "85%" }}
+                                        >
+                                            <div className="flex justify-between items-start mb-1">
+                                                <span className="text-blue-200 text-xs font-medium">
+                                                    {isSentByMe ? "You" : msg.senderName}
+                                                </span>
+                                                <span className="text-gray-400 text-xs ml-2">
+                                                    {msg.time.toLocaleTimeString()}
+                                                </span>
+                                            </div>
+                                            <p className="text-white text-sm">{msg.message}</p>
+                                        </div>
+                                    );
+                                })
+                            )}
                             <div ref={chatEndRef} />
                         </div>
 
@@ -301,7 +446,8 @@ const StudentExamRoomContent = () => {
                                 />
                                 <button
                                     onClick={sendMessage}
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                    disabled={!messageInput.trim()}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Send
                                 </button>

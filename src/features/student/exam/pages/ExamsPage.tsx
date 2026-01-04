@@ -1,62 +1,21 @@
-import { useState } from "react";
 import { Container } from "../../../../common/ui/Container";
 import { StudentExam } from "../../../../types/exam-types";
 import { useNavigate } from "react-router-dom";
-import { useGetStudentExamsQuery, useJoinStudentExamMutation } from "../../../../state/services/endpoints/exam";
-import { MediaPermissionModal } from "../components/MediaPermissionModal";
+import { useGetStudentExamsQuery } from "../../../../state/services/endpoints/exam";
+// import toast from "react-hot-toast";
 
 const ExamsPage = () => {
     const navigate = useNavigate();
     const { data, isLoading, error, refetch } = useGetStudentExamsQuery();
-    const [joinExam, { isLoading: isJoining }] = useJoinStudentExamMutation();
-
-    const [selectedExam, setSelectedExam] = useState<StudentExam | null>(null);
-    const [showPermissionModal, setShowPermissionModal] = useState(false);
 
     const handleJoinExam = (exam: StudentExam) => {
         // if (!exam.canJoin) {
-        //     alert("You cannot join this exam at the moment.");
+        //     toast.error("You can only join the exam during the scheduled time");
         //     return;
         // }
 
-        console.log("Selected exam for joining:", exam);
-        setSelectedExam(exam);
-        setShowPermissionModal(true);
-    };
-
-    const handlePermissionGranted = async () => {
-        if (!selectedExam) {
-            console.error("No exam selected");
-            return;
-        }
-
-        console.log("Attempting to join exam with ID:", selectedExam.examId);
-
-        try {
-            const response = await joinExam({
-                examId: selectedExam.examId,
-            }).unwrap();
-
-            console.log("Join exam response:", response);
-
-            navigate(`/student/exam-room/${selectedExam.examId}`, {
-                state: {
-                    roomId: response.data.roomId,
-                    authToken: response.data.authToken,
-                    examName: response.data.examName,
-                    duration: response.data.duration,
-                },
-            });
-        } catch (err: any) {
-            console.error("Join exam error:", err);
-            alert(err?.data?.message || err?.message || "Failed to join exam. Please try again.");
-            setShowPermissionModal(false);
-        }
-    };
-
-    const handleCancelPermission = () => {
-        setShowPermissionModal(false);
-        setSelectedExam(null);
+        // Navigate to environment check page
+        navigate(`/student/exam/${exam.examId}/environment-check`);
     };
 
     const getStatusColor = (status: string) => {
@@ -112,158 +71,150 @@ const ExamsPage = () => {
     const exams = data?.data || [];
 
     return (
-        <>
-            <Container>
-                <div className="py-6">
-                    <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-3xl font-bold text-gray-800">My Exams</h1>
-                    </div>
+        <Container>
+            <div className="py-6">
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-3xl font-bold text-gray-800">My Exams</h1>
+                </div>
 
-                    {exams.length === 0 ? (
-                        <div className="text-center py-12 bg-gray-50 rounded-lg">
-                            <svg
-                                className="mx-auto h-12 w-12 text-gray-400"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
+                {exams.length === 0 ? (
+                    <div className="text-center py-12 bg-gray-50 rounded-lg">
+                        <svg
+                            className="mx-auto h-12 w-12 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                        </svg>
+                        <h3 className="mt-2 text-lg font-medium text-gray-900">No exams available</h3>
+                        <p className="mt-1 text-gray-500">You don't have any scheduled exams at the moment.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {exams.map((exam) => (
+                            <div
+                                key={exam.examId}
+                                className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden"
                             >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                />
-                            </svg>
-                            <h3 className="mt-2 text-lg font-medium text-gray-900">No exams available</h3>
-                            <p className="mt-1 text-gray-500">You don't have any scheduled exams at the moment.</p>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {exams.map((exam) => (
-                                <div
-                                    key={exam.examId}
-                                    className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden"
-                                >
-                                    <div className="p-6">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <h3 className="text-xl font-semibold text-gray-800 flex-1">
-                                                {exam.examName}
-                                            </h3>
-                                            <span
-                                                className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
-                                                    exam.status
-                                                )}`}
+                                <div className="p-6">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <h3 className="text-xl font-semibold text-gray-800 flex-1">
+                                            {exam.examName}
+                                        </h3>
+                                        <span
+                                            className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
+                                                exam.status
+                                            )}`}
+                                        >
+                                            {exam.status}
+                                        </span>
+                                    </div>
+
+                                    <div className="space-y-2 mb-4">
+                                        <div className="flex items-center text-gray-600">
+                                            <svg
+                                                className="w-5 h-5 mr-2"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
                                             >
-                                                {exam.status}
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                />
+                                            </svg>
+                                            <span className="text-sm">{formatDate(exam.examDate)}</span>
+                                        </div>
+
+                                        <div className="flex items-center text-gray-600">
+                                            <svg
+                                                className="w-5 h-5 mr-2"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                />
+                                            </svg>
+                                            <span className="text-sm">
+                                                {exam.startTime} - {exam.endTime}
                                             </span>
                                         </div>
 
-                                        <div className="space-y-2 mb-4">
-                                            <div className="flex items-center text-gray-600">
-                                                <svg
-                                                    className="w-5 h-5 mr-2"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                                    />
-                                                </svg>
-                                                <span className="text-sm">{formatDate(exam.examDate)}</span>
-                                            </div>
-
-                                            <div className="flex items-center text-gray-600">
-                                                <svg
-                                                    className="w-5 h-5 mr-2"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                                    />
-                                                </svg>
-                                                <span className="text-sm">
-                                                    {exam.startTime} - {exam.endTime}
-                                                </span>
-                                            </div>
-
-                                            <div className="flex items-center text-gray-600">
-                                                <svg
-                                                    className="w-5 h-5 mr-2"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M13 10V3L4 14h7v7l9-11h-7z"
-                                                    />
-                                                </svg>
-                                                <span className="text-sm">{exam.duration} minutes</span>
-                                            </div>
-
-                                            <div className="flex items-center text-gray-600">
-                                                <svg
-                                                    className="w-5 h-5 mr-2"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                                    />
-                                                </svg>
-                                                <span className="text-sm capitalize">{exam.mode}</span>
-                                            </div>
+                                        <div className="flex items-center text-gray-600">
+                                            <svg
+                                                className="w-5 h-5 mr-2"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                                                />
+                                            </svg>
+                                            <span className="text-sm">{exam.duration} minutes</span>
                                         </div>
 
-                                        <div className="pt-4 border-t border-gray-200">
-                                            <div className="mb-3">
-                                                <span className="text-sm text-gray-500">Enrollment Status:</span>
-                                                <span className="ml-2 text-sm font-medium text-gray-700">
-                                                    {exam.enrollmentStatus}
-                                                </span>
-                                            </div>
-
-                                            <button
-                                                onClick={() => handleJoinExam(exam)}
-                                                // disabled={!exam.canJoin || isJoining}
-                                                className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${exam.canJoin && !isJoining
-                                                        ? "bg-blue-600 text-white hover:bg-blue-700"
-                                                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                                    }`}
+                                        <div className="flex items-center text-gray-600">
+                                            <svg
+                                                className="w-5 h-5 mr-2"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
                                             >
-                                                {/* {isJoining ? "Joining..." : exam.canJoin ? "Join Exam" : "Cannot Join"} */}
-                                                Join Exam
-                                            </button>
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                                />
+                                            </svg>
+                                            <span className="text-sm capitalize">{exam.mode}</span>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </Container>
 
-            <MediaPermissionModal
-                isOpen={showPermissionModal}
-                onPermissionGranted={handlePermissionGranted}
-                onCancel={handleCancelPermission}
-            />
-        </>
+                                    <div className="pt-4 border-t border-gray-200">
+                                        <div className="mb-3">
+                                            <span className="text-sm text-gray-500">Enrollment Status:</span>
+                                            <span className="ml-2 text-sm font-medium text-gray-700">
+                                                {exam.enrollmentStatus}
+                                            </span>
+                                        </div>
+
+                                        <button
+                                            onClick={() => handleJoinExam(exam)}
+                                            // disabled={!exam.canJoin}
+                                            className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${exam.canJoin
+                                                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                                                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                                }`}
+                                        >
+                                            {/* {exam.canJoin ? "Join Exam" : "Cannot Join Yet"} */}
+                                            Join Exam
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </Container>
     );
 };
 

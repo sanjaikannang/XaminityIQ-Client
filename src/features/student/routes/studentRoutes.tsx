@@ -4,6 +4,7 @@ import { RoleGuard } from "../../../hoc/withRoleGuard";
 import StudentDashboardPage from "../dashboard/pages/StudentDashboardPage";
 import ExamsPage from "../exam/pages/ExamsPage";
 import StudentExamRoomPage from "../exam/pages/StudentExamRoomPage";
+import StudentEnvironmentCheckPage from "../exam/pages/StudentEnvironmentCheckPage ";
 
 export const studentRoutes: RouteObject[] = [
     // ===== Dashboard =====
@@ -29,6 +30,14 @@ export const studentRoutes: RouteObject[] = [
         element: (
             <RoleGuard allowedRoles={[UserRole.STUDENT]}>
                 <StudentExamRoomPage />
+            </RoleGuard>
+        ),
+    },
+     {
+        path: "/student/exam/:examId/environment-check",
+        element: (
+            <RoleGuard allowedRoles={[UserRole.STUDENT]}>
+                <StudentEnvironmentCheckPage />
             </RoleGuard>
         ),
     }
