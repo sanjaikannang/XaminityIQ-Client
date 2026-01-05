@@ -26,18 +26,18 @@ export const studentRoutes: RouteObject[] = [
         ),
     },
     {
-        path: "/student/exam-room/:examId",
-        element: (
-            <RoleGuard allowedRoles={[UserRole.STUDENT]}>
-                <StudentExamRoomPage />
-            </RoleGuard>
-        ),
-    },
-     {
         path: "/student/exam/:examId/environment-check",
         element: (
             <RoleGuard allowedRoles={[UserRole.STUDENT]}>
                 <StudentEnvironmentCheckPage />
+            </RoleGuard>
+        ),
+    },
+    {
+        path: "/student/exam-room/:examId",
+        element: (
+            <RoleGuard allowedRoles={[UserRole.STUDENT]}>
+                <StudentExamRoomPage />
             </RoleGuard>
         ),
     }

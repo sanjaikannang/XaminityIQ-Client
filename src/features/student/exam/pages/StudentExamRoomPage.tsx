@@ -171,7 +171,7 @@ const StudentExamRoomContent = () => {
         // Check if still within exam time
         const examEndTime = getExamEndTime();
         if (examEndTime && new Date() < examEndTime) {
-            toast.info("You can request to rejoin the exam");
+            toast.error("You can request to rejoin the exam");
             navigate(`/student/exam/${examId}/environment-check`);
         } else {
             toast.error("Exam time has ended. Cannot rejoin.");
@@ -289,16 +289,16 @@ const StudentExamRoomContent = () => {
                             <div className="absolute bottom-4 left-4 flex gap-2">
                                 <div
                                     className={`px-3 py-1 rounded-full text-xs font-medium ${isAudioEnabled
-                                        ? "bg-green-600 text-white"
-                                        : "bg-red-600 text-white"
+                                            ? "bg-green-600 text-white"
+                                            : "bg-red-600 text-white"
                                         }`}
                                 >
                                     {isAudioEnabled ? "Mic On" : "Mic Off"}
                                 </div>
                                 <div
                                     className={`px-3 py-1 rounded-full text-xs font-medium ${isVideoEnabled
-                                        ? "bg-green-600 text-white"
-                                        : "bg-red-600 text-white"
+                                            ? "bg-green-600 text-white"
+                                            : "bg-red-600 text-white"
                                         }`}
                                 >
                                     {isVideoEnabled ? "Camera On" : "Camera Off"}
@@ -413,8 +413,8 @@ const StudentExamRoomContent = () => {
                                         <div
                                             key={msg.id}
                                             className={`rounded-lg p-3 ${isSentByMe
-                                                ? "bg-blue-600 ml-auto"
-                                                : "bg-gray-700"
+                                                    ? "bg-blue-600 ml-auto"
+                                                    : "bg-gray-700"
                                                 }`}
                                             style={{ maxWidth: "85%" }}
                                         >
