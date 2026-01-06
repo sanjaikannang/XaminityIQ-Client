@@ -51,7 +51,7 @@ const FacultyExamRoomContent = () => {
     const { data: joinRequestsData, refetch: refetchJoinRequests } = useGetPendingJoinRequestsQuery(
         examId!,
         {
-            pollingInterval: 3000, // Poll every 3 seconds
+            pollingInterval: 3000,
         }
     );
 
@@ -113,31 +113,27 @@ const FacultyExamRoomContent = () => {
             const now = new Date();
             const timeDiff = examEndTime.getTime() - now.getTime();
 
-            // Calculate time remaining
             const minutesRemaining = Math.floor(timeDiff / 60000);
             const secondsRemaining = Math.floor((timeDiff % 60000) / 1000);
 
             if (timeDiff <= 0) {
-                // Exam time has ended
                 toast.error("Exam time has ended. Disconnecting all participants...");
                 handleEndExam();
                 return;
             }
 
-            // Show warning at 5 minutes
             if (minutesRemaining === 5 && !isWarningShown) {
                 toast.error("5 minutes remaining in the exam!");
                 setIsWarningShown(true);
             }
 
-            // Update display
             if (minutesRemaining < 10) {
                 setTimeRemaining(`${minutesRemaining}:${secondsRemaining.toString().padStart(2, '0')}`);
             }
         };
 
         const interval = setInterval(checkTime, 1000);
-        checkTime(); // Initial check
+        checkTime();
 
         return () => clearInterval(interval);
     }, [examDate, endTime, isWarningShown]);
@@ -163,7 +159,6 @@ const FacultyExamRoomContent = () => {
     // Show notification when new join request arrives
     useEffect(() => {
         if (pendingRequests.length > 0) {
-            // Only show if requests panel is not already open
             if (!showJoinRequests) {
                 toast.error(`${pendingRequests.length} student(s) waiting to join`, {
                     duration: 3000,
@@ -250,10 +245,6 @@ const FacultyExamRoomContent = () => {
 
             toast.success(`${studentToRemove.name} has been removed from the exam`);
 
-            // Also remove from 100ms room
-            // Note: You may need to implement this in your 100ms service
-            // await hmsActions.removePeer(studentToRemove.id, removalReason);
-
             setShowRemoveModal(false);
             setStudentToRemove(null);
             setRemovalReason("");
@@ -313,7 +304,6 @@ const FacultyExamRoomContent = () => {
                     </p>
                 </div>
                 <div className="flex gap-3 items-center">
-                    {/* Join Requests Button with Badge */}
                     <button
                         onClick={() => setShowJoinRequests(!showJoinRequests)}
                         className="relative p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
@@ -429,9 +419,17 @@ const FacultyExamRoomContent = () => {
                 <div className="flex-1 p-4 overflow-y-auto">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-white text-lg">Student Video Grid</h2>
-                        <span className="text-gray-400 text-sm">
-                            {studentPeers.length} / {totalStudents} students in room
-                        </span>
+                        <div className="flex gap-3 items-center">
+                            <span className="text-gray-400 text-sm">
+                                {studentPeers.length} / {totalStudents} students in room
+                            </span>
+                            <button
+                                onClick={() => setShowChat(!showChat)}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                            >
+                                {showChat ? "Hide Chat" : "Show Chat"}
+                            </button>
+                        </div>
                     </div>
 
                     {studentPeers.length === 0 ? (
@@ -468,7 +466,7 @@ const FacultyExamRoomContent = () => {
                                     typeof audioTrack === "object" &&
                                     "enabled" in audioTrack
                                     ? !(audioTrack as { enabled: boolean }).enabled
-                                    : false;
+                                    : true;
 
                                 const hasVideo = videoTrack &&
                                     typeof videoTrack === "object" &&
@@ -503,7 +501,6 @@ const FacultyExamRoomContent = () => {
                                             </div>
                                         )}
 
-                                        {/* Student Info Overlay */}
                                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-2">
                                             <div className="flex justify-between items-center">
                                                 <span className="text-white text-sm font-medium">
@@ -537,7 +534,6 @@ const FacultyExamRoomContent = () => {
                                             </div>
                                         </div>
 
-                                        {/* Controls - Show on hover */}
                                         <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button
                                                 onClick={() => {
@@ -583,7 +579,6 @@ const FacultyExamRoomContent = () => {
                                             </button>
                                         </div>
 
-                                        {/* Warning indicators */}
                                         {(!hasVideo || isAudioMuted) && (
                                             <div className="absolute top-2 left-2">
                                                 <div className="bg-red-500 text-white text-xs px-2 py-1 rounded">
@@ -624,7 +619,6 @@ const FacultyExamRoomContent = () => {
                                 </button>
                             </div>
 
-                            {/* Mode Toggle */}
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => {
@@ -649,7 +643,6 @@ const FacultyExamRoomContent = () => {
                                 </button>
                             </div>
 
-                            {/* Student Selector */}
                             {!broadcastMode && (
                                 <select
                                     value={selectedStudent || ""}
@@ -667,29 +660,42 @@ const FacultyExamRoomContent = () => {
                         </div>
 
                         <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                            {storeMessages.map((msg: HMSMessage) => {
-                                const isSentByMe = msg.senderName === localPeer?.name;
-                                const recipient = msg.recipientPeer
-                                    ? studentPeers.find((p) => p.id === msg.recipientPeer)?.name
-                                    : null;
+                            {storeMessages.length === 0 ? (
+                                <div className="text-center text-gray-400 text-sm mt-8">
+                                    <p>No messages yet</p>
+                                </div>
+                            ) : (
+                                storeMessages.map((msg: HMSMessage) => {
+                                    const isSentByMe = msg.senderName === localPeer?.name;
+                                    const recipient = msg.recipientPeer
+                                        ? studentPeers.find((p) => p.id === msg.recipientPeer)?.name
+                                        : null;
 
-                                return (
-                                    <div key={msg.id} className="bg-gray-700 rounded-lg p-3">
-                                        <div className="flex justify-between items-start mb-1">
-                                            <span className="text-blue-400 text-sm font-medium">
-                                                {isSentByMe
-                                                    ? recipient
-                                                        ? `You to ${recipient}`
-                                                        : "You (Broadcast)"
-                                                    : msg.senderName}
-                                            </span>
-                                            <span className="text-gray-500 text-xs">
-                                                {msg.time.toLocaleTimeString()}
-                                            </span>
+                                    return (
+                                        <div
+                                            key={msg.id}
+                                            className={`rounded-lg p-3 ${isSentByMe
+                                                ? "bg-blue-600 ml-auto"
+                                                : "bg-gray-700"
+                                                }`}
+                                            style={{ maxWidth: "85%" }}
+                                        >
+                                            <div className="flex justify-between items-start mb-1">
+                                                <span className="text-blue-200 text-sm font-medium">
+                                                    {isSentByMe
+                                                        ? recipient
+                                                            ? `You to ${recipient}`
+                                                            : "You (Broadcast)"
+                                                        : msg.senderName}
+                                                </span>
+                                                <span>
+
+                                                </span>
+                                            </div>
                                         </div>
-                                    </div>
-                                )
-                            })
+                                    )
+                                })
+                            )
                             }
                         </div>
                     </div>
@@ -707,4 +713,4 @@ const FacultyExamRoomPage = () => {
     )
 }
 
-export default FacultyExamRoomPage
+export default FacultyExamRoomPage;

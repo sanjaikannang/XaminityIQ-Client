@@ -137,19 +137,6 @@ const StudentExamRoomContent = () => {
         }
     }, [localPeer?.videoTrack, hmsActions]);
 
-    // Ensure audio and video are enabled (students cannot mute themselves)
-    useEffect(() => {
-        if (localPeer) {
-            hmsActions.setLocalAudioEnabled(true);
-            hmsActions.setLocalVideoEnabled(true);
-        }
-    }, [localPeer, hmsActions]);
-
-    // Auto scroll chat
-    useEffect(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [storeMessages]);
-
     // Handle connection state changes (detect disconnection)
     useEffect(() => {
         if (!isConnected && hasLeftRef.current === false && localPeer) {
@@ -179,11 +166,17 @@ const StudentExamRoomContent = () => {
         }
     };
 
+    // Auto scroll chat
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [storeMessages]);
+
     const sendMessage = async () => {
         if (messageInput.trim()) {
             try {
                 await hmsActions.sendBroadcastMessage(messageInput);
                 setMessageInput("");
+                toast.success("Message sent to proctor");
             } catch (error) {
                 console.error("Failed to send message:", error);
                 toast.error("Failed to send message");
@@ -289,16 +282,16 @@ const StudentExamRoomContent = () => {
                             <div className="absolute bottom-4 left-4 flex gap-2">
                                 <div
                                     className={`px-3 py-1 rounded-full text-xs font-medium ${isAudioEnabled
-                                            ? "bg-green-600 text-white"
-                                            : "bg-red-600 text-white"
+                                        ? "bg-green-600 text-white"
+                                        : "bg-red-600 text-white"
                                         }`}
                                 >
                                     {isAudioEnabled ? "Mic On" : "Mic Off"}
                                 </div>
                                 <div
                                     className={`px-3 py-1 rounded-full text-xs font-medium ${isVideoEnabled
-                                            ? "bg-green-600 text-white"
-                                            : "bg-red-600 text-white"
+                                        ? "bg-green-600 text-white"
+                                        : "bg-red-600 text-white"
                                         }`}
                                 >
                                     {isVideoEnabled ? "Camera On" : "Camera Off"}
@@ -413,8 +406,8 @@ const StudentExamRoomContent = () => {
                                         <div
                                             key={msg.id}
                                             className={`rounded-lg p-3 ${isSentByMe
-                                                    ? "bg-blue-600 ml-auto"
-                                                    : "bg-gray-700"
+                                                ? "bg-blue-600 ml-auto"
+                                                : "bg-gray-700"
                                                 }`}
                                             style={{ maxWidth: "85%" }}
                                         >

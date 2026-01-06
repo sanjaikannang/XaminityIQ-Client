@@ -46,12 +46,12 @@ export interface ExamDetails {
 export interface JoinRequestResponse {
     message: string;
     requestId: string;
-    status: 'pending' | 'approved' | 'rejected';
+    status: 'PENDING' | 'APPROVED' | 'REJECTED';
     isRejoin: boolean;
 }
 
 export interface JoinRequestStatus {
-    status: 'pending' | 'approved' | 'rejected';
+    status: 'PENDING' | 'APPROVED' | 'REJECTED';
     isRejoin: boolean;
     approvedAt?: Date;
     rejectedAt?: Date;

@@ -3,3 +3,9 @@ export enum UserRole {
     FACULTY = "FACULTY",
     STUDENT = "STUDENT",
 }
+
+export enum JoinRequestStatus {
+    PENDING = 'PENDING',
+    APPROVED = 'APPROVED',
+    REJECTED = 'REJECTED'
+}
