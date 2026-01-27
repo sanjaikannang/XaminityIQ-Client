@@ -5,18 +5,19 @@ import { PageHeader } from '../../../../common/ui/PageHeader';
 import Button from '../../../../common/ui/Button';
 import { useGetFacultyExamsQuery } from '../../../../state/services/endpoints/exam';
 import { Calendar, Clock } from 'lucide-react';
+import { ExamStatus } from '../../../../utils/enum';
 
 const FacultyExamsPage: React.FC = () => {
     const navigate = useNavigate();
-    const facultyId = 'faculty_id_from_auth'; // Get from auth context
+    const facultyId = "6953d4593c9ee327e1b69fc9"; // Get from auth context
 
     const { data, isLoading } = useGetFacultyExamsQuery({ facultyId });
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'upcoming': return 'bg-warning text-whiteColor';
-            case 'ongoing': return 'bg-success text-whiteColor';
-            case 'completed': return 'bg-borderDark text-whiteColor';
+            case ExamStatus.UPCOMING: return 'bg-warning text-whiteColor';
+            case ExamStatus.ONGOING: return 'bg-success text-whiteColor';
+            case ExamStatus.COMPLETED: return 'bg-borderDark text-whiteColor';
             default: return 'bg-borderLight text-textPrimary';
         }
     };
@@ -61,7 +62,7 @@ const FacultyExamsPage: React.FC = () => {
                                     </div>
 
                                     <div className="flex gap-2">
-                                        {exam.status === 'upcoming' || exam.status === 'ongoing' ? (
+                                        {exam.status === ExamStatus.UPCOMING || exam.status === ExamStatus.ONGOING ? (
                                             <Button
                                                 variant="primary"
                                                 size="sm"

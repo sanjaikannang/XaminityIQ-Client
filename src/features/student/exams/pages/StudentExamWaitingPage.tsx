@@ -4,6 +4,7 @@ import { Container } from '../../../../common/ui/Container';
 import { PageHeader } from '../../../../common/ui/PageHeader';
 import { useCheckJoinStatusQuery } from '../../../../state/services/endpoints/exam';
 import { Loader, Clock } from 'lucide-react';
+import { JoinRequestStatus } from '../../../../utils/enum';
 
 const StudentExamWaitingPage: React.FC = () => {
     const { examId } = useParams<{ examId: string }>();
@@ -17,11 +18,11 @@ const StudentExamWaitingPage: React.FC = () => {
     );
 
     useEffect(() => {
-        if (data?.data?.status === 'approved' && data.data.tokens) {
+        if (data?.data?.status === JoinRequestStatus.APPROVED && data.data.tokens) {
             navigate(`/student/exams/${examId}/room`, {
                 state: { tokens: data.data.tokens }
             });
-        } else if (data?.data?.status === 'rejected') {
+        } else if (data?.data?.status === JoinRequestStatus.REJECTED) {
             // Show rejection message and redirect
             alert(`Your request was rejected: ${data.data.reason || 'No reason provided'}`);
             navigate('/student/exams');

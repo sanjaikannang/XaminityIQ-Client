@@ -32,7 +32,7 @@ export const examApiService = apiInstance.injectEndpoints({
             query: ({ examId, facultyId }) => ({
                 url: api.exam.facultyJoinExam(examId),
                 method: "POST",
-                body: { facultyId },
+                data: { facultyId },
             }),
         }),
 
@@ -53,7 +53,7 @@ export const examApiService = apiInstance.injectEndpoints({
             query: ({ examId, requestId }) => ({
                 url: api.exam.approveJoinRequest(examId),
                 method: "POST",
-                body: { requestId },
+                data: { requestId },
             }),
             invalidatesTags: ["JoinRequest"],
         }),
@@ -65,7 +65,7 @@ export const examApiService = apiInstance.injectEndpoints({
             query: ({ examId, requestId, reason }) => ({
                 url: api.exam.rejectJoinRequest(examId),
                 method: "POST",
-                body: { requestId, reason },
+                data: { requestId, reason },
             }),
             invalidatesTags: ["JoinRequest"],
         }),
@@ -80,10 +80,10 @@ export const examApiService = apiInstance.injectEndpoints({
                 recipientId?: string;
             }
         >({
-            query: ({ examId, ...body }) => ({
+            query: ({ examId, ...data }) => ({
                 url: api.exam.facultyMessages(examId),
                 method: "POST",
-                body,
+                data,
             }),
         }),
 
@@ -101,10 +101,10 @@ export const examApiService = apiInstance.injectEndpoints({
             { success: boolean },
             { examId: string; studentId: string; reason: string }
         >({
-            query: ({ examId, ...body }) => ({
+            query: ({ examId, ...data }) => ({
                 url: api.exam.removeStudent(examId),
                 method: "POST",
-                body,
+                data,
             }),
         }),
 
@@ -132,10 +132,10 @@ export const examApiService = apiInstance.injectEndpoints({
             StudentJoinRequestResponse,
             { examId: string } & StudentJoinRequestRequest
         >({
-            query: ({ examId, ...body }) => ({
+            query: ({ examId, ...data }) => ({
                 url: api.exam.studentJoinRequest(examId),
                 method: "POST",
-                body,
+                data,
             }),
         }),
 
@@ -166,7 +166,7 @@ export const examApiService = apiInstance.injectEndpoints({
             query: ({ examId, studentId }) => ({
                 url: api.exam.finishExam(examId),
                 method: "POST",
-                body: { studentId },
+                data: { studentId },
             }),
             invalidatesTags: ["exam"],
         }),

@@ -5,18 +5,19 @@ import { PageHeader } from '../../../../common/ui/PageHeader';
 import Button from '../../../../common/ui/Button';
 import { useGetStudentExamsQuery } from '../../../../state/services/endpoints/exam';
 import { Calendar, Clock } from 'lucide-react';
+import { ExamStatus, ParticipantStatus } from '../../../../utils/enum';
 
 const StudentExamsPage: React.FC = () => {
     const navigate = useNavigate();
-    const studentId = '"6953d8163bfb64f64c0e7df7"'; // Get from auth context
+    const studentId = "6953d8163bfb64f64c0e7df7"; // Get from auth context
 
     const { data, isLoading } = useGetStudentExamsQuery({ studentId });
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'upcoming': return 'bg-warning text-whiteColor';
-            case 'ongoing': return 'bg-success text-whiteColor';
-            case 'completed': return 'bg-borderDark text-whiteColor';
+            case ExamStatus.UPCOMING: return 'bg-warning text-whiteColor';
+            case ExamStatus.ONGOING: return 'bg-success text-whiteColor';
+            case ExamStatus.COMPLETED: return 'bg-borderDark text-whiteColor';
             default: return 'bg-borderLight text-textPrimary';
         }
     };
@@ -72,7 +73,7 @@ const StudentExamsPage: React.FC = () => {
                                     </div>
 
                                     <div className="flex gap-2">
-                                        {canJoin(exam) && exam.myStatus !== 'finished' && (
+                                        {/* {canJoin(exam) && exam.myStatus !== ParticipantStatus.FINISHED && ( */}
                                             <Button
                                                 variant="primary"
                                                 size="sm"
@@ -80,7 +81,7 @@ const StudentExamsPage: React.FC = () => {
                                             >
                                                 Join Exam
                                             </Button>
-                                        )}
+                                        {/* )} */}
                                     </div>
                                 </div>
                             </div>

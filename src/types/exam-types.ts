@@ -1,3 +1,5 @@
+import { ExamStatus, JoinRequestStatus, MessageType, ParticipantStatus } from "../utils/enum";
+
 export interface CreateExamRequest {
     examName: string;
     date: string;
@@ -24,8 +26,8 @@ export interface ExamData {
     date: string;
     time: string;
     duration: number;
-    status: 'upcoming' | 'ongoing' | 'completed';
-    myStatus?: 'invited' | 'waiting' | 'joined' | 'finished' | 'removed' | 'rejected';
+    status: ExamStatus;
+    myStatus?: ParticipantStatus;
 }
 
 export interface GetExamsResponse {
@@ -71,7 +73,7 @@ export interface ChatMessageData {
     senderName: string;
     recipientId?: string;
     message: string;
-    type: 'broadcast' | 'direct';
+    type: MessageType;
     timestamp: string;
 }
 
@@ -83,12 +85,12 @@ export interface GetMessagesResponse {
 
 export interface StudentJoinRequestRequest {
     studentId: string;
-    deviceStatus: {
-        camera: boolean;
-        microphone: boolean;
-        screenShare: boolean;
-        fullscreen: boolean;
-    };
+    // deviceStatus: {
+    //     camera: boolean;
+    //     microphone: boolean;
+    //     screenShare: boolean;
+    //     fullscreen: boolean;
+    // };
 }
 
 export interface StudentJoinRequestResponse {
@@ -105,7 +107,7 @@ export interface CheckJoinStatusResponse {
     success: boolean;
     message: string;
     data?: {
-        status: 'pending' | 'approved' | 'rejected';
+        status: JoinRequestStatus;
         reason?: string;
         tokens?: {
             rtcToken: string;

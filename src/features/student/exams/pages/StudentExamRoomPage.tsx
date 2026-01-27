@@ -14,7 +14,7 @@ import { Mic, MicOff, Video, VideoOff, MessageSquare, LogOut } from 'lucide-reac
 const StudentExamRoomPage: React.FC = () => {
     const { examId } = useParams<{ examId: string }>();
     const location = useLocation();
-    const studentId = '"6953d8163bfb64f64c0e7df7"'; // Get from auth
+    const studentId = "6953d8163bfb64f64c0e7df7"; // Get from auth
     const tokens = location.state?.tokens;
 
     const [message, setMessage] = useState('');

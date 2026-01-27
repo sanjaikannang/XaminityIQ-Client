@@ -14,10 +14,11 @@ import {
 } from '../../../../state/services/endpoints/exam';
 import { useFacultyExamRoom } from '../hooks/useFacultyExamRoom';
 import { Mic, MicOff, LogOut } from 'lucide-react';
+import { MessageType } from '../../../../utils/enum';
 
 const FacultyExamRoomPage: React.FC = () => {
     const { examId } = useParams<{ examId: string }>();
-    const facultyId = 'faculty_id_from_auth'; // Get from auth
+    const facultyId = '6953d4593c9ee327e1b69fc9'; // Get from auth
 
     const [activeTab, setActiveTab] = useState<'requests' | 'chat'>('requests');
     const [message, setMessage] = useState('');
@@ -75,7 +76,7 @@ const FacultyExamRoomPage: React.FC = () => {
                 examId: examId!,
                 senderId: facultyId,
                 message,
-                type: broadcastMode ? 'broadcast' : 'direct',
+                type: broadcastMode ? MessageType.BROADCAST : MessageType.DIRECT,
                 recipientId: selectedStudent || undefined,
             }).unwrap();
             setMessage('');
