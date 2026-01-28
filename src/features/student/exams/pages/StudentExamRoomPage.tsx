@@ -8,6 +8,7 @@ import { PageHeader } from '../../../../common/ui/PageHeader';
 import Button from '../../../../common/ui/Button';
 import { useStudentExamRoom } from '../hooks/useStudentExamRoom';
 import { Mic, MicOff, Video, VideoOff, MessageSquare, LogOut } from 'lucide-react';
+import { useEnvironmentCheck } from '../hooks/useEnvironmentCheck.ts';
 
 const StudentExamRoomPage: React.FC = () => {
     const { examId } = useParams<{ examId: string }>();
@@ -17,6 +18,9 @@ const StudentExamRoomPage: React.FC = () => {
     const [audioEnabled, setAudioEnabled] = useState(true);
     const [videoEnabled, setVideoEnabled] = useState(true);
     const [finishExam] = useFinishExamMutation();
+    const {
+        testScreenShare
+    } = useEnvironmentCheck();
 
     const {
         toggleAudio,
@@ -44,6 +48,11 @@ const StudentExamRoomPage: React.FC = () => {
                 console.error('Finish exam failed:', error);
             }
         }
+    };
+
+    const handleTestScreenShare = async () => {
+        const result = await testScreenShare();
+        console.log('Screen share test result:', result);
     };
 
     return (
@@ -83,6 +92,10 @@ const StudentExamRoomPage: React.FC = () => {
 
                             <Button variant="danger" onClick={handleFinishExam}>
                                 <LogOut className="w-4 h-4" /> Finish Exam
+                            </Button>
+
+                            <Button onClick={handleTestScreenShare} size="sm" variant="primary">
+                                Test Screen Share
                             </Button>
                         </div>
 

@@ -11,7 +11,7 @@ import {
     useEndExamMutation
 } from '../../../../state/services/endpoints/exam';
 import { useFacultyExamRoom } from '../hooks/useFacultyExamRoom';
-import { Mic, MicOff, LogOut } from 'lucide-react';
+import { Mic, MicOff, LogOut, Video, Monitor } from 'lucide-react';
 
 const FacultyExamRoomPage: React.FC = () => {
     const { examId } = useParams<{ examId: string }>();
@@ -27,7 +27,7 @@ const FacultyExamRoomPage: React.FC = () => {
     const [endExam] = useEndExamMutation();
 
     const [tokens, setTokens] = useState<any>(null);
-    const { remoteUsers, talkToAll, stopTalking, listenToStudent } = useFacultyExamRoom({
+    const { studentStreams, talkToAll, stopTalking } = useFacultyExamRoom({
         tokens,
         examId: examId!,
     });
@@ -60,7 +60,7 @@ const FacultyExamRoomPage: React.FC = () => {
         }
     };
 
-    console.log('Remote Users:', remoteUsers);
+    console.log('Student Streams:', studentStreams);
 
     return (
         <>
@@ -68,31 +68,53 @@ const FacultyExamRoomPage: React.FC = () => {
             <Container>
                 <div className="flex gap-4 h-[calc(100vh-200px)]">
                     {/* Main Video Grid */}
-                    <div className="flex-1 bg-whiteColor rounded-xl border border-borderDefault p-4">
-                        <div className="grid grid-cols-4 gap-4">
-                            {remoteUsers.map((user: any) => (
-                                <div
-                                    key={user.uid}
-                                    className="aspect-video bg-bgSecondary rounded-xl border border-borderDefault relative"
-                                >
-                                    <div id={`student-video-${user.uid}`} className="w-full h-full" />
-                                    <div className="absolute bottom-2 left-2 bg-blackColor/70 text-whiteColor px-2 py-1 rounded text-xs">
-                                        Student {user.uid}
+                    <div className="flex-1 bg-whiteColor rounded-xl border border-borderDefault p-4 overflow-y-auto">
+                        <div className="grid grid-cols-2 gap-4">
+                            {studentStreams.map((stream) => (
+                                <div key={stream.uid} className="space-y-2 border border-borderLight rounded-xl p-3">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h4 className="font-semibold text-sm">Student {stream.uid}</h4>
+                                        <div className="flex gap-1">
+                                            <span className={`flex items-center gap-1 text-xs px-2 py-1 rounded ${stream.cameraUser?.videoTrack ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                                                <Video className="w-3 h-3" />
+                                                {stream.cameraUser?.videoTrack ? 'On' : 'Off'}
+                                            </span>
+                                            <span className={`flex items-center gap-1 text-xs px-2 py-1 rounded ${stream.screenUser?.videoTrack ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}>
+                                                <Monitor className="w-3 h-3" />
+                                                {stream.screenUser?.videoTrack ? 'On' : 'Off'}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div className="absolute top-2 right-2 flex gap-1">
-                                        <button
-                                            onClick={() => listenToStudent(user.uid)}
-                                            className="bg-primary text-whiteColor p-1 rounded"
-                                        >
-                                            <Mic className="w-4 h-4" />
-                                        </button>
+
+                                    {/* Camera Feed */}
+                                    <div className="aspect-video bg-bgSecondary rounded-lg border border-borderDefault relative">
+                                        <div id={`student-camera-${stream.uid}`} className="w-full h-full rounded-lg overflow-hidden" />
+                                        <div className="absolute bottom-2 left-2 bg-blackColor/70 text-whiteColor px-2 py-1 rounded text-xs flex items-center gap-1">
+                                            <Video className="w-3 h-3" />
+                                            Camera
+                                        </div>
+                                    </div>
+
+                                    {/* Screen Share Feed */}
+                                    <div className="aspect-video bg-bgSecondary rounded-lg border border-borderDefault relative">
+                                        <div id={`student-screen-${stream.uid}`} className="w-full h-full rounded-lg overflow-hidden" />
+                                        <div className="absolute bottom-2 left-2 bg-blackColor/70 text-whiteColor px-2 py-1 rounded text-xs flex items-center gap-1">
+                                            <Monitor className="w-3 h-3" />
+                                            Screen
+                                        </div>
                                     </div>
                                 </div>
                             ))}
+
+                            {studentStreams.length === 0 && (
+                                <div className="col-span-2 text-center py-12 text-textSecondary">
+                                    No students connected yet
+                                </div>
+                            )}
                         </div>
 
                         {/* Faculty Controls */}
-                        <div className="mt-4 flex gap-2">
+                        <div className="mt-4 flex gap-2 border-t border-borderDefault pt-4">
                             <Button variant="primary" onClick={talkToAll}>
                                 <Mic className="w-4 h-4" /> Talk to All
                             </Button>
@@ -102,7 +124,9 @@ const FacultyExamRoomPage: React.FC = () => {
                             <Button
                                 variant="danger"
                                 onClick={async () => {
-                                    await endExam(examId!).unwrap();
+                                    if (confirm('Are you sure you want to end the exam for all students?')) {
+                                        await endExam(examId!).unwrap();
+                                    }
                                 }}
                             >
                                 <LogOut className="w-4 h-4" /> End Exam
@@ -157,6 +181,11 @@ const FacultyExamRoomPage: React.FC = () => {
                                         </div>
                                     </div>
                                 ))}
+                                {joinRequests?.data?.length === 0 && (
+                                    <p className="text-sm text-textSecondary text-center py-4">
+                                        No pending requests
+                                    </p>
+                                )}
                             </div>
                         ) : (
                             <div>

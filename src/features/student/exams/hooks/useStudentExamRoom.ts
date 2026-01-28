@@ -23,15 +23,17 @@ interface UseStudentExamRoomProps {
 export const useStudentExamRoom = ({
     tokens,
 }: UseStudentExamRoomProps) => {
-    /* ================= RTC ================= */
-    const rtcClient = useRef<IAgoraRTCClient>(
+    // ⭐ TWO SEPARATE CLIENTS - One for camera, one for screen
+    const cameraClient = useRef<IAgoraRTCClient>(
         AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })
     ).current;
 
-    /* ================= RTM ================= */
+    const screenClient = useRef<IAgoraRTCClient>(
+        AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })
+    ).current;
+
     const rtmClient = useRef<any>(null);
 
-    /* ================= STATE ================= */
     const [isJoined, setIsJoined] = useState(false);
 
     const [localTracks, setLocalTracks] = useState<{
@@ -44,7 +46,6 @@ export const useStudentExamRoom = ({
         screen: null,
     });
 
-    /* ================= JOIN ROOM ================= */
     useEffect(() => {
         if (!tokens) return;
 
@@ -52,37 +53,84 @@ export const useStudentExamRoom = ({
 
         const joinExamRoom = async () => {
             try {
-                /* ---------- RTC JOIN ---------- */
-                await rtcClient.join(
+                console.log("🚀 Starting exam room join...");
+                console.log("📋 Tokens:", {
+                    channelName: tokens.channelName,
+                    uid: tokens.uid,
+                    hasRtcToken: !!tokens.rtcToken,
+                    hasRtmToken: !!tokens.rtmToken
+                });
+
+                // ============ CLIENT 1: CAMERA + AUDIO ============
+                console.log("🎥 Joining camera client with UID:", tokens.uid);
+                
+                await cameraClient.join(
                     AGORA_APP_ID,
                     tokens.channelName,
                     tokens.rtcToken,
                     tokens.uid
                 );
 
-                /* ---------- TRACKS ---------- */
+                console.log("✅ Camera client joined successfully");
+
+                // Create camera and audio tracks
                 const [audioTrack, videoTrack] =
                     await AgoraRTC.createMicrophoneAndCameraTracks();
 
-                const screenTrack =
-                    await AgoraRTC.createScreenVideoTrack(
-                        { encoderConfig: "1080p_1" },
-                        "disable"
-                    );
+                console.log("✅ Created camera and audio tracks");
 
-                await rtcClient.publish([audioTrack, videoTrack, screenTrack]);
+                // Publish camera + audio
+                await cameraClient.publish([audioTrack, videoTrack]);
 
-                videoTrack.play("local-video-preview");
+                console.log("✅ Published camera and audio to channel");
+
+                // Play video preview locally
+                if (mounted) {
+                    videoTrack.play("local-video-preview");
+                    console.log("✅ Playing local video preview");
+                }
+
+                // ============ CLIENT 2: SCREEN SHARE ============
+                const screenUid = `${tokens.uid}_screen`;
+                console.log("🖥️ Joining screen client with UID:", screenUid);
+
+                await screenClient.join(
+                    AGORA_APP_ID,
+                    tokens.channelName,
+                    tokens.rtcToken, // Same token works because backend uses UID=0
+                    screenUid
+                );
+
+                console.log("✅ Screen client joined successfully");
+
+                // Create screen share track
+                const screenTrack = await AgoraRTC.createScreenVideoTrack(
+                    { encoderConfig: "1080p_1" },
+                    "disable"
+                );
+
+                console.log("✅ Created screen share track");
+
+                const screenVideoTrack = Array.isArray(screenTrack) 
+                    ? screenTrack[0] 
+                    : screenTrack;
+
+                // Publish screen share
+                await screenClient.publish([screenVideoTrack]);
+
+                console.log("✅ Published screen share to channel");
 
                 if (!mounted) return;
 
                 setLocalTracks({
                     audio: audioTrack,
                     video: videoTrack,
-                    screen: screenTrack as ILocalVideoTrack,
+                    screen: screenVideoTrack as ILocalVideoTrack,
                 });
 
-                /* ---------- RTM LOGIN ---------- */
+                // ============ RTM LOGIN ============
+                console.log("💬 Logging into RTM...");
+                
                 rtmClient.current = new AgoraRTM.RTM(
                     AGORA_APP_ID,
                     tokens.uid
@@ -92,9 +140,17 @@ export const useStudentExamRoom = ({
                     token: tokens.rtmToken,
                 });
 
+                console.log("✅ RTM logged in successfully");
+                console.log("🎉 All systems ready!");
+
                 setIsJoined(true);
             } catch (error) {
                 console.error("❌ Failed to join exam room:", error);
+                // console.error("Error details:", {
+                //     name: error.name,
+                //     message: error.message,
+                //     code: error.code
+                // });
             }
         };
 
@@ -104,55 +160,78 @@ export const useStudentExamRoom = ({
             mounted = false;
             leaveExamRoom();
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tokens]);
 
-    /* ================= RTM MESSAGE ================= */
     const sendMessageToFaculty = async (
         message: string,
         facultyUid: string
     ): Promise<void> => {
         try {
-            if (!rtmClient.current) return;
+            if (!rtmClient.current) {
+                console.warn("RTM client not initialized");
+                return;
+            }
 
-            const peer =
-                rtmClient.current.createPeerMessageChannel(facultyUid);
-
+            const peer = rtmClient.current.createPeerMessageChannel(facultyUid);
             await peer.send({ text: message });
+            console.log("✅ Message sent to faculty");
         } catch (error) {
             console.error("❌ RTM send failed:", error);
         }
     };
 
-    /* ================= CONTROLS ================= */
     const toggleAudio = async (enabled: boolean) => {
-        await localTracks.audio?.setEnabled(enabled);
+        try {
+            await localTracks.audio?.setEnabled(enabled);
+            console.log(`🎤 Audio ${enabled ? 'enabled' : 'disabled'}`);
+        } catch (error) {
+            console.error("❌ Toggle audio failed:", error);
+        }
     };
 
     const toggleVideo = async (enabled: boolean) => {
-        await localTracks.video?.setEnabled(enabled);
+        try {
+            await localTracks.video?.setEnabled(enabled);
+            console.log(`📹 Video ${enabled ? 'enabled' : 'disabled'}`);
+        } catch (error) {
+            console.error("❌ Toggle video failed:", error);
+        }
     };
 
     const toggleScreen = async (enabled: boolean) => {
-        await localTracks.screen?.setEnabled(enabled);
+        try {
+            await localTracks.screen?.setEnabled(enabled);
+            console.log(`🖥️ Screen share ${enabled ? 'enabled' : 'disabled'}`);
+        } catch (error) {
+            console.error("❌ Toggle screen failed:", error);
+        }
     };
 
-    /* ================= LEAVE ================= */
     const leaveExamRoom = async () => {
         try {
+            console.log("👋 Leaving exam room...");
+
             localTracks.audio?.close();
             localTracks.video?.close();
             localTracks.screen?.close();
 
-            if (rtcClient.connectionState !== "DISCONNECTED") {
-                await rtcClient.leave();
+            if (cameraClient.connectionState !== "DISCONNECTED") {
+                await cameraClient.leave();
+                console.log("✅ Camera client left");
+            }
+
+            if (screenClient.connectionState !== "DISCONNECTED") {
+                await screenClient.leave();
+                console.log("✅ Screen client left");
             }
 
             if (rtmClient.current) {
                 await rtmClient.current.logout();
+                console.log("✅ RTM logged out");
             }
 
             setIsJoined(false);
+            console.log("👋 Successfully left exam room");
         } catch (error) {
             console.error("❌ Leave exam failed:", error);
         }
