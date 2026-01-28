@@ -8,31 +8,22 @@ import {
     useGetPendingJoinRequestsQuery,
     useApproveJoinRequestMutation,
     useRejectJoinRequestMutation,
-    useSendMessageMutation,
-    // useRemoveStudentMutation,
     useEndExamMutation
 } from '../../../../state/services/endpoints/exam';
 import { useFacultyExamRoom } from '../hooks/useFacultyExamRoom';
 import { Mic, MicOff, LogOut } from 'lucide-react';
-import { MessageType } from '../../../../utils/enum';
 
 const FacultyExamRoomPage: React.FC = () => {
     const { examId } = useParams<{ examId: string }>();
     const facultyId = '6953d4593c9ee327e1b69fc9'; // Get from auth
 
     const [activeTab, setActiveTab] = useState<'requests' | 'chat'>('requests');
-    const [message, setMessage] = useState('');
-    const [broadcastMode, setBroadcastMode] = useState(true);
-    const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
-
     const [facultyJoin] = useFacultyJoinExamMutation();
     const { data: joinRequests } = useGetPendingJoinRequestsQuery(examId!, {
         pollingInterval: 3000,
     });
     const [approveRequest] = useApproveJoinRequestMutation();
     const [rejectRequest] = useRejectJoinRequestMutation();
-    const [sendMsg] = useSendMessageMutation();
-    // const [removeStudent] = useRemoveStudentMutation();
     const [endExam] = useEndExamMutation();
 
     const [tokens, setTokens] = useState<any>(null);
@@ -69,21 +60,7 @@ const FacultyExamRoomPage: React.FC = () => {
         }
     };
 
-    const handleSendMessage = async () => {
-        if (!message.trim()) return;
-        try {
-            await sendMsg({
-                examId: examId!,
-                senderId: facultyId,
-                message,
-                type: broadcastMode ? MessageType.BROADCAST : MessageType.DIRECT,
-                recipientId: selectedStudent || undefined,
-            }).unwrap();
-            setMessage('');
-        } catch (error) {
-            console.error('Send message failed:', error);
-        }
-    };
+    console.log('Remote Users:', remoteUsers);
 
     return (
         <>
@@ -187,8 +164,6 @@ const FacultyExamRoomPage: React.FC = () => {
                                     <label className="flex items-center gap-2">
                                         <input
                                             type="checkbox"
-                                            checked={broadcastMode}
-                                            onChange={(e) => setBroadcastMode(e.target.checked)}
                                         />
                                         <span className="text-sm">Broadcast to all</span>
                                     </label>
@@ -196,12 +171,10 @@ const FacultyExamRoomPage: React.FC = () => {
                                 <div className="flex gap-2">
                                     <input
                                         type="text"
-                                        value={message}
-                                        onChange={(e) => setMessage(e.target.value)}
                                         placeholder="Type message..."
                                         className="flex-1 px-3 py-2 border border-borderDefault rounded-xl"
                                     />
-                                    <Button onClick={handleSendMessage}>Send</Button>
+                                    <Button>Send</Button>
                                 </div>
                             </div>
                         )}

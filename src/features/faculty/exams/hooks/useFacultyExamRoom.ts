@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import AgoraRTC from "agora-rtc-sdk-ng";
+import { ENV } from '../../../../config/env';
 
-const AGORA_APP_ID = 'your_app_id'; // Move to env
+const AGORA_APP_ID = ENV.AGORA_APP_ID;
 
 interface UseFacultyExamRoomProps {
     tokens: any;
     examId: string;
 }
 
-export const useFacultyExamRoom = ({ tokens, examId }: UseFacultyExamRoomProps) => {
+export const useFacultyExamRoom = ({ tokens }: UseFacultyExamRoomProps) => {
     const rtcClient = useRef(AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })).current;
     const [remoteUsers, setRemoteUsers] = useState<any[]>([]);
     const [localAudioTrack, setLocalAudioTrack] = useState<any>(null);
