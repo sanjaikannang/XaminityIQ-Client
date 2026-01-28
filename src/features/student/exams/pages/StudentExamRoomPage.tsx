@@ -1,13 +1,11 @@
+import {
+    useFinishExamMutation
+} from '../../../../state/services/endpoints/exam';
 import React, { useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { Container } from '../../../../common/ui/Container';
 import { PageHeader } from '../../../../common/ui/PageHeader';
 import Button from '../../../../common/ui/Button';
-import {
-    useSendMessageMutation,
-    useGetStudentMessagesQuery,
-    useFinishExamMutation
-} from '../../../../state/services/endpoints/exam';
 import { useStudentExamRoom } from '../hooks/useStudentExamRoom';
 import { Mic, MicOff, Video, VideoOff, MessageSquare, LogOut } from 'lucide-react';
 
@@ -16,19 +14,11 @@ const StudentExamRoomPage: React.FC = () => {
     const location = useLocation();
     const studentId = "6953d8163bfb64f64c0e7df7"; // Get from auth
     const tokens = location.state?.tokens;
-
-    const [message, setMessage] = useState('');
     const [audioEnabled, setAudioEnabled] = useState(true);
     const [videoEnabled, setVideoEnabled] = useState(true);
-
-    const [sendMsg] = useSendMessageMutation();
-    const { data: messages } = useGetStudentMessagesQuery({ examId: examId!, studentId });
     const [finishExam] = useFinishExamMutation();
 
     const {
-        // isJoined,
-        // localTracks,
-        // sendMessageToFaculty,
         toggleAudio,
         toggleVideo,
         leaveExamRoom
@@ -42,22 +32,6 @@ const StudentExamRoomPage: React.FC = () => {
     const handleToggleVideo = async () => {
         await toggleVideo(!videoEnabled);
         setVideoEnabled(!videoEnabled);
-    };
-
-    const handleSendMessage = async () => {
-        if (!message.trim()) return;
-        try {
-            await sendMsg({
-                examId: examId!,
-                senderId: studentId,
-                message,
-                type: 'direct',
-                recipientId: 'faculty_id', // Get faculty ID from exam data
-            }).unwrap();
-            setMessage('');
-        } catch (error) {
-            console.error('Send message failed:', error);
-        }
     };
 
     const handleFinishExam = async () => {
@@ -131,35 +105,14 @@ const StudentExamRoomPage: React.FC = () => {
                             <h3 className="text-lg font-semibold">Chat with Faculty</h3>
                         </div>
 
-                        {/* Messages */}
-                        {/* <div className="h-96 overflow-y-auto mb-4 space-y-2">
-                            {messages?.data?.map((msg) => (
-                                <div
-                                    key={msg.messageId}
-                                    className={`p-3 rounded-xl ${msg.isFromFaculty
-                                        ? 'bg-bgSecondary border border-borderDefault'
-                                        : 'bg-primary/10 border border-primary/20'
-                                        }`}
-                                >
-                                    <p className="text-xs text-textTertiary mb-1">
-                                        {msg.isFromFaculty ? 'Faculty' : 'You'}
-                                    </p>
-                                    <p className="text-sm text-textPrimary">{msg.message}</p>
-                                </div>
-                            ))}
-                        </div> */}
-
                         {/* Message Input */}
                         <div className="flex gap-2">
                             <input
                                 type="text"
-                                value={message}
-                                onChange={(e) => setMessage(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                                 placeholder="Type message..."
                                 className="flex-1 px-3 py-2 border border-borderDefault rounded-xl text-sm"
                             />
-                            <Button onClick={handleSendMessage} size="sm">Send</Button>
+                            <Button size="sm">Send</Button>
                         </div>
                     </div>
                 </div>

@@ -22,7 +22,6 @@ interface UseStudentExamRoomProps {
 
 export const useStudentExamRoom = ({
     tokens,
-    examId,
 }: UseStudentExamRoomProps) => {
     /* ================= RTC ================= */
     const rtcClient = useRef<IAgoraRTCClient>(

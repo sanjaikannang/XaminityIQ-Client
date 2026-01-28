@@ -23,7 +23,7 @@ const StudentExamsPage: React.FC = () => {
     };
 
     const canJoin = (exam: any) => {
-        return exam.status === 'upcoming' || exam.status === 'ongoing';
+        return exam.status === ExamStatus.UPCOMING || exam.status === ExamStatus.ONGOING;
     };
 
     return (
@@ -73,7 +73,7 @@ const StudentExamsPage: React.FC = () => {
                                     </div>
 
                                     <div className="flex gap-2">
-                                        {/* {canJoin(exam) && exam.myStatus !== ParticipantStatus.FINISHED && ( */}
+                                        {canJoin(exam) && exam.myStatus !== ParticipantStatus.FINISHED && (
                                             <Button
                                                 variant="primary"
                                                 size="sm"
@@ -81,7 +81,7 @@ const StudentExamsPage: React.FC = () => {
                                             >
                                                 Join Exam
                                             </Button>
-                                        {/* )} */}
+                                        )}
                                     </div>
                                 </div>
                             </div>

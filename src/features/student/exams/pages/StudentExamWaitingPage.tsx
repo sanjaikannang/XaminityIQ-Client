@@ -12,7 +12,7 @@ const StudentExamWaitingPage: React.FC = () => {
     const navigate = useNavigate();
     const requestId = location.state?.requestId;
 
-    const { data, isLoading } = useCheckJoinStatusQuery(
+    const { data } = useCheckJoinStatusQuery(
         { examId: examId!, requestId },
         { pollingInterval: 3000 }
     );

@@ -39,19 +39,31 @@ export const useEnvironmentCheck = () => {
 
     const testScreenShare = async (): Promise<boolean> => {
         try {
-            const screenTrack = await AgoraRTC.createScreenVideoTrack({
-                encoderConfig: "1080p_1",
-            });
-            screenTrack.play("screen-preview-div");
+            const track = await AgoraRTC.createScreenVideoTrack(
+                {
+                    encoderConfig: "1080p_1",
+                },
+                "auto" // important for system audio handling
+            );
+
+            // Normalize return type
+            const screenVideoTrack = Array.isArray(track) ? track[0] : track;
+            const screenAudioTrack = Array.isArray(track) ? track[1] : null;
+
+            screenVideoTrack.play("screen-preview-div");
+
             setTimeout(() => {
-                screenTrack.close();
+                screenVideoTrack.close();
+                screenAudioTrack?.close();
             }, 3000);
+
             return true;
         } catch (error) {
             console.error("Screen share error:", error);
             return false;
         }
     };
+
 
     const checkFullscreen = (): boolean => {
         return !!(
