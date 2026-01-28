@@ -66,42 +66,56 @@ const FacultyExamRoomPage: React.FC = () => {
         <>
             <PageHeader>Exam Monitoring</PageHeader>
             <Container>
-                <div className="flex gap-4 h-[calc(100vh-200px)]">
+                <div className="flex gap-4 h-screen mb-4">
                     {/* Main Video Grid */}
                     <div className="flex-1 bg-whiteColor rounded-xl border border-borderDefault p-4 overflow-y-auto">
                         <div className="grid grid-cols-2 gap-4">
                             {studentStreams.map((stream) => (
-                                <div key={stream.uid} className="space-y-2 border border-borderLight rounded-xl p-3">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <h4 className="font-semibold text-sm">Student {stream.uid}</h4>
-                                        <div className="flex gap-1">
-                                            <span className={`flex items-center gap-1 text-xs px-2 py-1 rounded ${stream.cameraUser?.videoTrack ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                                                <Video className="w-3 h-3" />
-                                                {stream.cameraUser?.videoTrack ? 'On' : 'Off'}
-                                            </span>
-                                            <span className={`flex items-center gap-1 text-xs px-2 py-1 rounded ${stream.screenUser?.videoTrack ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}>
-                                                <Monitor className="w-3 h-3" />
-                                                {stream.screenUser?.videoTrack ? 'On' : 'Off'}
-                                            </span>
+                                <div key={stream.uid} className="space-y-2 border border-borderLight rounded-xl p-2">
+                                    <div className="flex items-center justify-center border-b border-borderDefault">
+                                        <h4 className="font-semibold text-sm mb-2">Student {stream.uid}</h4>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {/* Camera Feed */}
+                                        <div className="aspect-video bg-bgSecondary rounded border border-borderDefault relative">
+                                            <div id={`student-camera-${stream.uid}`} className="w-full h-full rounded overflow-hidden" />
+                                            <div className="absolute bottom-1 left-1 rounded text-xs flex items-center gap-1">
+                                                <span className={`flex items-center gap-1 text-[10px] px-1 py-0.5 rounded-[2px] ${stream.cameraUser?.videoTrack ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                                                    <Video className="w-3 h-3" />
+                                                    {stream.cameraUser?.videoTrack ? 'On' : 'Off'}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Screen Share Feed */}
+                                        <div className="aspect-video bg-bgSecondary rounded border border-borderDefault relative">
+                                            <div id={`student-screen-${stream.uid}`} className="w-full h-full rounded overflow-hidden" />
+                                            <div className="absolute bottom-1 left-1 rounded text-xs flex items-center gap-1">
+                                                <span className={`flex items-center gap-1 text-[10px] px-1 py-0.5 rounded-[2px] ${stream.screenUser?.videoTrack ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                                                    <Monitor className="w-3 h-3" />
+                                                    {stream.screenUser?.videoTrack ? 'On' : 'Off'}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    {/* Camera Feed */}
-                                    <div className="aspect-video bg-bgSecondary rounded-lg border border-borderDefault relative">
-                                        <div id={`student-camera-${stream.uid}`} className="w-full h-full rounded-lg overflow-hidden" />
-                                        <div className="absolute bottom-2 left-2 bg-blackColor/70 text-whiteColor px-2 py-1 rounded text-xs flex items-center gap-1">
-                                            <Video className="w-3 h-3" />
-                                            Camera
-                                        </div>
-                                    </div>
-
-                                    {/* Screen Share Feed */}
-                                    <div className="aspect-video bg-bgSecondary rounded-lg border border-borderDefault relative">
-                                        <div id={`student-screen-${stream.uid}`} className="w-full h-full rounded-lg overflow-hidden" />
-                                        <div className="absolute bottom-2 left-2 bg-blackColor/70 text-whiteColor px-2 py-1 rounded text-xs flex items-center gap-1">
-                                            <Monitor className="w-3 h-3" />
-                                            Screen
-                                        </div>
+                                    <div className='grid grid-cols-3 gap-2'>
+                                        <Button
+                                            variant="primary"
+                                        >
+                                            Talk
+                                        </Button>
+                                        <Button
+                                            variant="primary"
+                                        >
+                                            Chat
+                                        </Button>
+                                        <Button
+                                            variant="primary"
+                                        >
+                                            Remove
+                                        </Button>
                                     </div>
                                 </div>
                             ))}
@@ -116,10 +130,10 @@ const FacultyExamRoomPage: React.FC = () => {
                         {/* Faculty Controls */}
                         <div className="mt-4 flex gap-2 border-t border-borderDefault pt-4">
                             <Button variant="primary" onClick={talkToAll}>
-                                <Mic className="w-4 h-4" /> Talk to All
+                                <Mic className="w-4 h-4" />
                             </Button>
                             <Button variant="secondary" onClick={stopTalking}>
-                                <MicOff className="w-4 h-4" /> Stop Talking
+                                <MicOff className="w-4 h-4" />
                             </Button>
                             <Button
                                 variant="danger"
@@ -129,7 +143,7 @@ const FacultyExamRoomPage: React.FC = () => {
                                     }
                                 }}
                             >
-                                <LogOut className="w-4 h-4" /> End Exam
+                                <LogOut className="w-4 h-4" />
                             </Button>
                         </div>
                     </div>
@@ -190,20 +204,6 @@ const FacultyExamRoomPage: React.FC = () => {
                         ) : (
                             <div>
                                 <div className="mb-4">
-                                    <label className="flex items-center gap-2">
-                                        <input
-                                            type="checkbox"
-                                        />
-                                        <span className="text-sm">Broadcast to all</span>
-                                    </label>
-                                </div>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        placeholder="Type message..."
-                                        className="flex-1 px-3 py-2 border border-borderDefault rounded-xl"
-                                    />
-                                    <Button>Send</Button>
                                 </div>
                             </div>
                         )}

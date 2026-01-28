@@ -19,7 +19,6 @@ const StudentEnvironmentCheckPage: React.FC = () => {
         checkFullscreen,
         enableFullscreen,
         cleanup,
-        devices
     } = useEnvironmentCheck();
 
     const [deviceStatus, setDeviceStatus] = useState({
@@ -78,7 +77,7 @@ const StudentEnvironmentCheckPage: React.FC = () => {
         <>
             <PageHeader>Environment Check</PageHeader>
             <Container>
-                <div className="max-w-3xl mx-auto">
+                <div>
                     <div className="bg-whiteColor rounded-xl border border-borderDefault p-6 mb-6">
                         <h2 className="text-xl font-bold text-textPrimary mb-4">
                             Test Your Devices
