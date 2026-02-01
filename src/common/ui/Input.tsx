@@ -4,7 +4,7 @@ import { Eye, EyeOff } from 'lucide-react';
 interface InputFieldProps {
     id: string;
     name: string;
-    type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
+    type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'date' | 'time' | 'datetime-local';
     label?: string;
     placeholder?: string;
     value?: string | number;
@@ -17,6 +17,8 @@ interface InputFieldProps {
     required?: boolean;
     className?: string;
     showPasswordToggle?: boolean;
+    min?: string | number;
+    max?: string | number;
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -34,7 +36,9 @@ const InputField: React.FC<InputFieldProps> = ({
     disabled = false,
     required = false,
     className = '',
-    showPasswordToggle = false
+    showPasswordToggle = false,
+    min,
+    max
 }) => {
     const [showPassword, setShowPassword] = useState(false);
 
@@ -68,6 +72,8 @@ const InputField: React.FC<InputFieldProps> = ({
                         onChange={onChange}
                         onBlur={onBlur}
                         disabled={disabled}
+                        min={min}
+                        max={max}
                         className={`block w-full ${Icon ? 'pl-10' : 'pl-3'} ${isPasswordField ? 'pr-12' : 'pr-3'} py-2 border ${hasError ? 'border-red-500' : 'border-borderLight'
                             } rounded-lg focus:outline-none duration-200 text-textTertiary placeholder-borderLight disabled:bg-borderLight disabled:cursor-not-allowed`}
                         placeholder={placeholder}

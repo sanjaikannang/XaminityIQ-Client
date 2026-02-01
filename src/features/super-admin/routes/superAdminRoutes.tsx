@@ -1,15 +1,17 @@
 import { UserRole } from "../../../utils/enum";
+import ExamsPage from "../exams/pages/ExamsPage";
 import type { RouteObject } from "react-router-dom";
 import { RoleGuard } from "../../../hoc/withRoleGuard";
 import BatchesPage from "../academics/pages/BatchesPage";
 import CoursesPage from "../academics/pages/CoursesPage";
 import StudentsPage from "../students/pages/StudentsPage";
+import CreateExamPage from "../exams/pages/CreateExamPage";
 import FacultiesPage from "../faculties/pages/FacultiesPage";
 import DepartmentsPage from "../academics/pages/DepartmentsPage";
-import SuperAdminDashboardPage from "../dashboard/pages/SuperAdminDashboardPage";
-import ExamsPage from "../exams/pages/ExamsPage";
 import StudentDetailPage from "../students/pages/StudentDetailPage";
 import FacultyDetailPage from "../faculties/pages/FacultyDetailPage ";
+import SuperAdminDashboardPage from "../dashboard/pages/SuperAdminDashboardPage";
+
 
 export const superAdminRoutes: RouteObject[] = [
     {
@@ -85,6 +87,14 @@ export const superAdminRoutes: RouteObject[] = [
         element: (
             <RoleGuard allowedRoles={[UserRole.ADMIN]}>
                 <ExamsPage />
+            </RoleGuard>
+        ),
+    },
+    {
+        path: "/super-admin/exams/create",
+        element: (
+            <RoleGuard allowedRoles={[UserRole.ADMIN]}>
+                <CreateExamPage />
             </RoleGuard>
         ),
     },

@@ -1,4 +1,8 @@
 export const exam = {
+    // SUPER ADMIN
+    createExam: () => "/admin/exams/create",
+    getAllExams: () => "/admin/exams",
+
     // FACULTY
     getFacultyExams: () => "/faculty/exams/my-exams",
     facultyJoinExam: (examId: string) => `/faculty/exams/${examId}/faculty-join`,

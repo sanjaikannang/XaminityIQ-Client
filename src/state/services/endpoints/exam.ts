@@ -9,10 +9,49 @@ import type {
     StudentJoinRequestResponse,
     CheckJoinStatusResponse,
     GetStudentExamsResponse,
+    CreateExamResponse,
+    GetAllExamsResponse,
 } from "../../../types/exam-types";
+import { CreateExamFormValues } from "../../../features/super-admin/exams/components/CreateExamForm";
 
 export const examApiService = apiInstance.injectEndpoints({
     endpoints: (builder) => ({
+        // ---------- SUPER ADMIN ----------
+        createExam: builder.mutation<
+            CreateExamResponse,
+            CreateExamFormValues
+        >({
+            query: (data) => ({
+                url: api.exam.createExam(),
+                method: "POST",
+                data,
+            }),
+            invalidatesTags: ["exam"],
+        }),
+
+        getAllExams: builder.query<
+            GetAllExamsResponse,
+            {
+                page?: number;
+                limit?: number;
+                search?: string;
+                examMode?: string;
+                status?: string;
+            }
+        >({
+            query: ({ page, limit, search, examMode, status }) => ({
+                url: api.exam.getAllExams(),
+                params: {
+                    page,
+                    limit,
+                    ...(search && { search }),
+                    ...(examMode && { examMode }),
+                    ...(status && { status }),
+                },
+            }),
+            providesTags: ["exam"],
+        }),
+
 
         // ---------- FACULTY ----------
         getFacultyExams: builder.query<
@@ -175,6 +214,8 @@ export const examApiService = apiInstance.injectEndpoints({
 });
 
 export const {
+    useCreateExamMutation,
+    useGetAllExamsQuery,
     useGetFacultyExamsQuery,
     useFacultyJoinExamMutation,
     useGetPendingJoinRequestsQuery,
