@@ -1,13 +1,14 @@
 import { api } from "../../../api";
 import { apiInstance } from "../api-instance";
 import type {
-    GetExamsResponse,
+    GetFacultyExamsResponse,
     FacultyJoinExamResponse,
     GetJoinRequestsResponse,
     GetMessagesResponse,
     StudentJoinRequestRequest,
     StudentJoinRequestResponse,
     CheckJoinStatusResponse,
+    GetStudentExamsResponse,
 } from "../../../types/exam-types";
 
 export const examApiService = apiInstance.injectEndpoints({
@@ -15,12 +16,12 @@ export const examApiService = apiInstance.injectEndpoints({
 
         // ---------- FACULTY ----------
         getFacultyExams: builder.query<
-            GetExamsResponse,
-            { facultyId: string; status?: string }
+            GetFacultyExamsResponse,
+            { status?: string }
         >({
-            query: ({ facultyId, status }) => ({
+            query: ({ status }) => ({
                 url: api.exam.getFacultyExams(),
-                params: { facultyId, status },
+                params: status ? { status } : {},
             }),
             providesTags: ["exam"],
         }),
@@ -118,12 +119,12 @@ export const examApiService = apiInstance.injectEndpoints({
 
         // ---------- STUDENT ----------
         getStudentExams: builder.query<
-            GetExamsResponse,
-            { studentId: string; status?: string }
+            GetStudentExamsResponse,
+            { status?: string }
         >({
-            query: ({ studentId, status }) => ({
+            query: ({ status }) => ({
                 url: api.exam.getStudentExams(),
-                params: { studentId, status },
+                params: status ? { status } : {},
             }),
             providesTags: ["exam"],
         }),

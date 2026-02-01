@@ -1,12 +1,16 @@
-import { ExamStatus, JoinRequestStatus, MessageType, ParticipantStatus } from "../utils/enum";
+import { ExamStatus, JoinRequestStatus, MessageType, ParticipantStatus, ExamMode } from "../utils/enum";
 
 export interface CreateExamRequest {
+    examMode: ExamMode;
     examName: string;
-    date: string;
-    time: string;
     duration: number;
-    facultyId: string;
-    studentIds: string[];
+    examDate?: string;
+    startTime?: string;
+    endTime?: string;
+    examStartDate?: string;
+    examEndDate?: string;
+    facultyId?: string;
+    studentIds?: string[];
 }
 
 export interface CreateExamResponse {
@@ -20,20 +24,47 @@ export interface CreateExamResponse {
     };
 }
 
-export interface ExamData {
+// Student Exam Types
+export interface StudentExamData {
     examId: string;
     examName: string;
-    date: string;
-    time: string;
+    examMode: ExamMode;
+    examDate?: string;
+    startTime?: string;
+    endTime?: string;
+    examStartDate?: string;
+    examEndDate?: string;
     duration: number;
     status: ExamStatus;
-    myStatus?: ParticipantStatus;
+    myStatus: ParticipantStatus;
+    canJoin: boolean;
+    totalStudents: number;
 }
 
-export interface GetExamsResponse {
+export interface GetStudentExamsResponse {
     success: boolean;
     message: string;
-    data?: ExamData[];
+    data: StudentExamData[];
+}
+
+// Faculty Exam Types
+export interface FacultyExamData {
+    examId: string;
+    examName: string;
+    examDate: string;
+    startTime: string;
+    endTime: string;
+    duration: number;
+    status: ExamStatus;
+    canJoin: boolean;
+    totalStudents: number;
+    joinedStudents: number;
+}
+
+export interface GetFacultyExamsResponse {
+    success: boolean;
+    message: string;
+    data: FacultyExamData[];
 }
 
 export interface FacultyJoinExamResponse {
