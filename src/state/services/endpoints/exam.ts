@@ -67,12 +67,11 @@ export const examApiService = apiInstance.injectEndpoints({
 
         facultyJoinExam: builder.mutation<
             FacultyJoinExamResponse,
-            { examId: string; facultyId: string }
+            { examId: string }
         >({
-            query: ({ examId, facultyId }) => ({
+            query: ({ examId }) => ({
                 url: api.exam.facultyJoinExam(examId),
                 method: "POST",
-                data: { facultyId },
             }),
         }),
 

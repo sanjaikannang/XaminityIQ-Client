@@ -1,8 +1,3 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Container } from '../../../../common/ui/Container';
-import { PageHeader } from '../../../../common/ui/PageHeader';
-import Button from '../../../../common/ui/Button';
 import {
     useFacultyJoinExamMutation,
     useGetPendingJoinRequestsQuery,
@@ -10,13 +5,16 @@ import {
     useRejectJoinRequestMutation,
     useEndExamMutation
 } from '../../../../state/services/endpoints/exam';
+import { useParams } from 'react-router-dom';
+import Button from '../../../../common/ui/Button';
+import React, { useState, useEffect } from 'react';
+import { Container } from '../../../../common/ui/Container';
+import { PageHeader } from '../../../../common/ui/PageHeader';
 import { useFacultyExamRoom } from '../hooks/useFacultyExamRoom';
 import { Mic, MicOff, LogOut, Video, Monitor } from 'lucide-react';
 
 const FacultyExamRoomPage: React.FC = () => {
     const { examId } = useParams<{ examId: string }>();
-    const facultyId = '6953d4593c9ee327e1b69fc9'; // Get from auth
-
     const [activeTab, setActiveTab] = useState<'requests' | 'chat'>('requests');
     const [facultyJoin] = useFacultyJoinExamMutation();
     const { data: joinRequests } = useGetPendingJoinRequestsQuery(examId!, {
@@ -35,7 +33,7 @@ const FacultyExamRoomPage: React.FC = () => {
     useEffect(() => {
         const join = async () => {
             try {
-                const result = await facultyJoin({ examId: examId!, facultyId }).unwrap();
+                const result = await facultyJoin({ examId: examId! }).unwrap();
                 setTokens(result.data);
             } catch (error) {
                 console.error('Failed to join:', error);
