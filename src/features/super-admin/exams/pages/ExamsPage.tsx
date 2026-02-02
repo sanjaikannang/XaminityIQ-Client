@@ -13,14 +13,12 @@ const ExamsPage = () => {
     const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-    const [searchTerm, setSearchTerm] = useState("");
     const [examModeFilter, setExamModeFilter] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
 
     const { data, isLoading, isFetching } = useGetAllExamsQuery({
         page,
         limit: pageSize,
-        ...(searchTerm && { search: searchTerm }),
         ...(examModeFilter && { examMode: examModeFilter }),
         ...(statusFilter && { status: statusFilter }),
     });
@@ -38,11 +36,6 @@ const ExamsPage = () => {
         { value: ExamStatus.COMPLETED, label: 'Completed' },
     ];
 
-    const handleSearch = useCallback((search: string) => {
-        setSearchTerm(search);
-        setPage(1);
-    }, []);
-
     const handlePageChange = useCallback((newPage: number) => {
         setPage(newPage);
     }, []);
@@ -56,23 +49,6 @@ const ExamsPage = () => {
         navigate('/super-admin/exams/create');
     }, [navigate]);
 
-    const getStatusBadge = (status: ExamStatus) => {
-        return (
-            <span className={`inline-block px-3 py-1 rounded-lg text-xs font-semibold ${status}`}>
-                {status}
-            </span>
-        );
-    };
-
-    const getModeBadge = (mode: ExamMode) => {
-        return (
-            <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${mode === ExamMode.PROCTORING ? 'bg-info text-whiteColor' : 'bg-bgSecondary text-textSecondary'
-                }`}>
-                {mode === ExamMode.PROCTORING ? 'Proctoring' : 'Auto'}
-            </span>
-        );
-    };
-
     const columns: ColumnDef<ExamData, any>[] = [
         {
             accessorKey: "examName",
@@ -80,7 +56,24 @@ const ExamsPage = () => {
             cell: ({ row }: { row: { original: ExamData } }) => (
                 <div>
                     <div className="font-medium text-textPrimary">{row.original.examName}</div>
-                    <div className="mt-1">{getModeBadge(row.original.examMode)}</div>
+                </div>
+            ),
+        },
+        {
+            accessorKey: "examMode",
+            header: "Exam Mode",
+            cell: ({ row }: { row: { original: ExamData } }) => (
+                <div>
+                    <div className="mt-1">{(row.original.examMode)}</div>
+                </div>
+            ),
+        },
+        {
+            accessorKey: "status",
+            header: "Status",
+            cell: ({ row }: { row: { original: ExamData } }) => (
+                <div>
+                    <div className="mt-1">{(row.original.status)}</div>
                 </div>
             ),
         },
@@ -126,11 +119,6 @@ const ExamsPage = () => {
             cell: ({ getValue }: { getValue: () => number }) => (
                 <span className="text-sm text-textPrimary">{getValue()}</span>
             ),
-        },
-        {
-            accessorKey: "status",
-            header: "Status",
-            cell: ({ getValue }: { getValue: () => ExamStatus }) => getStatusBadge(getValue()),
         },
         {
             accessorKey: "createdAt",
@@ -203,7 +191,6 @@ const ExamsPage = () => {
                         onPageSizeChange={handlePageSizeChange}
                         isLoading={isLoading || isFetching}
                         tableTitle="Exams"
-                        onSearch={handleSearch}
                     />
                 </div>
             </Container>
