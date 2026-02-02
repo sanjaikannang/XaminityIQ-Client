@@ -115,7 +115,6 @@ export interface GetMessagesResponse {
 }
 
 export interface StudentJoinRequestRequest {
-    studentId: string;
     // deviceStatus: {
     //     camera: boolean;
     //     microphone: boolean;

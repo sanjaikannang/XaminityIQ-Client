@@ -5,7 +5,6 @@ import type {
     FacultyJoinExamResponse,
     GetJoinRequestsResponse,
     GetMessagesResponse,
-    StudentJoinRequestRequest,
     StudentJoinRequestResponse,
     CheckJoinStatusResponse,
     GetStudentExamsResponse,
@@ -169,7 +168,7 @@ export const examApiService = apiInstance.injectEndpoints({
 
         studentJoinRequest: builder.mutation<
             StudentJoinRequestResponse,
-            { examId: string } & StudentJoinRequestRequest
+            { examId: string }
         >({
             query: ({ examId, ...data }) => ({
                 url: api.exam.studentJoinRequest(examId),

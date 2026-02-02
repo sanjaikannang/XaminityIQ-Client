@@ -10,7 +10,6 @@ import { Camera, Mic, Monitor, Maximize, CheckCircle, XCircle } from 'lucide-rea
 const StudentEnvironmentCheckPage: React.FC = () => {
     const { examId } = useParams<{ examId: string }>();
     const navigate = useNavigate();
-    const studentId = '6953d8163bfb64f64c0e7df7'; // Get from auth
 
     const {
         testCamera,
@@ -59,7 +58,6 @@ const StudentEnvironmentCheckPage: React.FC = () => {
         try {
             const result = await joinRequest({
                 examId: examId!,
-                studentId,
                 // deviceStatus,
             }).unwrap();
 

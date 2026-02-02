@@ -173,8 +173,10 @@ const FacultyExamRoomPage: React.FC = () => {
                                     <div
                                         key={req.requestId}
                                         className="border border-borderDefault rounded-xl p-3"
-                                    >
+                                    >                                        
                                         <p className="font-semibold text-sm">{req.studentName}</p>
+                                        <p className="font-semibold text-sm">{req.studentId}</p>
+                                        <p className="font-semibold text-sm">{req.timestamp}</p>
                                         <div className="flex gap-2 mt-2">
                                             <Button
                                                 variant="primary"
