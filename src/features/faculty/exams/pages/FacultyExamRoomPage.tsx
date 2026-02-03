@@ -9,7 +9,6 @@ import { useParams } from 'react-router-dom';
 import Button from '../../../../common/ui/Button';
 import React, { useState, useEffect } from 'react';
 import { Container } from '../../../../common/ui/Container';
-import { PageHeader } from '../../../../common/ui/PageHeader';
 import { useFacultyExamRoom } from '../hooks/useFacultyExamRoom';
 import { Mic, MicOff, LogOut, Video, Monitor, User } from 'lucide-react';
 

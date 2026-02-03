@@ -1,11 +1,10 @@
+import Button from '../../../../common/ui/Button';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container } from '../../../../common/ui/Container';
-import { PageHeader } from '../../../../common/ui/PageHeader';
-import Button from '../../../../common/ui/Button';
-import { useStudentJoinRequestMutation } from '../../../../state/services/endpoints/exam';
 import { useEnvironmentCheck } from '../hooks/useEnvironmentCheck.ts';
 import { Camera, Mic, Monitor, Maximize, CheckCircle, XCircle } from 'lucide-react';
+import { useStudentJoinRequestMutation } from '../../../../state/services/endpoints/exam';
 
 const StudentEnvironmentCheckPage: React.FC = () => {
     const { examId } = useParams<{ examId: string }>();
@@ -73,10 +72,9 @@ const StudentEnvironmentCheckPage: React.FC = () => {
 
     return (
         <>
-            <PageHeader>Environment Check</PageHeader>
             <Container>
                 <div>
-                    <div className="bg-whiteColor rounded-xl border border-borderDefault p-6 mb-6">
+                    <div className="bg-whiteColor rounded-xl border border-borderDefault p-4 mb-6 mt-6">
                         <h2 className="text-xl font-bold text-textPrimary mb-4">
                             Test Your Devices
                         </h2>

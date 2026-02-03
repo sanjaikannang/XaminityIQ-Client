@@ -28,6 +28,12 @@ const navigationItems: NavigationItem[] = [
     }
 ];
 
+// Routes that should hide the sidebar and header (full-screen mode)
+// This will match any route after /faculty/exams/:examId/
+const FULL_SCREEN_ROUTES = [
+    /^\/faculty\/exams\/[^/]+\/.+/,
+];
+
 export interface RootLayoutContext {
     infoBar?: ReactNode;
 }
@@ -45,6 +51,10 @@ export function FacultyLayout() {
         return location.pathname === item.path;
     };
 
+    const shouldShowLayout = (): boolean => {
+        return !FULL_SCREEN_ROUTES.some(pattern => pattern.test(location.pathname));
+    };
+
     const handleLogout = () => {
         logout(navigate);
     };
@@ -56,6 +66,18 @@ export function FacultyLayout() {
 
     const roleInitial = userData.role?.charAt(0).toUpperCase();
 
+    const showLayout = shouldShowLayout();
+
+    // Full-screen mode (no sidebar/header)
+    if (!showLayout) {
+        return (
+            <main className="h-screen w-screen overflow-y-auto">
+                <Outlet />
+            </main>
+        );
+    }
+
+    // Standard layout with sidebar and header
     return (
         <>
             <div className="flex h-screen bg-bgSecondary">
@@ -78,8 +100,8 @@ export function FacultyLayout() {
                                     key={item.id}
                                     to={item.path}
                                     className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${isActive
-                                        ? "bg-primaryLighter text-primary"
-                                        : "text-textSecondary hover:bg-bgTertiary"
+                                            ? "bg-primaryLighter text-primary"
+                                            : "text-textSecondary hover:bg-bgTertiary"
                                         }`}
                                 >
                                     <Icon className="w-5 h-5" />
@@ -93,7 +115,8 @@ export function FacultyLayout() {
                     <div className="py-2 border-t border-borderLight flex-shrink-0">
                         <button
                             onClick={handleLogout}
-                            className="flex items-center justify-center gap-3 px-4 py-3 w-full text-textSecondary cursor-pointer transition-colors">
+                            className="flex items-center justify-center gap-3 px-4 py-3 w-full text-textSecondary cursor-pointer transition-colors"
+                        >
                             <LogOut className="w-5 h-5" />
                             <span>Logout</span>
                         </button>
@@ -117,7 +140,6 @@ export function FacultyLayout() {
                                 {roleInitial}
                             </div>
                         </div>
-
                     </header>
 
                     {/* Main Content - Scrollable */}

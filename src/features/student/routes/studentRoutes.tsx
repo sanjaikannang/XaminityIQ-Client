@@ -1,11 +1,12 @@
 import { RouteObject } from "react-router-dom";
 import { UserRole } from "../../../utils/enum";
 import { RoleGuard } from "../../../hoc/withRoleGuard";
-import StudentDashboardPage from "../dashboard/pages/StudentDashboardPage";
 import StudentExamsPage from "../exams/pages/StudentExamsPage";
-import StudentEnvironmentCheckPage from "../exams/pages/StudentEnvironmentCheckPage";
-import StudentExamWaitingPage from "../exams/pages/StudentExamWaitingPage";
 import StudentExamRoomPage from "../exams/pages/StudentExamRoomPage";
+import StudentExamWaitingPage from "../exams/pages/StudentExamWaitingPage";
+import StudentDashboardPage from "../dashboard/pages/StudentDashboardPage";
+import StudentEnvironmentCheckPage from "../exams/pages/StudentEnvironmentCheckPage";
+
 
 export const studentRoutes: RouteObject[] = [
     {

@@ -28,6 +28,11 @@ const navigationItems: NavigationItem[] = [
     }
 ];
 
+// Routes that should hide the sidebar and header (full-screen mode)
+const FULL_SCREEN_ROUTES = [
+    /^\/student\/exams\/[^/]+\/.+/,
+];
+
 export interface RootLayoutContext {
     infoBar?: ReactNode;
 }
@@ -45,6 +50,10 @@ export function StudentLayout() {
         return location.pathname === item.path;
     };
 
+    const shouldShowLayout = (): boolean => {
+        return !FULL_SCREEN_ROUTES.some(pattern => pattern.test(location.pathname));
+    };
+
     const handleLogout = () => {
         logout(navigate);
     };
@@ -55,6 +64,17 @@ export function StudentLayout() {
     };
 
     const roleInitial = userData.role?.charAt(0).toUpperCase();
+
+    const showLayout = shouldShowLayout();
+
+    // Full-screen mode (no sidebar/header)
+    if (!showLayout) {
+        return (
+            <main className="h-screen w-screen overflow-y-auto">
+                <Outlet />
+            </main>
+        );
+    }
 
     return (
         <>
@@ -93,7 +113,8 @@ export function StudentLayout() {
                     <div className="py-2 border-t border-borderLight flex-shrink-0">
                         <button
                             onClick={handleLogout}
-                            className="flex items-center justify-center gap-3 px-4 py-3 w-full text-textSecondary cursor-pointer transition-colors">
+                            className="flex items-center justify-center gap-3 px-4 py-3 w-full text-textSecondary cursor-pointer transition-colors"
+                        >
                             <LogOut className="w-5 h-5" />
                             <span>Logout</span>
                         </button>
@@ -117,7 +138,6 @@ export function StudentLayout() {
                                 {roleInitial}
                             </div>
                         </div>
-
                     </header>
 
                     {/* Main Content - Scrollable */}

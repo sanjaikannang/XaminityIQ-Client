@@ -2,10 +2,9 @@ import {
     useFinishExamMutation
 } from '../../../../state/services/endpoints/exam';
 import React, { useState } from 'react';
+import Button from '../../../../common/ui/Button';
 import { useParams, useLocation } from 'react-router-dom';
 import { Container } from '../../../../common/ui/Container';
-import { PageHeader } from '../../../../common/ui/PageHeader';
-import Button from '../../../../common/ui/Button';
 import { useStudentExamRoom } from '../hooks/useStudentExamRoom';
 import { Mic, MicOff, Video, VideoOff, LogOut } from 'lucide-react';
 
@@ -48,9 +47,8 @@ const StudentExamRoomPage: React.FC = () => {
 
     return (
         <>
-            <PageHeader>Exam Room</PageHeader>
             <Container>
-                <div className="flex gap-4 h-screen mb-4">
+                <div className="flex gap-4 h-screen">
                     {/* Main Area - Your Video */}
                     <div className="flex-1 bg-whiteColor rounded-xl border border-borderDefault p-2">
                         <div className="mb-4">
