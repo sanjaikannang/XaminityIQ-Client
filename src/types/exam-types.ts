@@ -81,8 +81,9 @@ export interface FacultyJoinExamResponse {
 
 export interface JoinRequestData {
     requestId: string;
-    studentId: string;
+    studentEmail: string;
     studentName: string;
+    studentRollNumber: string;
     timestamp: string;
     deviceStatus: {
         camera: boolean;

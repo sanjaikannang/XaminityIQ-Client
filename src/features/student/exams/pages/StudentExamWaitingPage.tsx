@@ -1,10 +1,9 @@
+import { Loader } from 'lucide-react';
 import React, { useEffect } from 'react';
-import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { Container } from '../../../../common/ui/Container';
-import { PageHeader } from '../../../../common/ui/PageHeader';
-import { useCheckJoinStatusQuery } from '../../../../state/services/endpoints/exam';
-import { Loader, Clock } from 'lucide-react';
 import { JoinRequestStatus } from '../../../../utils/enum';
+import { Container } from '../../../../common/ui/Container';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import { useCheckJoinStatusQuery } from '../../../../state/services/endpoints/exam';
 
 const StudentExamWaitingPage: React.FC = () => {
     const { examId } = useParams<{ examId: string }>();
@@ -31,29 +30,30 @@ const StudentExamWaitingPage: React.FC = () => {
 
     return (
         <>
-            <PageHeader>Waiting for Approval</PageHeader>
             <Container>
-                <div className="flex items-center justify-center min-h-[60vh]">
-                    <div className="bg-whiteColor rounded-xl border border-borderDefault p-12 text-center max-w-md">
+                <div className="flex items-center justify-center h-screen px-4">
+                    <div className="bg-white rounded-2xl shadow-lg border border-borderDefault p-8 md:p-10 max-w-md w-full text-center">
+
+                        {/* Status Icon */}
                         <div className="flex justify-center mb-6">
-                            <div className="relative">
-                                <Clock className="w-20 h-20 text-primary animate-pulse" />
-                                <Loader className="w-8 h-8 text-primary absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-spin" />
+                            <div className="relative flex items-center justify-center w-24 h-24 rounded-full bg-primary/10">
+                                <Loader className="w-10 h-10 text-primary absolute animate-spin" />
                             </div>
                         </div>
 
-                        <h2 className="text-2xl font-bold text-textPrimary mb-4">
-                            Waiting for Faculty Approval
+                        <h2 className="text-xl md:text-2xl font-semibold text-textPrimary mb-2">
+                            Waiting for Approval
                         </h2>
 
-                        <p className="text-textSecondary mb-6">
-                            Your join request has been sent to the faculty. Please wait while they review your request.
+                        <p className="text-sm text-textSecondary mb-6">
+                            Your request has been sent to the faculty for review.
                         </p>
 
-                        <div className="bg-bgSecondary rounded-xl p-4 border border-borderDefault">
+                        <div className="bg-bgSecondary rounded-xl p-2 border border-borderDefault text-center">
                             <p className="text-sm text-textSecondary">
-                                <span className="font-semibold text-textPrimary">Note:</span>
-                                Do not close or refresh this page. You will be automatically redirected once approved.
+                                <span className="font-semibold text-textPrimary">Important:</span>
+                                <br />
+                                Please keep this page open. You’ll be automatically redirected once approval is granted.
                             </p>
                         </div>
                     </div>

@@ -11,7 +11,7 @@ import React, { useState, useEffect } from 'react';
 import { Container } from '../../../../common/ui/Container';
 import { PageHeader } from '../../../../common/ui/PageHeader';
 import { useFacultyExamRoom } from '../hooks/useFacultyExamRoom';
-import { Mic, MicOff, LogOut, Video, Monitor } from 'lucide-react';
+import { Mic, MicOff, LogOut, Video, Monitor, User } from 'lucide-react';
 
 const FacultyExamRoomPage: React.FC = () => {
     const { examId } = useParams<{ examId: string }>();
@@ -62,7 +62,6 @@ const FacultyExamRoomPage: React.FC = () => {
 
     return (
         <>
-            <PageHeader>Exam Monitoring</PageHeader>
             <Container>
                 <div className="flex gap-4 h-screen mb-4">
                     {/* Main Video Grid */}
@@ -172,22 +171,38 @@ const FacultyExamRoomPage: React.FC = () => {
                                 {joinRequests?.data?.map((req) => (
                                     <div
                                         key={req.requestId}
-                                        className="border border-borderDefault rounded-xl p-3"
-                                    >                                        
-                                        <p className="font-semibold text-sm">{req.studentName}</p>
-                                        <p className="font-semibold text-sm">{req.studentId}</p>
-                                        <p className="font-semibold text-sm">{req.timestamp}</p>
-                                        <div className="flex gap-2 mt-2">
+                                        className="border border-borderDefault rounded-xl p-2 bg-white"
+                                    >
+                                        {/* Header */}
+                                        <div className="flex items-center gap-3 mb-3">
+                                            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10">
+                                                <User className="w-5 h-5 text-primary" />
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-sm text-gray-900">
+                                                    {req.studentName}
+                                                </p>
+                                                <p className="text-xs text-gray-500">
+                                                    Roll No: {req.studentRollNumber}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Actions */}
+                                        <div className="flex gap-3 mt-4">
                                             <Button
                                                 variant="primary"
                                                 size="sm"
+                                                className="flex-1"
                                                 onClick={() => handleApprove(req.requestId)}
                                             >
                                                 Approve
                                             </Button>
+
                                             <Button
                                                 variant="danger"
                                                 size="sm"
+                                                className="flex-1"
                                                 onClick={() => handleReject(req.requestId)}
                                             >
                                                 Reject
