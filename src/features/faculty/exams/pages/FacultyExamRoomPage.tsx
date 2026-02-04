@@ -5,16 +5,31 @@ import {
     useRejectJoinRequestMutation,
     useEndExamMutation
 } from '../../../../state/services/endpoints/exam';
-import { useParams } from 'react-router-dom';
-import Button from '../../../../common/ui/Button';
 import React, { useState, useEffect } from 'react';
-import { Container } from '../../../../common/ui/Container';
+import EndExamModal from '../components/EndExamModal';
+import ExamRoomFooter from '../components/ExamRoomFooter';
+import { useParams, useNavigate } from 'react-router-dom';
+import ExamRoomSidebar from '../components/ExamRoomSidebar';
+import StudentVideoGrid from '../components/StudentVideoGrid';
 import { useFacultyExamRoom } from '../hooks/useFacultyExamRoom';
-import { Mic, MicOff, LogOut, Video, Monitor, User } from 'lucide-react';
+import RejectReasonModal from '../components/RejectReasonModal';
 
 const FacultyExamRoomPage: React.FC = () => {
     const { examId } = useParams<{ examId: string }>();
-    const [activeTab, setActiveTab] = useState<'requests' | 'chat'>('requests');
+    const navigate = useNavigate();
+
+    // Sidebar state
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [sidebarContent, setSidebarContent] = useState<'requests' | 'chat'>('requests');
+
+    // Audio state
+    const [isAudioOn, setIsAudioOn] = useState(false);
+
+    // End exam modal state
+    const [isEndExamModalOpen, setIsEndExamModalOpen] = useState(false);
+    const [endExamInput, setEndExamInput] = useState('');
+
+    // API hooks
     const [facultyJoin] = useFacultyJoinExamMutation();
     const { data: joinRequests } = useGetPendingJoinRequestsQuery(examId!, {
         pollingInterval: 3000,
@@ -23,12 +38,41 @@ const FacultyExamRoomPage: React.FC = () => {
     const [rejectRequest] = useRejectJoinRequestMutation();
     const [endExam] = useEndExamMutation();
 
+    // Room state
     const [tokens, setTokens] = useState<any>(null);
     const { studentStreams, talkToAll, stopTalking } = useFacultyExamRoom({
         tokens,
         examId: examId!,
     });
 
+    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+    const [rejectReason, setRejectReason] = useState('');
+    const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
+
+    // open modal instead of direct reject
+    const handleRejectClick = (requestId: string) => {
+        setSelectedRequestId(requestId);
+        setRejectReason('');
+        setIsRejectModalOpen(true);
+    };
+
+    const handleRejectConfirm = async () => {
+        if (!selectedRequestId) return;
+        try {
+            await rejectRequest({
+                examId: examId!,
+                requestId: selectedRequestId,
+                reason: rejectReason,
+            }).unwrap();
+            setIsRejectModalOpen(false);
+            setSelectedRequestId(null);
+            setRejectReason('');
+        } catch (error) {
+            console.error('Reject failed:', error);
+        }
+    };
+
+    // Join exam room on mount
     useEffect(() => {
         const join = async () => {
             try {
@@ -39,8 +83,9 @@ const FacultyExamRoomPage: React.FC = () => {
             }
         };
         join();
-    }, []);
+    }, [examId, facultyJoin]);
 
+    // Handlers
     const handleApprove = async (requestId: string) => {
         try {
             await approveRequest({ examId: examId!, requestId }).unwrap();
@@ -49,181 +94,94 @@ const FacultyExamRoomPage: React.FC = () => {
         }
     };
 
-    const handleReject = async (requestId: string) => {
-        try {
-            await rejectRequest({ examId: examId!, requestId, reason: 'Denied by faculty' }).unwrap();
-        } catch (error) {
-            console.error('Reject failed:', error);
+    const toggleSidebar = (content: 'requests' | 'chat') => {
+        if (sidebarOpen && sidebarContent === content) {
+            setSidebarOpen(false);
+        } else {
+            setSidebarContent(content);
+            setSidebarOpen(true);
         }
     };
 
-    console.log('Student Streams:', studentStreams);
+    const toggleAudio = () => {
+        if (isAudioOn) {
+            stopTalking();
+            setIsAudioOn(false);
+        } else {
+            talkToAll();
+            setIsAudioOn(true);
+        }
+    };
+
+    const handleEndExamClick = () => {
+        setIsEndExamModalOpen(true);
+        setEndExamInput('');
+    };
+
+    const handleEndExamConfirm = async () => {
+        if (endExamInput === 'END') {
+            try {
+                await endExam(examId!).unwrap();
+                setIsEndExamModalOpen(false);
+                setEndExamInput('');
+                // Navigate to faculty exams page
+                navigate('/faculty/exams');
+            } catch (error) {
+                console.error('Failed to end exam:', error);
+            }
+        }
+    };
+
+    const pendingCount = joinRequests?.data?.length || 0;
 
     return (
         <>
-            <Container>
-                <div className="flex gap-4 h-screen mb-4">
-                    {/* Main Video Grid */}
-                    <div className="flex-1 bg-whiteColor rounded-xl border border-borderDefault p-4 overflow-y-auto">
-                        <div className="grid grid-cols-2 gap-4">
-                            {studentStreams.map((stream) => (
-                                <div key={stream.uid} className="space-y-2 border border-borderLight rounded-xl p-2">
-                                    <div className="flex items-center justify-center border-b border-borderDefault">
-                                        <h4 className="font-semibold text-sm mb-2">Student {stream.uid}</h4>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        {/* Camera Feed */}
-                                        <div className="aspect-video bg-bgSecondary rounded border border-borderDefault relative">
-                                            <div id={`student-camera-${stream.uid}`} className="w-full h-full rounded overflow-hidden" />
-                                            <div className="absolute bottom-1 left-1 rounded text-xs flex items-center gap-1">
-                                                <span className={`flex items-center gap-1 text-[10px] px-1 py-0.5 rounded-[2px] ${stream.cameraUser?.videoTrack ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                                                    <Video className="w-3 h-3" />
-                                                    {stream.cameraUser?.videoTrack ? 'On' : 'Off'}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        {/* Screen Share Feed */}
-                                        <div className="aspect-video bg-bgSecondary rounded border border-borderDefault relative">
-                                            <div id={`student-screen-${stream.uid}`} className="w-full h-full rounded overflow-hidden" />
-                                            <div className="absolute bottom-1 left-1 rounded text-xs flex items-center gap-1">
-                                                <span className={`flex items-center gap-1 text-[10px] px-1 py-0.5 rounded-[2px] ${stream.screenUser?.videoTrack ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                                                    <Monitor className="w-3 h-3" />
-                                                    {stream.screenUser?.videoTrack ? 'On' : 'Off'}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className='grid grid-cols-3 gap-2'>
-                                        <Button
-                                            variant="primary"
-                                        >
-                                            Talk
-                                        </Button>
-                                        <Button
-                                            variant="primary"
-                                        >
-                                            Chat
-                                        </Button>
-                                        <Button
-                                            variant="primary"
-                                        >
-                                            Remove
-                                        </Button>
-                                    </div>
-                                </div>
-                            ))}
-
-                            {studentStreams.length === 0 && (
-                                <div className="col-span-2 text-center py-12 text-textSecondary">
-                                    No students connected yet
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Faculty Controls */}
-                        <div className="mt-4 flex gap-2 border-t border-borderDefault pt-4">
-                            <Button variant="primary" onClick={talkToAll}>
-                                <Mic className="w-4 h-4" />
-                            </Button>
-                            <Button variant="secondary" onClick={stopTalking}>
-                                <MicOff className="w-4 h-4" />
-                            </Button>
-                            <Button
-                                variant="danger"
-                                onClick={async () => {
-                                    if (confirm('Are you sure you want to end the exam for all students?')) {
-                                        await endExam(examId!).unwrap();
-                                    }
-                                }}
-                            >
-                                <LogOut className="w-4 h-4" />
-                            </Button>
-                        </div>
+            <div className="h-screen flex flex-col bg-bgSecondary">
+                <div className="flex-1 flex overflow-hidden p-2 gap-2">
+                    {/* Video Grid Area */}
+                    <div className="flex-1">
+                        <StudentVideoGrid studentStreams={studentStreams} />
                     </div>
 
-                    {/* Sidebar */}
-                    <div className="w-80 bg-whiteColor rounded-xl border border-borderDefault p-4">
-                        <div className="flex gap-2 mb-4">
-                            <Button
-                                variant={activeTab === 'requests' ? 'primary' : 'outline'}
-                                size="sm"
-                                fullWidth
-                                onClick={() => setActiveTab('requests')}
-                            >
-                                Join Requests ({joinRequests?.data?.length || 0})
-                            </Button>
-                            <Button
-                                variant={activeTab === 'chat' ? 'primary' : 'outline'}
-                                size="sm"
-                                fullWidth
-                                onClick={() => setActiveTab('chat')}
-                            >
-                                Chat
-                            </Button>
-                        </div>
-
-                        {activeTab === 'requests' ? (
-                            <div className="space-y-2">
-                                {joinRequests?.data?.map((req) => (
-                                    <div
-                                        key={req.requestId}
-                                        className="border border-borderDefault rounded-xl p-2 bg-white"
-                                    >
-                                        {/* Header */}
-                                        <div className="flex items-center gap-3 mb-3">
-                                            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10">
-                                                <User className="w-5 h-5 text-primary" />
-                                            </div>
-                                            <div>
-                                                <p className="font-semibold text-sm text-gray-900">
-                                                    {req.studentName}
-                                                </p>
-                                                <p className="text-xs text-gray-500">
-                                                    Roll No: {req.studentRollNumber}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        {/* Actions */}
-                                        <div className="flex gap-3 mt-4">
-                                            <Button
-                                                variant="primary"
-                                                size="sm"
-                                                className="flex-1"
-                                                onClick={() => handleApprove(req.requestId)}
-                                            >
-                                                Approve
-                                            </Button>
-
-                                            <Button
-                                                variant="danger"
-                                                size="sm"
-                                                className="flex-1"
-                                                onClick={() => handleReject(req.requestId)}
-                                            >
-                                                Reject
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))}
-                                {joinRequests?.data?.length === 0 && (
-                                    <p className="text-sm text-textSecondary text-center py-4">
-                                        No pending requests
-                                    </p>
-                                )}
-                            </div>
-                        ) : (
-                            <div>
-                                <div className="mb-4">
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                    {/* Right Sidebar */}
+                    <ExamRoomSidebar
+                        isOpen={sidebarOpen}
+                        content={sidebarContent}
+                        onClose={() => setSidebarOpen(false)}
+                        joinRequests={joinRequests?.data || []}
+                        onApproveRequest={handleApprove}
+                        onRejectRequest={handleRejectClick}
+                    />
                 </div>
-            </Container>
+
+                {/* Footer Control Bar */}
+                <ExamRoomFooter
+                    isAudioOn={isAudioOn}
+                    onToggleAudio={toggleAudio}
+                    onEndExamClick={handleEndExamClick}
+                    onToggleSidebar={toggleSidebar}
+                    sidebarOpen={sidebarOpen}
+                    sidebarContent={sidebarContent}
+                    pendingRequestsCount={pendingCount}
+                />
+
+                <RejectReasonModal
+                    isOpen={isRejectModalOpen}
+                    onClose={() => setIsRejectModalOpen(false)}
+                    onConfirm={handleRejectConfirm}
+                    reason={rejectReason}
+                    onReasonChange={setRejectReason}
+                />
+
+                {/* End Exam Modal */}
+                <EndExamModal
+                    isOpen={isEndExamModalOpen}
+                    onClose={() => setIsEndExamModalOpen(false)}
+                    onConfirm={handleEndExamConfirm}
+                    inputValue={endExamInput}
+                    onInputChange={setEndExamInput}
+                />
+            </div>
         </>
     );
 };
