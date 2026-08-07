@@ -16,7 +16,31 @@ export interface LoginResponse {
         };
         tokens: {
             accessToken: string;
-            refreshToken: string;
         }
     };
+}
+
+export interface LogoutResponse {
+    success: boolean;
+    message: string;
+}
+
+export interface ForgotPasswordRequest {
+    email: string;
+}
+
+export interface ForgotPasswordResponse {
+    success: boolean;
+    message: string;
+}
+
+export interface ResetPasswordRequest {
+    token: string;
+    newPassword: string;
+    confirmPassword: string;
+}
+
+export interface ResetPasswordResponse {
+    success: boolean;
+    message: string;
 }

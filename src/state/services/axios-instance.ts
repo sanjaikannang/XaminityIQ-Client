@@ -6,6 +6,7 @@ export const createAxiosInstance = (baseUrl: string): AxiosInstance => {
     const instance = axios.create({
         baseURL: baseUrl,
         timeout: 120000,
+        withCredentials: true,
         headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
@@ -24,6 +25,7 @@ export const createAxiosInstance = (baseUrl: string): AxiosInstance => {
     const publicEndpoints = [
         '/auth/login',
         '/auth/refresh-token',
+        '/auth/forgot-password',
         '/auth/reset-password'
     ];
 
@@ -43,36 +45,31 @@ export const createAxiosInstance = (baseUrl: string): AxiosInstance => {
         failedQueue = [];
     };
 
-    // Refresh token function
-    const refreshTokens = async (): Promise<{ accessToken: string; refreshToken: string } | null> => {
+    // Refresh token function - the refresh token itself lives in an httpOnly cookie,
+    // sent automatically by the browser; we never read or store it in JS.
+    const refreshTokens = async (): Promise<{ accessToken: string } | null> => {
         try {
-            const refreshToken = getItemFromStorage({ key: "refreshToken" });
-
-            if (!refreshToken) {
-                throw new Error("No refresh token available");
-            }
-
             // Call refresh token API
-            const response = await axios.post(`${baseUrl}/auth/refresh-token`, {
-                refreshToken
-            });
+            const response = await axios.post(
+                `${baseUrl}/auth/refresh-token`,
+                {},
+                { withCredentials: true }
+            );
 
-            const { accessToken, refreshToken: newRefreshToken } = response.data.data;
+            const { accessToken } = response.data.data;
 
-            // Save new tokens
+            // Save new access token
             setItemInStorage({ key: "accessToken", value: accessToken });
-            setItemInStorage({ key: "refreshToken", value: newRefreshToken });
 
             // Reset token expiry time to recalculate
             tokenExpTimeInSeconds = 0;
 
-            return { accessToken, refreshToken: newRefreshToken };
+            return { accessToken };
         } catch (error) {
             console.error("Token refresh failed:", error);
 
             // Clear all auth data and redirect to login
             removeItemFromStorage({ key: "accessToken" });
-            removeItemFromStorage({ key: "refreshToken" });
             removeItemFromStorage({ key: "user" });
             removeItemFromStorage({ key: "userRole" });
 

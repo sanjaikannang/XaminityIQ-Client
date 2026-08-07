@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
-import { logout } from "../../utils/logout";
+import { useLogout } from "../../features/auth/logout/useLogout";
 import { getItemFromStorage } from "../../utils/storage";
-import { Outlet, useLocation, Link, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, Link } from "react-router-dom";
 import { LogOut, Home, type LucideIcon, GraduationCap, Users, UserCog, ClipboardCheck } from "lucide-react";
 
 interface NavigationItem {
@@ -55,7 +55,7 @@ export interface RootLayoutContext {
 
 export function RootLayout() {
     const location = useLocation();
-    const navigate = useNavigate();
+    const { logout } = useLogout();
 
     const isActiveRoute = (item: NavigationItem): boolean => {
         // If matchPattern is defined, check if current path starts with it
@@ -67,7 +67,7 @@ export function RootLayout() {
     };
 
     const handleLogout = () => {
-        logout(navigate);
+        logout();
     };
 
     const userData = getItemFromStorage({ key: "user" }) as {
