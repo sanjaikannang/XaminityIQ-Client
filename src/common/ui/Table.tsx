@@ -80,7 +80,7 @@ export function Table<TData, TValue>({
 
                 {/* Table Section - Show Skeleton when Loading */}
                 {isLoading ? (
-                    <div className="overflow-hidden border border-borderLight border-t">
+                    <div className="overflow-x-auto border border-borderLight border-t">
                         <table className="w-full border-collapse">
                             <thead className="bg-bgSecondary">
                                 <tr>
@@ -108,7 +108,7 @@ export function Table<TData, TValue>({
                         </table>
                     </div>
                 ) : (
-                    <div className="overflow-hidden border border-borderLight border-t">
+                    <div className="overflow-x-auto border border-borderLight border-t">
                         <table className="w-full border-collapse">
                             <thead className="bg-bgSecondary">
                                 <tr>

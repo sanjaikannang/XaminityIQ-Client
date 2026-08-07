@@ -4,6 +4,11 @@ import {
     GetAllFacultyResponse,
     GetFacultyResponse,
     BasePaginationParams,
+    CreateFacultyRequest,
+    CreateFacultyResponse,
+    EditFacultyRequest,
+    EditFacultyResponse,
+    DeleteFacultyResponse,
 } from "../../../types/faculty-types";
 
 export const facultyApiService = apiInstance.injectEndpoints({
@@ -27,6 +32,29 @@ export const facultyApiService = apiInstance.injectEndpoints({
             }),
             providesTags: ['faculty-detail'],
         }),
+        createFaculty: build.mutation<CreateFacultyResponse, CreateFacultyRequest>({
+            query: (data) => ({
+                url: api.faculty.createFaculty(),
+                method: "POST",
+                data,
+            }),
+            invalidatesTags: ['faculty'],
+        }),
+        updateFaculty: build.mutation<EditFacultyResponse, { id: string; data: EditFacultyRequest }>({
+            query: ({ id, data }) => ({
+                url: api.faculty.updateFaculty(id),
+                method: "PATCH",
+                data,
+            }),
+            invalidatesTags: ['faculty', 'faculty-detail'],
+        }),
+        deleteFaculty: build.mutation<DeleteFacultyResponse, string>({
+            query: (id) => ({
+                url: api.faculty.deleteFaculty(id),
+                method: "DELETE",
+            }),
+            invalidatesTags: ['faculty', 'faculty-detail'],
+        }),
     }),
 });
 
@@ -35,4 +63,7 @@ export const {
     useLazyGetAllFacultyQuery,
     useGetFacultyByIdQuery,
     useLazyGetFacultyByIdQuery,
+    useCreateFacultyMutation,
+    useUpdateFacultyMutation,
+    useDeleteFacultyMutation,
 } = facultyApiService;

@@ -1,6 +1,5 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import Modal from "../../../../common/ui/Modal";
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
@@ -13,7 +12,6 @@ const StudentsPage = () => {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [searchTerm, setSearchTerm] = useState("");
-    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const { data, isLoading, isFetching } = useGetAllStudentsQuery({
         page,
@@ -38,14 +36,6 @@ const StudentsPage = () => {
     const handleRowClick = useCallback((row: StudentsData) => {
         navigate(`/super-admin/students/${row.id}`);
     }, [navigate]);
-
-    const handleOpenModal = useCallback(() => {
-        setIsModalOpen(true);
-    }, []);
-
-    const handleCloseModal = useCallback(() => {
-        setIsModalOpen(false);
-    }, []);
 
     const columns: ColumnDef<StudentsData, any>[] = [
         {
@@ -130,15 +120,17 @@ const StudentsPage = () => {
     return (
         <>
             <PageHeader>Students</PageHeader>
-            <div className="flex justify-end">
-                <Button
-                    type="submit"
-                    variant="primary"
-                    size="md"
-                    onClick={handleOpenModal}
-                >
-                    Add Student
-                </Button>
+            <div className="px-6">
+                <div className="flex justify-end">
+                    <Button
+                        type="button"
+                        variant="primary"
+                        size="md"
+                        onClick={() => navigate('/super-admin/students/create')}
+                    >
+                        Add Student
+                    </Button>
+                </div>
             </div>
 
             <Container>
@@ -159,15 +151,6 @@ const StudentsPage = () => {
                     />
                 </div>
             </Container>
-
-            <Modal
-                isOpen={isModalOpen}
-                onClose={handleCloseModal}
-                title="Add New Student"
-                size="md"
-            >
-                <div></div>
-            </Modal>
         </>
     );
 };

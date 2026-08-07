@@ -4,6 +4,11 @@ import {
     GetAllStudentsResponse,
     GetStudentResponse,
     BasePaginationParams,
+    CreateStudentRequest,
+    CreateStudentResponse,
+    EditStudentRequest,
+    EditStudentResponse,
+    DeleteStudentResponse,
 } from "../../../types/students-types";
 
 export const studentsApiService = apiInstance.injectEndpoints({
@@ -27,6 +32,29 @@ export const studentsApiService = apiInstance.injectEndpoints({
             }),
             providesTags: ['student'],
         }),
+        createStudent: build.mutation<CreateStudentResponse, CreateStudentRequest>({
+            query: (data) => ({
+                url: api.students.createStudent(),
+                method: "POST",
+                data,
+            }),
+            invalidatesTags: ['students'],
+        }),
+        updateStudent: build.mutation<EditStudentResponse, { id: string; data: EditStudentRequest }>({
+            query: ({ id, data }) => ({
+                url: api.students.updateStudent(id),
+                method: "PATCH",
+                data,
+            }),
+            invalidatesTags: ['students', 'student'],
+        }),
+        deleteStudent: build.mutation<DeleteStudentResponse, string>({
+            query: (id) => ({
+                url: api.students.deleteStudent(id),
+                method: "DELETE",
+            }),
+            invalidatesTags: ['students', 'student'],
+        }),
     }),
 });
 
@@ -35,4 +63,7 @@ export const {
     useLazyGetAllStudentsQuery,
     useGetStudentByIdQuery,
     useLazyGetStudentByIdQuery,
+    useCreateStudentMutation,
+    useUpdateStudentMutation,
+    useDeleteStudentMutation,
 } = studentsApiService;
