@@ -1,7 +1,7 @@
 import toast from "react-hot-toast";
 import { Formik, Form } from 'formik';
 import { Mail, Lock } from "lucide-react";
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Button from "../../../../common/ui/Button";
 import { UserRole } from "../../../../utils/enum";
 import InputField from "../../../../common/ui/Input";
@@ -33,27 +33,20 @@ const LoginPage = () => {
       const response = await login(values).unwrap();
 
       if (response.data.tokens) {
-        if (response.data.tokens) {
-          setItemInStorage({
-            key: 'accessToken',
-            value: response.data.tokens.accessToken,
-          });
+        setItemInStorage({
+          key: 'accessToken',
+          value: response.data.tokens.accessToken,
+        });
 
-          setItemInStorage({
-            key: 'refreshToken',
-            value: response.data.tokens.refreshToken,
-          });
+        setItemInStorage({
+          key: 'user',
+          value: response.data.user,
+        });
 
-          setItemInStorage({
-            key: 'user',
-            value: response.data.user,
-          });
-
-          setItemInStorage({
-            key: 'userRole',
-            value: response.data.user.role,
-          });
-        }
+        setItemInStorage({
+          key: 'userRole',
+          value: response.data.user.role,
+        });
       }
 
       toast.success(response.message || 'Login successful!');
@@ -138,6 +131,16 @@ const LoginPage = () => {
                         showPasswordToggle
                         required
                       />
+
+                      {/* Forgot Password Link */}
+                      <div className="text-right">
+                        <Link
+                          to="/forgot-password"
+                          className="text-sm text-primary font-medium hover:underline transition-colors duration-200"
+                        >
+                          Forgot Password?
+                        </Link>
+                      </div>
 
                       {/* Login Button */}
                       <div className="mt-6">

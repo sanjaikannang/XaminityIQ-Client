@@ -8,8 +8,7 @@ export function withAuthGuard<P extends object>(
     const ComponentWithAuthGuard: React.FC<P> = (props) => {
         const checkAuthentication = (): boolean => {
             const accessToken = getItemFromStorage({ key: "accessToken" });
-            const refreshToken = getItemFromStorage({ key: "refreshToken" });
-            return !!(accessToken && refreshToken);
+            return !!accessToken;
         };
 
         const isAuthenticated = checkAuthentication();
