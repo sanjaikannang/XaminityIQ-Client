@@ -154,3 +154,75 @@ export interface GetStudentResponse {
     message: string;
     data?: StudentData;
 }
+
+// Create / Edit Student Types
+export interface EducationHistoryInput {
+    level: string;
+    qualification: string;
+    boardOrUniversity: string;
+    institutionName: string;
+    yearOfPassing: number;
+    percentageOrCGPA: number;
+}
+
+export interface ParentInfoInput {
+    name?: string;
+    phoneNumber?: string;
+    email?: string;
+    occupation?: string;
+}
+
+export interface GuardianInfoInput extends ParentInfoInput {
+    relation?: string;
+}
+
+export interface CreateStudentRequest {
+    firstName: string;
+    lastName: string;
+    gender: string;
+    dateOfBirth: string;
+    profilePhotoUrl: string;
+    religion?: string;
+
+    personalEmail: string;
+    phoneNumber: string;
+    alternatePhoneNumber?: string;
+    emergencyContact: EmergencyContact;
+
+    currentAddress: Address;
+    sameAsCurrent: boolean;
+    permanentAddress?: Address;
+
+    batchId: string;
+    courseId: string;
+    departmentId: string;
+    sectionId: string;
+    currentSemester: number;
+    admissionType: string;
+
+    father?: ParentInfoInput;
+    mother?: ParentInfoInput;
+    guardian?: GuardianInfoInput;
+
+    educationHistory: EducationHistoryInput[];
+}
+
+export interface CreateStudentResponse {
+    success: boolean;
+    message: string;
+}
+
+export type EditStudentRequest = Omit<
+    CreateStudentRequest,
+    "batchId" | "courseId" | "departmentId" | "sectionId" | "currentSemester" | "admissionType"
+>;
+
+export interface EditStudentResponse {
+    success: boolean;
+    message: string;
+}
+
+export interface DeleteStudentResponse {
+    success: boolean;
+    message: string;
+}

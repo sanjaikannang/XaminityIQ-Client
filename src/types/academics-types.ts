@@ -148,6 +148,13 @@ export interface GetAvailableDepartmentsResponse {
     data?: DepartmentInfo[];
 }
 
+// All Departments Types (unscoped - used for Faculty department dropdown)
+export interface GetAllDepartmentsResponse {
+    success: boolean;
+    message: string;
+    data?: DepartmentInfo[];
+}
+
 // Add Department to Batch Course Types
 export interface AddDepartmentToBatchCourseRequest {
     batchCourseId: string;
