@@ -103,3 +103,9 @@ export enum FacultyStatus {
     RETIRED = "RETIRED",
     PENDING = "PENDING",
 }
+
+export enum SubjectType {
+    THEORY = "THEORY",
+    PRACTICAL = "PRACTICAL",
+    ELECTIVE = "ELECTIVE",
+}

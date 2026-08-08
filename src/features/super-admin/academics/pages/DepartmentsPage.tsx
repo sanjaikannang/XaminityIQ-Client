@@ -1,4 +1,5 @@
 import toast from "react-hot-toast";
+import { BookOpen, Layers } from "lucide-react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useState, useCallback } from "react";
 import Button from "../../../../common/ui/Button";
@@ -63,8 +64,12 @@ const DepartmentsPage = () => {
         setPage(1);
     }, []);
 
-    const handleRowClick = useCallback((row: DepartmentData) => {
+    const handleViewSections = useCallback((row: DepartmentData) => {
         navigate(`/super-admin/academics/departments/${row.batchDepartmentId}/sections?batchCourseId=${batchCourseId}&courseId=${courseId}&batchId=${batchId}`);
+    }, [navigate, batchCourseId, courseId, batchId]);
+
+    const handleViewSubjects = useCallback((row: DepartmentData) => {
+        navigate(`/super-admin/academics/departments/${row.batchDepartmentId}/subjects?batchCourseId=${batchCourseId}&courseId=${courseId}&batchId=${batchId}`);
     }, [navigate, batchCourseId, courseId, batchId]);
 
     const handleOpenModal = useCallback(() => {
@@ -132,6 +137,29 @@ const DepartmentsPage = () => {
                 });
             },
         },
+        {
+            header: "Actions",
+            cell: ({ row }: { row: { original: DepartmentData } }) => (
+                <div className="flex items-center gap-1">
+                    <button
+                        type="button"
+                        title="View Subjects"
+                        onClick={() => handleViewSubjects(row.original)}
+                        className="p-1.5 rounded hover:bg-bgSecondary cursor-pointer transition-colors text-blue-600 hover:text-blue-700"
+                    >
+                        <BookOpen className="h-4 w-4" />
+                    </button>
+                    <button
+                        type="button"
+                        title="View Sections"
+                        onClick={() => handleViewSections(row.original)}
+                        className="p-1.5 rounded hover:bg-bgSecondary cursor-pointer transition-colors text-textSecondary hover:text-textPrimary"
+                    >
+                        <Layers className="h-4 w-4" />
+                    </button>
+                </div>
+            ),
+        },
     ];
 
     return (
@@ -167,7 +195,6 @@ const DepartmentsPage = () => {
                     <Table
                         columns={columns}
                         data={data?.data || []}
-                        onRowClick={handleRowClick}
                         totalCount={data?.pagination?.totalItems || 0}
                         pageNumber={page}
                         pageLimit={pageSize}

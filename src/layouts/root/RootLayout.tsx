@@ -1,8 +1,9 @@
 import { ReactNode } from "react";
+import { UserRole } from "../../utils/enum";
 import { useLogout } from "../../features/auth/logout/useLogout";
 import { getItemFromStorage } from "../../utils/storage";
 import { Outlet, useLocation, Link } from "react-router-dom";
-import { LogOut, Home, type LucideIcon, GraduationCap, Users, UserCog, ClipboardCheck } from "lucide-react";
+import { LogOut, Home, type LucideIcon, GraduationCap, Users, UserCog, ClipboardCheck, BookOpen } from "lucide-react";
 
 interface NavigationItem {
     id: string;
@@ -12,7 +13,7 @@ interface NavigationItem {
     matchPattern?: string;
 }
 
-const navigationItems: NavigationItem[] = [
+const adminNavItems: NavigationItem[] = [
     {
         id: "dashboard",
         label: "Dashboard",
@@ -49,6 +50,44 @@ const navigationItems: NavigationItem[] = [
     }
 ];
 
+const facultyNavItems: NavigationItem[] = [
+    {
+        id: "dashboard",
+        label: "Dashboard",
+        path: "/faculty/dashboard",
+        icon: Home,
+    },
+    {
+        id: "subjects",
+        label: "Subjects",
+        path: "/faculty/subjects",
+        icon: BookOpen,
+        matchPattern: "/faculty/subjects",
+    },
+];
+
+const studentNavItems: NavigationItem[] = [
+    {
+        id: "dashboard",
+        label: "Dashboard",
+        path: "/student/dashboard",
+        icon: Home,
+    },
+    {
+        id: "subjects",
+        label: "Subjects",
+        path: "/student/subjects",
+        icon: BookOpen,
+        matchPattern: "/student/subjects",
+    },
+];
+
+const navigationItemsByRole: Record<string, NavigationItem[]> = {
+    [UserRole.ADMIN]: adminNavItems,
+    [UserRole.FACULTY]: facultyNavItems,
+    [UserRole.STUDENT]: studentNavItems,
+};
+
 export interface RootLayoutContext {
     infoBar?: ReactNode;
 }
@@ -76,6 +115,7 @@ export function RootLayout() {
     };
 
     const roleInitial = userData.role?.charAt(0).toUpperCase();
+    const navigationItems = navigationItemsByRole[userData.role] || [];
 
     return (
         <>
