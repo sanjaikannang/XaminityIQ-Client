@@ -80,6 +80,13 @@ const studentNavItems: NavigationItem[] = [
         icon: BookOpen,
         matchPattern: "/student/subjects",
     },
+    {
+        id: "exams",
+        label: "My Exams",
+        path: "/student/exams",
+        icon: ClipboardCheck,
+        matchPattern: "/student/exams",
+    },
 ];
 
 const navigationItemsByRole: Record<string, NavigationItem[]> = {

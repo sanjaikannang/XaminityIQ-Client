@@ -1,0 +1,118 @@
+import { AttemptStatus, ExamMode, ExamStatus, QuestionType, RecordingMediaType } from "../utils/enum";
+
+export interface MyExamData {
+    _id: string;
+    name: string;
+    description?: string;
+    mode: ExamMode;
+    status: ExamStatus;
+    subjectName?: string;
+    durationMinutes: number;
+    totalMarks: number;
+    passingMarks: number;
+    startDate: string;
+    endDate: string;
+    myAttemptId: string | null;
+    myAttemptStatus: AttemptStatus | null;
+}
+
+export interface GetAllExamsResponse {
+    success: boolean;
+    message: string;
+    data?: MyExamData[];
+}
+
+export interface AttemptQuestionOption {
+    optionId: string;
+    text: string;
+}
+
+export interface AttemptQuestionData {
+    _id: string;
+    type: QuestionType;
+    text: string;
+    marks: number;
+    order: number;
+    options?: AttemptQuestionOption[];
+}
+
+export interface StartAttemptData {
+    attemptId: string;
+    examId: string;
+    examName: string;
+    durationMinutes: number;
+    startedAt: string;
+    questions: AttemptQuestionData[];
+}
+
+export interface StartAttemptResponse {
+    success: boolean;
+    message: string;
+    data?: StartAttemptData;
+}
+
+export interface AttemptAnswerData {
+    questionId: string;
+    selectedOptionId?: string;
+    selectedOptionIds?: string[];
+}
+
+export interface GetAttemptData {
+    attemptId: string;
+    examId: string;
+    examName: string;
+    durationMinutes: number;
+    startedAt: string;
+    status: AttemptStatus;
+    remainingMs: number;
+    questions: AttemptQuestionData[];
+    answers: AttemptAnswerData[];
+}
+
+export interface GetAttemptResponse {
+    success: boolean;
+    message: string;
+    data?: GetAttemptData;
+}
+
+export interface SaveAnswerRequest {
+    selectedOptionId?: string;
+    selectedOptionIds?: string[];
+}
+
+export interface SubmitAttemptResponse {
+    success: boolean;
+    message: string;
+    status?: AttemptStatus;
+    objectiveScore?: number;
+    totalScore?: number;
+    passed?: boolean;
+}
+
+export interface RecordingSignatureData {
+    signature: string;
+    timestamp: number;
+    apiKey: string;
+    cloudName: string;
+    publicId: string;
+    folder: string;
+}
+
+export interface RecordingSignatureResponse {
+    success: boolean;
+    message: string;
+    data?: RecordingSignatureData;
+}
+
+export interface RecordChunkRequest {
+    mediaType: RecordingMediaType;
+    sequence: number;
+    cloudinaryAssetId: string;
+    cloudinaryUrl: string;
+}
+
+export interface FinalizeRecordingResponse {
+    success: boolean;
+    message: string;
+    allComplete?: boolean;
+}
