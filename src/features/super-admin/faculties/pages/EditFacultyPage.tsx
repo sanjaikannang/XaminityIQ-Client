@@ -24,6 +24,15 @@ const EditFacultyPage = () => {
             <>
                 <PageHeader>Edit Faculty</PageHeader>
                 <Container>
+                    <div className="pt-6">
+                        <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => navigate(`/super-admin/faculties/${id}`)}
+                        >
+                            ← Back to Faculty Details
+                        </Button>
+                    </div>
                     <div className="py-6 text-textSecondary">Loading faculty details...</div>
                 </Container>
             </>
@@ -109,6 +118,15 @@ const EditFacultyPage = () => {
         <>
             <PageHeader>Edit Faculty</PageHeader>
             <Container>
+                <div className="pt-6">
+                    <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => navigate(`/super-admin/faculties/${id}`)}
+                    >
+                        ← Back to Faculty Details
+                    </Button>
+                </div>
                 <div className="py-6 space-y-10">
                     <section className="space-y-2">
                         <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">Employment Details (read-only)</h3>

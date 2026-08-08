@@ -21,12 +21,15 @@ const CoursesPage = () => {
     const [pageSize, setPageSize] = useState(10);
     const [searchTerm, setSearchTerm] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [sortBy, setSortBy] = useState<string | undefined>(undefined);
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | undefined>(undefined);
 
     const { data, isLoading, isFetching } = useGetCoursesQuery({
         batchId: batchId!,
         page,
         limit: pageSize,
         ...(searchTerm && { search: searchTerm }),
+        ...(sortBy && { sortBy, sortOrder: sortOrder || 'asc' }),
     });
 
     const { data: availableCoursesData, isLoading: isLoadingAvailableCourses } = useGetAvailableCoursesQuery(
@@ -47,6 +50,12 @@ const CoursesPage = () => {
 
     const handlePageSizeChange = useCallback((newPageSize: number) => {
         setPageSize(newPageSize);
+        setPage(1);
+    }, []);
+
+    const handleSortChange = useCallback((newSortBy: string, newSortOrder: 'asc' | 'desc') => {
+        setSortBy(newSortBy);
+        setSortOrder(newSortOrder);
         setPage(1);
     }, []);
 
@@ -79,34 +88,42 @@ const CoursesPage = () => {
         {
             accessorKey: "courseCode",
             header: "Course Code",
+            sortKey: "courseCode",
         },
         {
             accessorKey: "courseName",
             header: "Course Name",
+            sortKey: "courseName",
         },
         {
             accessorKey: "streamCode",
             header: "Stream Code",
+            sortKey: "streamCode",
         },
         {
             accessorKey: "streamName",
             header: "Stream Name",
+            sortKey: "streamName",
         },
         {
             accessorKey: "level",
             header: "Level",
+            sortKey: "level",
         },
         {
             accessorKey: "duration",
             header: "Duration",
+            sortKey: "duration",
         },
         {
             accessorKey: "semesters",
             header: "Semesters",
+            sortKey: "semesters",
         },
         {
             accessorKey: "createdAt",
             header: "Created At",
+            sortKey: "createdAt",
             cell: ({ getValue }: { getValue: () => string }) => {
                 const date = new Date(getValue());
                 return date.toLocaleDateString("en-US", {
@@ -157,6 +174,9 @@ const CoursesPage = () => {
                         isLoading={isLoading || isFetching}
                         tableTitle="Courses"
                         onSearch={handleSearch}
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
+                        onSortChange={handleSortChange}
                     />
                 </div>
             </Container>

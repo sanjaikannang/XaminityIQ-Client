@@ -25,12 +25,15 @@ const DepartmentsPage = () => {
     const [pageSize, setPageSize] = useState(10);
     const [searchTerm, setSearchTerm] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [sortBy, setSortBy] = useState<string | undefined>(undefined);
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | undefined>(undefined);
 
     const { data, isLoading, isFetching } = useGetDepartmentsQuery({
         batchCourseId: batchCourseId!,
         page,
         limit: pageSize,
         ...(searchTerm && { search: searchTerm }),
+        ...(sortBy && { sortBy, sortOrder: sortOrder || 'asc' }),
     });
 
     const { data: availableDepartmentsData, isLoading: isLoadingAvailableDepartments } = useGetAvailableDepartmentsQuery(
@@ -51,6 +54,12 @@ const DepartmentsPage = () => {
 
     const handlePageSizeChange = useCallback((newPageSize: number) => {
         setPageSize(newPageSize);
+        setPage(1);
+    }, []);
+
+    const handleSortChange = useCallback((newSortBy: string, newSortOrder: 'asc' | 'desc') => {
+        setSortBy(newSortBy);
+        setSortOrder(newSortOrder);
         setPage(1);
     }, []);
 
@@ -81,18 +90,22 @@ const DepartmentsPage = () => {
         {
             accessorKey: "deptCode",
             header: "Department Code",
+            sortKey: "deptCode",
         },
         {
             accessorKey: "deptName",
             header: "Department Name",
+            sortKey: "deptName",
         },
         {
             accessorKey: "totalSeats",
             header: "Total Seats",
+            sortKey: "totalSeats",
         },
         {
             accessorKey: "sectionCapacity",
             header: "Section Capacity",
+            sortKey: "sectionCapacity",
         },
         {
             accessorKey: "sections",
@@ -105,6 +118,7 @@ const DepartmentsPage = () => {
         {
             accessorKey: "createdAt",
             header: "Created At",
+            sortKey: "createdAt",
             cell: ({ getValue }: { getValue: () => string }) => {
                 const date = new Date(getValue());
                 return date.toLocaleDateString("en-US", {
@@ -158,6 +172,9 @@ const DepartmentsPage = () => {
                         isLoading={isLoading || isFetching}
                         tableTitle="Departments"
                         onSearch={handleSearch}
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
+                        onSortChange={handleSortChange}
                     />
                 </div>
             </Container>

@@ -16,11 +16,14 @@ const BatchesPage = () => {
     const [pageSize, setPageSize] = useState(10);
     const [searchTerm, setSearchTerm] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [sortBy, setSortBy] = useState<string | undefined>(undefined);
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | undefined>(undefined);
 
     const { data, isLoading, isFetching } = useGetBatchesQuery({
         page,
         limit: pageSize,
         ...(searchTerm && { search: searchTerm }),
+        ...(sortBy && { sortBy, sortOrder: sortOrder || 'asc' }),
     });
 
     const [createBatch, { isLoading: isCreating }] = useCreateBatchMutation();
@@ -36,6 +39,12 @@ const BatchesPage = () => {
 
     const handlePageSizeChange = useCallback((newPageSize: number) => {
         setPageSize(newPageSize);
+        setPage(1);
+    }, []);
+
+    const handleSortChange = useCallback((newSortBy: string, newSortOrder: 'asc' | 'desc') => {
+        setSortBy(newSortBy);
+        setSortOrder(newSortOrder);
         setPage(1);
     }, []);
 
@@ -66,18 +75,22 @@ const BatchesPage = () => {
         {
             accessorKey: "batchName",
             header: "Batch Name",
+            sortKey: "batchName",
         },
         {
             accessorKey: "startYear",
             header: "Start Year",
+            sortKey: "startYear",
         },
         {
             accessorKey: "endYear",
             header: "End Year",
+            sortKey: "endYear",
         },
         {
             accessorKey: "createdAt",
             header: "Created At",
+            sortKey: "createdAt",
             cell: ({ getValue }: { getValue: () => string }) => {
                 const date = new Date(getValue());
                 return date.toLocaleDateString("en-US", {
@@ -118,6 +131,9 @@ const BatchesPage = () => {
                         isLoading={isLoading || isFetching}
                         tableTitle="Batches"
                         onSearch={handleSearch}
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
+                        onSortChange={handleSortChange}
                     />
                 </div>
             </Container>

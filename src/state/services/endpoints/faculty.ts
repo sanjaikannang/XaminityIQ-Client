@@ -1,9 +1,10 @@
 import { api } from "../../../api";
 import { apiInstance } from "../api-instance";
+import { GetActivityResponse } from "../../../types/activity-types";
 import {
     GetAllFacultyResponse,
     GetFacultyResponse,
-    BasePaginationParams,
+    GetAllFacultyParams,
     CreateFacultyRequest,
     CreateFacultyResponse,
     EditFacultyRequest,
@@ -13,7 +14,7 @@ import {
 
 export const facultyApiService = apiInstance.injectEndpoints({
     endpoints: (build) => ({
-        getAllFaculty: build.query<GetAllFacultyResponse, BasePaginationParams>({
+        getAllFaculty: build.query<GetAllFacultyResponse, GetAllFacultyParams>({
             query: (params) => ({
                 url: api.faculty.getAllFaculty(),
                 method: "GET",
@@ -21,6 +22,12 @@ export const facultyApiService = apiInstance.injectEndpoints({
                     page: params.page || 1,
                     limit: params.limit || 10,
                     ...(params.search && { search: params.search }),
+                    ...(params.departmentId && { departmentId: params.departmentId }),
+                    ...(params.designation && { designation: params.designation }),
+                    ...(params.employmentType && { employmentType: params.employmentType }),
+                    ...(params.status && { status: params.status }),
+                    ...(params.sortBy && { sortBy: params.sortBy }),
+                    ...(params.sortOrder && { sortOrder: params.sortOrder }),
                 },
             }),
             providesTags: ['faculty'],
@@ -55,6 +62,12 @@ export const facultyApiService = apiInstance.injectEndpoints({
             }),
             invalidatesTags: ['faculty', 'faculty-detail'],
         }),
+        getFacultyActivity: build.query<GetActivityResponse, string>({
+            query: (id) => ({
+                url: api.faculty.getFacultyActivity(id),
+                method: "GET",
+            }),
+        }),
     }),
 });
 
@@ -66,4 +79,5 @@ export const {
     useCreateFacultyMutation,
     useUpdateFacultyMutation,
     useDeleteFacultyMutation,
+    useGetFacultyActivityQuery,
 } = facultyApiService;

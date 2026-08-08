@@ -21,6 +21,16 @@ export interface BasePaginationParams {
     search?: string;
 }
 
+export interface GetAllStudentsParams extends BasePaginationParams {
+    batchId?: string;
+    courseId?: string;
+    departmentId?: string;
+    sectionId?: string;
+    status?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+}
+
 // Student List Types
 export interface StudentPersonalData {
     firstName: string;

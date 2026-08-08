@@ -31,6 +31,15 @@ const EditStudentPage = () => {
             <>
                 <PageHeader>Edit Student</PageHeader>
                 <Container>
+                    <div className="pt-6">
+                        <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => navigate(`/super-admin/students/${id}`)}
+                        >
+                            ← Back to Student Details
+                        </Button>
+                    </div>
                     <div className="py-6 text-textSecondary">Loading student details...</div>
                 </Container>
             </>
@@ -105,6 +114,15 @@ const EditStudentPage = () => {
         <>
             <PageHeader>Edit Student</PageHeader>
             <Container>
+                <div className="pt-6">
+                    <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => navigate(`/super-admin/students/${id}`)}
+                    >
+                        ← Back to Student Details
+                    </Button>
+                </div>
                 <div className="py-6 space-y-10">
                     <section className="space-y-2">
                         <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">Academic Placement (read-only)</h3>

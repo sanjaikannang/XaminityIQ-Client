@@ -1,9 +1,10 @@
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, ChevronsUpDown, Search } from "lucide-react";
 import { useState } from "react";
 
 export interface ColumnDef<TData, TValue> {
     accessorKey?: string;
     header: string | (() => React.ReactNode);
+    sortKey?: string;
     cell?: (info: {
         row: { original: TData };
         getValue: () => TValue;
@@ -24,6 +25,9 @@ interface TableProps<TData, TValue> {
     tableTitle: string;
     onSearch?: (searchTerm: string) => void;
     onFilterApply?: (filters: Record<string, any>) => void;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+    onSortChange?: (sortBy: string, sortOrder: 'asc' | 'desc') => void;
 }
 
 export function Table<TData, TValue>({
@@ -37,6 +41,9 @@ export function Table<TData, TValue>({
     isLoading,
     tableTitle,
     onSearch,
+    sortBy,
+    sortOrder,
+    onSortChange,
 }: TableProps<TData, TValue>) {
     const [searchTerm, setSearchTerm] = useState("");
 
@@ -44,6 +51,15 @@ export function Table<TData, TValue>({
         const value = e.target.value;
         setSearchTerm(value);
         onSearch?.(value);
+    };
+
+    const handleSortClick = (key: string) => {
+        if (!onSortChange) return;
+        if (sortBy === key) {
+            onSortChange(key, sortOrder === 'asc' ? 'desc' : 'asc');
+        } else {
+            onSortChange(key, 'asc');
+        }
     };
 
     const canGoPrevious = pageNumber > 1;
@@ -112,16 +128,48 @@ export function Table<TData, TValue>({
                         <table className="w-full border-collapse">
                             <thead className="bg-bgSecondary">
                                 <tr>
-                                    {columns.map((column, index) => (
-                                        <th
-                                            key={index}
-                                            className="px-4 py-4 text-left text-md font-semibold text-textSecondary"
-                                        >
-                                            {typeof column.header === "function"
-                                                ? column.header()
-                                                : column.header}
-                                        </th>
-                                    ))}
+                                    {columns.map((column, index) => {
+                                        const label = typeof column.header === "function"
+                                            ? column.header()
+                                            : column.header;
+
+                                        if (!column.sortKey) {
+                                            return (
+                                                <th
+                                                    key={index}
+                                                    className="px-4 py-4 text-left text-md font-semibold text-textSecondary"
+                                                >
+                                                    {label}
+                                                </th>
+                                            );
+                                        }
+
+                                        const isActive = sortBy === column.sortKey;
+
+                                        return (
+                                            <th
+                                                key={index}
+                                                className="px-4 py-4 text-left text-md font-semibold text-textSecondary"
+                                            >
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleSortClick(column.sortKey as string)}
+                                                    className="flex items-center gap-1 cursor-pointer hover:text-textPrimary"
+                                                >
+                                                    {label}
+                                                    {isActive ? (
+                                                        sortOrder === 'asc' ? (
+                                                            <ChevronUp size={14} />
+                                                        ) : (
+                                                            <ChevronDown size={14} />
+                                                        )
+                                                    ) : (
+                                                        <ChevronsUpDown size={14} className="text-textTertiary" />
+                                                    )}
+                                                </button>
+                                            </th>
+                                        );
+                                    })}
                                 </tr>
                             </thead>
                             <tbody>

@@ -4,4 +4,5 @@ export const faculty = {
     createFaculty: () => "/admin/faculty",
     updateFaculty: (id: string) => `/admin/faculty/${id}`,
     deleteFaculty: (id: string) => `/admin/faculty/${id}`,
+    getFacultyActivity: (id: string) => `/admin/faculty/${id}/activity`,
 };
