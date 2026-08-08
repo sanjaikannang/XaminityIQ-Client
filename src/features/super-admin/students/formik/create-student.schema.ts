@@ -46,7 +46,6 @@ export const createStudentValidationSchema = Yup.object({
     batchId: Yup.string().required('Batch is required'),
     courseId: Yup.string().required('Course is required'),
     departmentId: Yup.string().required('Department is required'),
-    sectionId: Yup.string().required('Section is required'),
     currentSemester: Yup.number().typeError('Must be a number').required('Current semester is required').min(1),
     admissionType: Yup.string().oneOf(Object.values(AdmissionType)).required('Admission type is required'),
 

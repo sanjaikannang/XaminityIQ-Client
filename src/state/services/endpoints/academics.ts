@@ -17,6 +17,7 @@ import {
     AddDepartmentToBatchCourseRequest,
     AddDepartmentToBatchCourseResponse,
     GetAllDepartmentsResponse,
+    GetDepartmentSectionsResponse,
 } from "../../../types/academics-types";
 
 export const academicsApiService = apiInstance.injectEndpoints({
@@ -119,6 +120,13 @@ export const academicsApiService = apiInstance.injectEndpoints({
             }),
             providesTags: ['all-departments'],
         }),
+        getDepartmentSections: build.query<GetDepartmentSectionsResponse, string>({
+            query: (batchDepartmentId) => ({
+                url: api.academics.getDepartmentSections(batchDepartmentId),
+                method: "GET",
+            }),
+            providesTags: ['departments'],
+        }),
     }),
 });
 
@@ -140,4 +148,5 @@ export const {
     useLazyGetCoursesWithDepartmentsQuery,
     useGetAllDepartmentsQuery,
     useLazyGetAllDepartmentsQuery,
+    useGetDepartmentSectionsQuery,
 } = academicsApiService;

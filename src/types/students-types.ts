@@ -206,7 +206,6 @@ export interface CreateStudentRequest {
     batchId: string;
     courseId: string;
     departmentId: string;
-    sectionId: string;
     currentSemester: number;
     admissionType: string;
 
@@ -224,7 +223,7 @@ export interface CreateStudentResponse {
 
 export type EditStudentRequest = Omit<
     CreateStudentRequest,
-    "batchId" | "courseId" | "departmentId" | "sectionId" | "currentSemester" | "admissionType"
+    "batchId" | "courseId" | "departmentId" | "currentSemester" | "admissionType"
 >;
 
 export interface EditStudentResponse {

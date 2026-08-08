@@ -63,6 +63,10 @@ const DepartmentsPage = () => {
         setPage(1);
     }, []);
 
+    const handleRowClick = useCallback((row: DepartmentData) => {
+        navigate(`/super-admin/academics/departments/${row.batchDepartmentId}/sections?batchCourseId=${batchCourseId}&courseId=${courseId}&batchId=${batchId}`);
+    }, [navigate, batchCourseId, courseId, batchId]);
+
     const handleOpenModal = useCallback(() => {
         setIsModalOpen(true);
     }, []);
@@ -163,6 +167,7 @@ const DepartmentsPage = () => {
                     <Table
                         columns={columns}
                         data={data?.data || []}
+                        onRowClick={handleRowClick}
                         totalCount={data?.pagination?.totalItems || 0}
                         pageNumber={page}
                         pageLimit={pageSize}

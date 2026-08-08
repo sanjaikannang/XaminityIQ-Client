@@ -6,6 +6,7 @@ import CoursesPage from "../academics/pages/CoursesPage";
 import StudentsPage from "../students/pages/StudentsPage";
 import FacultiesPage from "../faculties/pages/FacultiesPage";
 import DepartmentsPage from "../academics/pages/DepartmentsPage";
+import SectionsPage from "../academics/pages/SectionsPage";
 import SuperAdminDashboardPage from "../dashboard/pages/SuperAdminDashboardPage";
 import ExamsPage from "../exams/pages/ExamsPage";
 import StudentDetailPage from "../students/pages/StudentDetailPage";
@@ -46,6 +47,14 @@ export const superAdminRoutes: RouteObject[] = [
         element: (
             <RoleGuard allowedRoles={[UserRole.ADMIN]}>
                 <DepartmentsPage />
+            </RoleGuard>
+        ),
+    },
+    {
+        path: "/super-admin/academics/departments/:batchDepartmentId/sections",
+        element: (
+            <RoleGuard allowedRoles={[UserRole.ADMIN]}>
+                <SectionsPage />
             </RoleGuard>
         ),
     },

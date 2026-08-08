@@ -157,6 +157,25 @@ export interface GetAllDepartmentsResponse {
     data?: DepartmentInfo[];
 }
 
+// Department Sections (single department detail + its sections) Types
+export interface DepartmentSectionsData {
+    batchDepartmentId: string;
+    batchId: string;
+    batchName: string;
+    courseId: string;
+    courseName: string;
+    deptId: string;
+    deptCode: string;
+    deptName: string;
+    sections: SectionData[];
+}
+
+export interface GetDepartmentSectionsResponse {
+    success: boolean;
+    message: string;
+    data?: DepartmentSectionsData;
+}
+
 // Add Department to Batch Course Types
 export interface AddDepartmentToBatchCourseRequest {
     batchCourseId: string;

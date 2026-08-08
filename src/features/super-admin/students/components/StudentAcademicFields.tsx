@@ -28,13 +28,9 @@ const StudentAcademicFields = ({ values, errors, touched, handleChange, handleBl
         { skip: !selectedCourse?.batchCourseId }
     );
 
-    const selectedDepartment = departmentsData?.data?.find((d) => d._id === values.departmentId);
-    const sections = selectedDepartment?.sections || [];
-
     const batchOptions = (batchesData?.data || []).map((b) => ({ value: b._id, label: b.batchName }));
     const courseOptions = (coursesData?.data || []).map((c) => ({ value: c._id, label: c.courseName }));
     const departmentOptions = (departmentsData?.data || []).map((d) => ({ value: d._id, label: d.deptName }));
-    const sectionOptions = sections.map((s) => ({ value: s._id, label: s.sectionName }));
 
     return (
         <div className="space-y-4">
@@ -50,7 +46,6 @@ const StudentAcademicFields = ({ values, errors, touched, handleChange, handleBl
                         setFieldValue("batchId", value);
                         setFieldValue("courseId", "");
                         setFieldValue("departmentId", "");
-                        setFieldValue("sectionId", "");
                     }}
                     error={errors.batchId}
                     touched={touched.batchId}
@@ -67,7 +62,6 @@ const StudentAcademicFields = ({ values, errors, touched, handleChange, handleBl
                     onChange={(value) => {
                         setFieldValue("courseId", value);
                         setFieldValue("departmentId", "");
-                        setFieldValue("sectionId", "");
                     }}
                     error={errors.courseId}
                     touched={touched.courseId}
@@ -83,28 +77,11 @@ const StudentAcademicFields = ({ values, errors, touched, handleChange, handleBl
                     value={values.departmentId}
                     loading={isDepartmentsLoading}
                     disabled={!values.courseId}
-                    onChange={(value) => {
-                        setFieldValue("departmentId", value);
-                        setFieldValue("sectionId", "");
-                    }}
+                    onChange={(value) => setFieldValue("departmentId", value)}
                     error={errors.departmentId}
                     touched={touched.departmentId}
                     required
                 />
-                <Select
-                    id="sectionId"
-                    name="sectionId"
-                    label="Section"
-                    options={sectionOptions}
-                    value={values.sectionId}
-                    disabled={!values.departmentId}
-                    onChange={(value) => setFieldValue("sectionId", value)}
-                    error={errors.sectionId}
-                    touched={touched.sectionId}
-                    required
-                />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField
                     id="currentSemester"
                     name="currentSemester"
@@ -118,6 +95,8 @@ const StudentAcademicFields = ({ values, errors, touched, handleChange, handleBl
                     touched={touched.currentSemester}
                     required
                 />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select
                     id="admissionType"
                     name="admissionType"
