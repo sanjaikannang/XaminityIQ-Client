@@ -9,4 +9,5 @@ export const academics = {
     createBatch: () => `/admin/batches`,
     getCoursesWithDepartments: () => "/admin/courses-with-departments",
     getAllDepartments: () => "/admin/departments",
+    getDepartmentSections: (batchDepartmentId: string) => `/admin/batch-departments/${batchDepartmentId}/sections`,
 };

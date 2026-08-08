@@ -21,12 +21,15 @@ const CoursesPage = () => {
     const [pageSize, setPageSize] = useState(10);
     const [searchTerm, setSearchTerm] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [sortBy, setSortBy] = useState<string | undefined>(undefined);
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | undefined>(undefined);
 
     const { data, isLoading, isFetching } = useGetCoursesQuery({
         batchId: batchId!,
         page,
         limit: pageSize,
         ...(searchTerm && { search: searchTerm }),
+        ...(sortBy && { sortBy, sortOrder: sortOrder || 'asc' }),
     });
 
     const { data: availableCoursesData, isLoading: isLoadingAvailableCourses } = useGetAvailableCoursesQuery(
@@ -50,9 +53,15 @@ const CoursesPage = () => {
         setPage(1);
     }, []);
 
+    const handleSortChange = useCallback((newSortBy: string, newSortOrder: 'asc' | 'desc') => {
+        setSortBy(newSortBy);
+        setSortOrder(newSortOrder);
+        setPage(1);
+    }, []);
+
     const handleRowClick = useCallback((row: CourseData) => {
-        navigate(`/super-admin/academics/courses/${row.batchCourseId}/departments?courseId=${row._id}`);        
-    }, [navigate]);
+        navigate(`/super-admin/academics/courses/${row.batchCourseId}/departments?courseId=${row._id}&batchId=${batchId}`);
+    }, [navigate, batchId]);
 
     const handleOpenModal = useCallback(() => {
         setIsModalOpen(true);
@@ -79,34 +88,42 @@ const CoursesPage = () => {
         {
             accessorKey: "courseCode",
             header: "Course Code",
+            sortKey: "courseCode",
         },
         {
             accessorKey: "courseName",
             header: "Course Name",
+            sortKey: "courseName",
         },
         {
             accessorKey: "streamCode",
             header: "Stream Code",
+            sortKey: "streamCode",
         },
         {
             accessorKey: "streamName",
             header: "Stream Name",
+            sortKey: "streamName",
         },
         {
             accessorKey: "level",
             header: "Level",
+            sortKey: "level",
         },
         {
             accessorKey: "duration",
             header: "Duration",
+            sortKey: "duration",
         },
         {
             accessorKey: "semesters",
             header: "Semesters",
+            sortKey: "semesters",
         },
         {
             accessorKey: "createdAt",
             header: "Created At",
+            sortKey: "createdAt",
             cell: ({ getValue }: { getValue: () => string }) => {
                 const date = new Date(getValue());
                 return date.toLocaleDateString("en-US", {
@@ -122,6 +139,16 @@ const CoursesPage = () => {
         <>
             <PageHeader>Courses</PageHeader>
             <Container>
+                <div className="mb-6">
+                    <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => navigate("/super-admin/academics/batches")}
+                    >
+                        ← Back to Batches
+                    </Button>
+                </div>
+
                 <div className="flex justify-end">
                     <Button
                         type="submit"
@@ -147,6 +174,9 @@ const CoursesPage = () => {
                         isLoading={isLoading || isFetching}
                         tableTitle="Courses"
                         onSearch={handleSearch}
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
+                        onSortChange={handleSortChange}
                     />
                 </div>
             </Container>

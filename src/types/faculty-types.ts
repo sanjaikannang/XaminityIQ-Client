@@ -21,6 +21,15 @@ export interface BasePaginationParams {
     search?: string;
 }
 
+export interface GetAllFacultyParams extends BasePaginationParams {
+    departmentId?: string;
+    designation?: string;
+    employmentType?: string;
+    status?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+}
+
 // Faculty List Types
 export interface FacultyPersonalData {
     firstName: string;

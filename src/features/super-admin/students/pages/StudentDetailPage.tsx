@@ -1,6 +1,6 @@
 import toast from "react-hot-toast";
 import { useState } from "react";
-import Modal from "../../../../common/ui/Modal";
+import DeleteConfirmModal from "../../../../common/ui/DeleteConfirmModal";
 import Button from "../../../../common/ui/Button";
 import Timeline from "../../../../common/ui/Timeline";
 import { useParams, useNavigate } from "react-router-dom";
@@ -487,26 +487,18 @@ const StudentDetailPage = () => {
 
             </Container>
 
-            <Modal
+            <DeleteConfirmModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDelete}
+                isDeleting={isDeleting}
                 title="Delete Student"
-                size="sm"
-            >
-                <div className="space-y-6">
-                    <p className="text-sm text-textSecondary">
+                message={
+                    <>
                         Are you sure you want to delete <span className="font-semibold text-textPrimary">{fullName}</span>? This will deactivate their account and they will no longer be able to log in.
-                    </p>
-                    <div className="flex justify-end gap-3">
-                        <Button variant="outline" size="sm" onClick={() => setIsDeleteModalOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button variant="danger" size="sm" loading={isDeleting} disabled={isDeleting} onClick={handleDelete}>
-                            {isDeleting ? '' : 'Delete'}
-                        </Button>
-                    </div>
-                </div>
-            </Modal>
+                    </>
+                }
+            />
         </>
     );
 };

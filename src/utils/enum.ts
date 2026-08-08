@@ -85,3 +85,27 @@ export enum HighestQualification {
     BTECH = "BTECH",
     OTHER = "OTHER",
 }
+
+export enum StudentStatus {
+    ACTIVE = "ACTIVE",
+    ALUMNI = "ALUMNI",
+    DROPOUT = "DROPOUT",
+    SUSPENDED = "SUSPENDED",
+    ON_LEAVE = "ON_LEAVE",
+}
+
+export enum FacultyStatus {
+    ACTIVE = "ACTIVE",
+    INACTIVE = "INACTIVE",
+    SUSPENDED = "SUSPENDED",
+    ON_LEAVE = "ON_LEAVE",
+    TERMINATED = "TERMINATED",
+    RETIRED = "RETIRED",
+    PENDING = "PENDING",
+}
+
+export enum SubjectType {
+    THEORY = "THEORY",
+    PRACTICAL = "PRACTICAL",
+    ELECTIVE = "ELECTIVE",
+}

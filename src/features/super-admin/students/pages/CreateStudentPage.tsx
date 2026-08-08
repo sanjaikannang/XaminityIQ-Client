@@ -24,7 +24,7 @@ const initialValues = {
     currentAddress: { addressLine1: '', addressLine2: '', city: '', state: '', pincode: '' },
     sameAsCurrent: true,
     permanentAddress: { addressLine1: '', addressLine2: '', city: '', state: '', pincode: '' },
-    batchId: '', courseId: '', departmentId: '', sectionId: '', currentSemester: '', admissionType: '',
+    batchId: '', courseId: '', departmentId: '', currentSemester: '', admissionType: '',
     father: { ...emptyParent },
     mother: { ...emptyParent },
     guardian: { ...emptyGuardian },

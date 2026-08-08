@@ -4,4 +4,5 @@ export const students = {
     createStudent: () => "/admin/students",
     updateStudent: (id: string) => `/admin/students/${id}`,
     deleteStudent: (id: string) => `/admin/students/${id}`,
+    getStudentActivity: (id: string) => `/admin/students/${id}/activity`,
 };

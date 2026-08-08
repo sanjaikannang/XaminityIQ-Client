@@ -1,9 +1,10 @@
 import { api } from "../../../api";
 import { apiInstance } from "../api-instance";
+import { GetActivityResponse } from "../../../types/activity-types";
 import {
     GetAllStudentsResponse,
     GetStudentResponse,
-    BasePaginationParams,
+    GetAllStudentsParams,
     CreateStudentRequest,
     CreateStudentResponse,
     EditStudentRequest,
@@ -13,7 +14,7 @@ import {
 
 export const studentsApiService = apiInstance.injectEndpoints({
     endpoints: (build) => ({
-        getAllStudents: build.query<GetAllStudentsResponse, BasePaginationParams>({
+        getAllStudents: build.query<GetAllStudentsResponse, GetAllStudentsParams>({
             query: (params) => ({
                 url: api.students.getAllStudents(),
                 method: "GET",
@@ -21,6 +22,13 @@ export const studentsApiService = apiInstance.injectEndpoints({
                     page: params.page || 1,
                     limit: params.limit || 10,
                     ...(params.search && { search: params.search }),
+                    ...(params.batchId && { batchId: params.batchId }),
+                    ...(params.courseId && { courseId: params.courseId }),
+                    ...(params.departmentId && { departmentId: params.departmentId }),
+                    ...(params.sectionId && { sectionId: params.sectionId }),
+                    ...(params.status && { status: params.status }),
+                    ...(params.sortBy && { sortBy: params.sortBy }),
+                    ...(params.sortOrder && { sortOrder: params.sortOrder }),
                 },
             }),
             providesTags: ['students'],
@@ -55,6 +63,12 @@ export const studentsApiService = apiInstance.injectEndpoints({
             }),
             invalidatesTags: ['students', 'student'],
         }),
+        getStudentActivity: build.query<GetActivityResponse, string>({
+            query: (id) => ({
+                url: api.students.getStudentActivity(id),
+                method: "GET",
+            }),
+        }),
     }),
 });
 
@@ -66,4 +80,5 @@ export const {
     useCreateStudentMutation,
     useUpdateStudentMutation,
     useDeleteStudentMutation,
+    useGetStudentActivityQuery,
 } = studentsApiService;
