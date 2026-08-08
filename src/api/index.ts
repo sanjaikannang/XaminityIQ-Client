@@ -3,11 +3,13 @@ import { academics } from "./academics.api";
 import { students } from "./students.api";
 import { faculty } from "./faculty.api";
 import { subjects } from "./subjects.api";
+import { exams } from "./exams.api";
 
 export const api = {
     auth,
     academics,
     students,
     faculty,
-    subjects
+    subjects,
+    exams
 };

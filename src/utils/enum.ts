@@ -109,3 +109,22 @@ export enum SubjectType {
     PRACTICAL = "PRACTICAL",
     ELECTIVE = "ELECTIVE",
 }
+
+export enum ExamMode {
+    AUTO = "AUTO",
+    PROCTORING = "PROCTORING",
+}
+
+export enum ExamStatus {
+    DRAFT = "DRAFT",
+    PUBLISHED = "PUBLISHED",
+    ONGOING = "ONGOING",
+    COMPLETED = "COMPLETED",
+    RESULTS_PUBLISHED = "RESULTS_PUBLISHED",
+}
+
+export enum QuestionType {
+    MCQ = "MCQ",
+    MSQ = "MSQ",
+    WRITTEN = "WRITTEN",
+}
