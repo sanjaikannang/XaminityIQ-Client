@@ -1,5 +1,5 @@
 import toast from "react-hot-toast";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useState, useCallback } from "react";
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
@@ -15,9 +15,11 @@ import Modal from "../../../../common/ui/Modal";
 import CreateDepartmentForm, { CreateDepartmentFormValues } from "../components/CreateDepartmentForm";
 
 const DepartmentsPage = () => {
+    const navigate = useNavigate();
     const { courseId: batchCourseId } = useParams<{ courseId: string }>();
     const [searchParams] = useSearchParams();
     const courseId = searchParams.get('courseId'); // Get the actual courseId from query params
+    const batchId = searchParams.get('batchId'); // Get the batchId from query params, for back navigation
 
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
@@ -118,6 +120,20 @@ const DepartmentsPage = () => {
         <>
             <PageHeader>Departments</PageHeader>
             <Container>
+                <div className="mb-6">
+                    <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => navigate(
+                            batchId
+                                ? `/super-admin/academics/batches/${batchId}/courses`
+                                : "/super-admin/academics/batches"
+                        )}
+                    >
+                        ← Back to Courses
+                    </Button>
+                </div>
+
                 <div className="flex justify-end">
                     <Button
                         type="submit"

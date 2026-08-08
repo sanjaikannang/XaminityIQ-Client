@@ -51,8 +51,8 @@ const CoursesPage = () => {
     }, []);
 
     const handleRowClick = useCallback((row: CourseData) => {
-        navigate(`/super-admin/academics/courses/${row.batchCourseId}/departments?courseId=${row._id}`);        
-    }, [navigate]);
+        navigate(`/super-admin/academics/courses/${row.batchCourseId}/departments?courseId=${row._id}&batchId=${batchId}`);
+    }, [navigate, batchId]);
 
     const handleOpenModal = useCallback(() => {
         setIsModalOpen(true);
@@ -122,6 +122,16 @@ const CoursesPage = () => {
         <>
             <PageHeader>Courses</PageHeader>
             <Container>
+                <div className="mb-6">
+                    <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => navigate("/super-admin/academics/batches")}
+                    >
+                        ← Back to Batches
+                    </Button>
+                </div>
+
                 <div className="flex justify-end">
                     <Button
                         type="submit"
