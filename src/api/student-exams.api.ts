@@ -9,4 +9,5 @@ export const studentExams = {
     finalizeRecording: (attemptId: string) => `/student/exams/attempts/${attemptId}/recordings/finalize`,
     networkProbeDownload: () => "/student/exams/network-probe/download",
     networkProbeUpload: () => "/student/exams/network-probe/upload",
+    getMyResult: (attemptId: string) => `/student/exams/attempts/${attemptId}/result`,
 };

@@ -174,3 +174,30 @@ export interface DeleteQuestionResponse {
     success: boolean;
     message: string;
 }
+
+// Evaluation & Results
+export interface AssignEvaluatorsRequest {
+    evaluatorFacultyIds: string[];
+}
+
+export interface AssignEvaluatorsResponse {
+    success: boolean;
+    message: string;
+}
+
+export interface EvaluationProgressData {
+    totalWrittenAnswers: number;
+    evaluatedCount: number;
+    pendingCount: number;
+}
+
+export interface GetEvaluationProgressResponse {
+    success: boolean;
+    message: string;
+    data?: EvaluationProgressData;
+}
+
+export interface PublishResultsResponse {
+    success: boolean;
+    message: string;
+}

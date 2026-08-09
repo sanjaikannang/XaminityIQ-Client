@@ -15,6 +15,10 @@ import {
     EditQuestionRequest,
     EditQuestionResponse,
     DeleteQuestionResponse,
+    AssignEvaluatorsRequest,
+    AssignEvaluatorsResponse,
+    GetEvaluationProgressResponse,
+    PublishResultsResponse,
 } from "../../../types/exams-types";
 import { FormExamRoomsResponse, GetExamRoomsResponse } from "../../../types/proctoring-types";
 
@@ -112,6 +116,28 @@ export const examsApiService = apiInstance.injectEndpoints({
             }),
             providesTags: ['exam-rooms'],
         }),
+        assignEvaluators: build.mutation<AssignEvaluatorsResponse, { examId: string; data: AssignEvaluatorsRequest }>({
+            query: ({ examId, data }) => ({
+                url: api.exams.assignEvaluators(examId),
+                method: "PATCH",
+                data,
+            }),
+            invalidatesTags: ['exam-detail'],
+        }),
+        getEvaluationProgress: build.query<GetEvaluationProgressResponse, string>({
+            query: (examId) => ({
+                url: api.exams.getEvaluationProgress(examId),
+                method: "GET",
+            }),
+            providesTags: ['evaluation-progress'],
+        }),
+        publishResults: build.mutation<PublishResultsResponse, string>({
+            query: (examId) => ({
+                url: api.exams.publishResults(examId),
+                method: "POST",
+            }),
+            invalidatesTags: ['exams', 'exam-detail', 'evaluation-progress'],
+        }),
     }),
 });
 
@@ -127,4 +153,7 @@ export const {
     useDeleteQuestionMutation,
     useFormExamRoomsMutation,
     useGetExamRoomsQuery,
+    useAssignEvaluatorsMutation,
+    useGetEvaluationProgressQuery,
+    usePublishResultsMutation,
 } = examsApiService;

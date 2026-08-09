@@ -10,4 +10,7 @@ export const exams = {
     deleteQuestion: (examId: string, questionId: string) => `/admin/exams/${examId}/questions/${questionId}`,
     formExamRooms: (examId: string) => `/admin/exams/${examId}/rooms`,
     getExamRooms: (examId: string) => `/admin/exams/${examId}/rooms`,
+    assignEvaluators: (examId: string) => `/admin/exams/${examId}/evaluators`,
+    getEvaluationProgress: (examId: string) => `/admin/exams/${examId}/evaluation-progress`,
+    publishResults: (examId: string) => `/admin/exams/${examId}/publish-results`,
 };

@@ -4,6 +4,8 @@ import { RoleGuard } from "../../../hoc/withRoleGuard";
 import FacultyDashboardPage from "../dashboard/pages/FacultyDashboardPage";
 import SubjectsPage from "../subjects/pages/SubjectsPage";
 import MyExamRoomsPage from "../proctoring/pages/MyExamRoomsPage";
+import MyEvaluationExamsPage from "../evaluation/pages/MyEvaluationExamsPage";
+import EvaluationQueuePage from "../evaluation/pages/EvaluationQueuePage";
 
 export const facultyRoutes: RouteObject[] = [
     {
@@ -27,6 +29,22 @@ export const facultyRoutes: RouteObject[] = [
         element: (
             <RoleGuard allowedRoles={[UserRole.FACULTY]}>
                 <MyExamRoomsPage />
+            </RoleGuard>
+        ),
+    },
+    {
+        path: "/faculty/evaluation",
+        element: (
+            <RoleGuard allowedRoles={[UserRole.FACULTY]}>
+                <MyEvaluationExamsPage />
+            </RoleGuard>
+        ),
+    },
+    {
+        path: "/faculty/evaluation/:examId",
+        element: (
+            <RoleGuard allowedRoles={[UserRole.FACULTY]}>
+                <EvaluationQueuePage />
             </RoleGuard>
         ),
     },

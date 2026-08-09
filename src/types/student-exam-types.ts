@@ -14,6 +14,8 @@ export interface MyExamData {
     endDate: string;
     myAttemptId: string | null;
     myAttemptStatus: AttemptStatus | null;
+    totalScore?: number;
+    passed?: boolean;
 }
 
 export interface GetAllExamsResponse {
@@ -115,4 +117,37 @@ export interface FinalizeRecordingResponse {
     success: boolean;
     message: string;
     allComplete?: boolean;
+}
+
+export interface ResultAnswerPageData {
+    pageNumber: number;
+    cloudinaryUrl: string;
+    uploadedAt: string;
+}
+
+export interface ResultQuestionData {
+    questionId: string;
+    type: QuestionType;
+    text: string;
+    maxMarks: number;
+    marksObtained: number;
+    remarks?: string;
+    pages?: ResultAnswerPageData[];
+}
+
+export interface MyResultData {
+    examName: string;
+    totalMarks: number;
+    passingMarks: number;
+    objectiveScore?: number;
+    writtenScore?: number;
+    totalScore?: number;
+    passed?: boolean;
+    questions: ResultQuestionData[];
+}
+
+export interface GetMyResultResponse {
+    success: boolean;
+    message: string;
+    data?: MyResultData;
 }

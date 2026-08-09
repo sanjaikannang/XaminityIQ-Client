@@ -8,6 +8,7 @@ import { studentExams } from "./student-exams.api";
 import { studentProctoring } from "./student-proctoring.api";
 import { facultyProctoring } from "./faculty-proctoring.api";
 import { writtenAnswer } from "./written-answer.api";
+import { evaluation } from "./evaluation.api";
 
 export const api = {
     auth,
@@ -19,5 +20,6 @@ export const api = {
     studentExams,
     studentProctoring,
     facultyProctoring,
-    writtenAnswer
+    writtenAnswer,
+    evaluation
 };

@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
-import { AttemptStatus, ExamMode } from "../../../../utils/enum";
+import { AttemptStatus, ExamMode, ExamStatus } from "../../../../utils/enum";
 import { useGetMyExamsQuery } from "../../../../state/services/endpoints/student-exams";
 
 const MyExamsPage = () => {
@@ -11,6 +11,17 @@ const MyExamsPage = () => {
     const exams = data?.data || [];
 
     const renderAction = (exam: (typeof exams)[number]) => {
+        if (exam.status === ExamStatus.RESULTS_PUBLISHED && exam.myAttemptId) {
+            return (
+                <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => navigate(`/student/exams/results/${exam.myAttemptId}`)}
+                >
+                    View Result
+                </Button>
+            );
+        }
         if (exam.myAttemptStatus === AttemptStatus.SUBMITTED || exam.myAttemptStatus === AttemptStatus.COMPLETED) {
             return <span className="text-sm text-textSecondary font-medium">Completed</span>;
         }

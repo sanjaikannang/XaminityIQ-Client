@@ -9,6 +9,7 @@ import {
     RecordingSignatureResponse,
     RecordChunkRequest,
     FinalizeRecordingResponse,
+    GetMyResultResponse,
 } from "../../../types/student-exam-types";
 import { RecordingMediaType, SubmissionTrigger } from "../../../utils/enum";
 
@@ -70,6 +71,12 @@ export const studentExamsApiService = apiInstance.injectEndpoints({
                 data: { mediaType },
             }),
         }),
+        getMyResult: build.query<GetMyResultResponse, string>({
+            query: (attemptId) => ({
+                url: api.studentExams.getMyResult(attemptId),
+                method: "GET",
+            }),
+        }),
     }),
 });
 
@@ -82,4 +89,5 @@ export const {
     useGetRecordingSignatureMutation,
     useRecordChunkMutation,
     useFinalizeRecordingMutation,
+    useGetMyResultQuery,
 } = studentExamsApiService;
