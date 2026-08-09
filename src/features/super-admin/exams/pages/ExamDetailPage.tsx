@@ -8,7 +8,7 @@ import DeleteConfirmModal from "../../../../common/ui/DeleteConfirmModal";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
 import { ColumnDef, Table } from "../../../../common/ui/Table";
-import { ExamStatus } from "../../../../utils/enum";
+import { ExamMode, ExamStatus } from "../../../../utils/enum";
 import { QuestionData } from "../../../../types/exams-types";
 import QuestionForm, { QuestionFormValues } from "../components/QuestionForm";
 import { useGetAllFacultyQuery } from "../../../../state/services/endpoints/faculty";
@@ -22,6 +22,9 @@ import {
     useAssignEvaluatorsMutation,
     useGetEvaluationProgressQuery,
     usePublishResultsMutation,
+    useFormExamRoomsMutation,
+    useGetExamRoomsQuery,
+    useGetExamAttemptsQuery,
 } from "../../../../state/services/endpoints/exams";
 
 const ExamDetailPage = () => {
@@ -54,6 +57,15 @@ const ExamDetailPage = () => {
     const { data: evaluationProgressData } = useGetEvaluationProgressQuery(id as string, { skip: !id || !isCompleted });
     const evaluationProgress = evaluationProgressData?.data;
     const [publishResults, { isLoading: isPublishingResults }] = usePublishResultsMutation();
+
+    const isProctoring = exam?.mode === ExamMode.PROCTORING;
+    const canFormRooms = isProctoring && exam?.status && exam.status !== ExamStatus.DRAFT;
+    const [formExamRooms, { isLoading: isFormingRooms }] = useFormExamRoomsMutation();
+    const { data: examRoomsData, isFetching: isLoadingRooms } = useGetExamRoomsQuery(id as string, { skip: !id || !canFormRooms });
+    const rooms = examRoomsData?.data?.rooms || [];
+
+    const { data: examAttemptsData, isFetching: isLoadingAttempts } = useGetExamAttemptsQuery(id as string, { skip: !id });
+    const attempts = examAttemptsData?.data?.attempts || [];
 
     useEffect(() => {
         if (exam) {
@@ -140,6 +152,24 @@ const ExamDetailPage = () => {
             toast.success(response.message || 'Results published successfully');
         } catch (error: any) {
             toast.error(error.data?.message || 'Failed to publish results');
+        }
+    };
+
+    const handleFormRooms = async () => {
+        if (!id) return;
+        try {
+            const response = await formExamRooms(id).unwrap();
+            const rooms = response.data?.rooms || [];
+            const pooledNames = new Set(
+                rooms.flatMap((r) => r.pooledExamNames).filter((name) => name !== exam?.name),
+            );
+            toast.success(
+                pooledNames.size > 0
+                    ? `${rooms.length} room(s) formed — pooled with: ${[...pooledNames].join(', ')}`
+                    : response.message || `${rooms.length} room(s) formed successfully`,
+            );
+        } catch (error: any) {
+            toast.error(error.data?.message || 'Failed to form exam rooms');
         }
     };
 
@@ -249,6 +279,106 @@ const ExamDetailPage = () => {
                         tableTitle="Questions"
                     />
                 </div>
+
+                {(isLoadingAttempts || attempts.length > 0) && (
+                    <div className="pt-6 border-t border-borderLight">
+                        <h3 className="text-lg font-semibold text-textPrimary mb-3">Attempts &amp; Integrity</h3>
+                        {isLoadingAttempts && <p className="text-sm text-textSecondary">Loading attempts...</p>}
+                        {!isLoadingAttempts && attempts.length > 0 && (
+                            <div className="overflow-x-auto rounded-md border border-borderLight">
+                                <table className="w-full text-sm">
+                                    <thead className="bg-bgSecondary">
+                                        <tr>
+                                            <th className="px-3 py-2 text-left font-medium text-textSecondary">Student</th>
+                                            <th className="px-3 py-2 text-left font-medium text-textSecondary">Status</th>
+                                            <th className="px-3 py-2 text-left font-medium text-textSecondary">Score</th>
+                                            <th className="px-3 py-2 text-left font-medium text-textSecondary">Flagged</th>
+                                            <th className="px-3 py-2 text-left font-medium text-textSecondary">Violations</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-borderLight">
+                                        {attempts.map((attempt) => (
+                                            <tr key={attempt.attemptId}>
+                                                <td className="px-3 py-2 text-textPrimary">{attempt.studentCode}</td>
+                                                <td className="px-3 py-2 text-textPrimary">{attempt.status}</td>
+                                                <td className="px-3 py-2 text-textPrimary">
+                                                    {attempt.totalScore !== undefined && attempt.totalScore !== null ? attempt.totalScore : '—'}
+                                                </td>
+                                                <td className="px-3 py-2">
+                                                    {attempt.isFlagged ? (
+                                                        <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                                            Flagged
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-textSecondary">—</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-3 py-2 text-textSecondary">
+                                                    {Object.keys(attempt.violationCounts).length > 0
+                                                        ? Object.entries(attempt.violationCounts)
+                                                            .map(([type, count]) => `${type}: ${count}`)
+                                                            .join(', ')
+                                                        : '—'}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {canFormRooms && (
+                    <div className="pt-6 border-t border-borderLight">
+                        <div className="flex items-center justify-between mb-3">
+                            <h3 className="text-lg font-semibold text-textPrimary">Exam Rooms</h3>
+                            {rooms.length === 0 && (
+                                <Button
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={handleFormRooms}
+                                    loading={isFormingRooms}
+                                    disabled={isFormingRooms}
+                                >
+                                    {isFormingRooms ? '' : 'Form Exam Rooms'}
+                                </Button>
+                            )}
+                        </div>
+                        {isLoadingRooms && <p className="text-sm text-textSecondary">Loading rooms...</p>}
+                        {!isLoadingRooms && rooms.length === 0 && (
+                            <p className="text-sm text-textSecondary">No rooms formed yet.</p>
+                        )}
+                        {rooms.length > 0 && (
+                            <div className="overflow-x-auto rounded-md border border-borderLight">
+                                <table className="w-full text-sm">
+                                    <thead className="bg-bgSecondary">
+                                        <tr>
+                                            <th className="px-3 py-2 text-left font-medium text-textSecondary">Faculty</th>
+                                            <th className="px-3 py-2 text-left font-medium text-textSecondary">Students (this exam)</th>
+                                            <th className="px-3 py-2 text-left font-medium text-textSecondary">Room Occupancy</th>
+                                            <th className="px-3 py-2 text-left font-medium text-textSecondary">Status</th>
+                                            <th className="px-3 py-2 text-left font-medium text-textSecondary">Pooled With</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-borderLight">
+                                        {rooms.map((room) => (
+                                            <tr key={room.roomId}>
+                                                <td className="px-3 py-2 text-textPrimary">{room.facultyCode}</td>
+                                                <td className="px-3 py-2 text-textPrimary">{room.totalCount}</td>
+                                                <td className="px-3 py-2 text-textPrimary">{room.roomTotalOccupancy}</td>
+                                                <td className="px-3 py-2 text-textPrimary">{room.status}</td>
+                                                <td className="px-3 py-2 text-textSecondary">
+                                                    {room.pooledWithExamNames.length > 0 ? room.pooledWithExamNames.join(', ') : '—'}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {!isResultsPublished && (
                     <div className="pt-6 border-t border-borderLight">

@@ -201,3 +201,20 @@ export interface PublishResultsResponse {
     success: boolean;
     message: string;
 }
+
+export interface ExamAttemptSummaryData {
+    attemptId: string;
+    studentId: string;
+    studentCode: string;
+    status: string;
+    isFlagged: boolean;
+    violationCounts: Record<string, number>;
+    totalScore?: number;
+    passed?: boolean;
+}
+
+export interface GetExamAttemptsResponse {
+    success: boolean;
+    message: string;
+    data?: { attempts: ExamAttemptSummaryData[] };
+}

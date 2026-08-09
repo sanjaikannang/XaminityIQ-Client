@@ -220,7 +220,7 @@ const ProctoringDashboardPage = () => {
         <div className="h-screen flex flex-col bg-bgSecondary">
             <header className="h-16 bg-whiteColor border-b border-borderLight flex items-center justify-between px-6 shadow-sm flex-shrink-0">
                 <div className="flex items-center gap-3">
-                    <h1 className="font-semibold text-textPrimary">{room.examName}</h1>
+                    <h1 className="font-semibold text-textPrimary">{room.exams.map((e) => e.examName).join(', ')}</h1>
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${liveKitStatus === 'CONNECTED' ? 'bg-green-100 text-green-700' : liveKitStatus === 'FAILED' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
                         {liveKitStatus === 'CONNECTED' ? 'Live' : liveKitStatus === 'FAILED' ? 'Offline' : 'Connecting...'}
                     </span>
@@ -243,19 +243,26 @@ const ProctoringDashboardPage = () => {
                                             <div className="absolute inset-0 flex items-center justify-center text-whiteColor text-xs">No video</div>
                                         )}
                                     </div>
-                                    <div className="flex items-center justify-between px-2 py-1.5">
-                                        <div className="flex items-center gap-1.5 text-xs text-textPrimary">
-                                            <span>{a.studentCode}</span>
-                                            {tile?.hasAudio && <span title="Mic active">🎤</span>}
-                                            {tile?.screen && <span title="Screen sharing">🖥️</span>}
+                                    <div className="px-2 py-1.5">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-1.5 text-xs text-textPrimary min-w-0">
+                                                <span className="flex-shrink-0">{a.studentCode}</span>
+                                                {tile?.hasAudio && <span title="Mic active">🎤</span>}
+                                                {tile?.screen && <span title="Screen sharing">🖥️</span>}
+                                            </div>
+                                            <button
+                                                type="button"
+                                                className="text-xs font-medium text-red-600 flex-shrink-0"
+                                                onClick={() => setRemoveTarget(a)}
+                                            >
+                                                Remove
+                                            </button>
                                         </div>
-                                        <button
-                                            type="button"
-                                            className="text-xs font-medium text-red-600"
-                                            onClick={() => setRemoveTarget(a)}
-                                        >
-                                            Remove
-                                        </button>
+                                        {room.exams.length > 1 && (
+                                            <p className="text-[10px] text-textSecondary truncate mt-0.5" title={a.examName}>
+                                                {a.examName}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             );
@@ -271,12 +278,19 @@ const ProctoringDashboardPage = () => {
                         <p className="text-sm font-semibold text-textPrimary mb-2">Waiting Queue ({waiting.length})</p>
                         <div className="space-y-2">
                             {waiting.map((a) => (
-                                <div key={a.assignmentId} className="flex items-center justify-between rounded-md border border-borderLight px-3 py-2">
-                                    <span className="text-sm text-textPrimary">{a.studentCode}</span>
-                                    <div className="flex gap-2">
-                                        <Button variant="primary" size="sm" loading={isAdmitting} onClick={() => handleAdmit(a)}>Admit</Button>
-                                        <Button variant="outline" size="sm" onClick={() => setRejectTarget(a)}>Reject</Button>
+                                <div key={a.assignmentId} className="rounded-md border border-borderLight px-3 py-2">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-textPrimary">{a.studentCode}</span>
+                                        <div className="flex gap-2 flex-shrink-0">
+                                            <Button variant="primary" size="sm" loading={isAdmitting} onClick={() => handleAdmit(a)}>Admit</Button>
+                                            <Button variant="outline" size="sm" onClick={() => setRejectTarget(a)}>Reject</Button>
+                                        </div>
                                     </div>
+                                    {room.exams.length > 1 && (
+                                        <p className="text-[10px] text-textSecondary truncate mt-0.5" title={a.examName}>
+                                            {a.examName}
+                                        </p>
+                                    )}
                                 </div>
                             ))}
                             {waiting.length === 0 && <p className="text-xs text-textSecondary">No students waiting.</p>}

@@ -1,4 +1,5 @@
-import { AttemptStatus, ExamMode, ExamStatus, QuestionType, RecordingMediaType } from "../utils/enum";
+import { AttemptStatus, ExamMode, ExamStatus, QuestionType, RecordingMediaType, ViolationType } from "../utils/enum";
+import { SecuritySettings } from "./exams-types";
 
 export interface MyExamData {
     _id: string;
@@ -44,6 +45,7 @@ export interface StartAttemptData {
     examName: string;
     durationMinutes: number;
     startedAt: string;
+    securitySettings: SecuritySettings;
     questions: AttemptQuestionData[];
 }
 
@@ -67,6 +69,7 @@ export interface GetAttemptData {
     startedAt: string;
     status: AttemptStatus;
     remainingMs: number;
+    securitySettings: SecuritySettings;
     questions: AttemptQuestionData[];
     answers: AttemptAnswerData[];
 }
@@ -85,6 +88,21 @@ export interface SaveAnswerRequest {
 export interface SubmitAttemptResponse {
     success: boolean;
     message: string;
+    status?: AttemptStatus;
+    objectiveScore?: number;
+    totalScore?: number;
+    passed?: boolean;
+}
+
+export interface ReportViolationRequest {
+    type: ViolationType;
+}
+
+export interface ReportViolationResponse {
+    success: boolean;
+    message?: string;
+    violationCount: number;
+    terminated: boolean;
     status?: AttemptStatus;
     objectiveScore?: number;
     totalScore?: number;

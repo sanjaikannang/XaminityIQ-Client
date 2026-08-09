@@ -4,6 +4,7 @@ export const studentExams = {
     getAttempt: (attemptId: string) => `/student/exams/attempts/${attemptId}`,
     saveAnswer: (attemptId: string, questionId: string) => `/student/exams/attempts/${attemptId}/answers/${questionId}`,
     submitAttempt: (attemptId: string) => `/student/exams/attempts/${attemptId}/submit`,
+    reportViolation: (attemptId: string) => `/student/exams/attempts/${attemptId}/violations`,
     getRecordingSignature: (attemptId: string) => `/student/exams/attempts/${attemptId}/recordings/signature`,
     recordChunk: (attemptId: string) => `/student/exams/attempts/${attemptId}/recordings/chunk`,
     finalizeRecording: (attemptId: string) => `/student/exams/attempts/${attemptId}/recordings/finalize`,

@@ -19,6 +19,7 @@ import {
     AssignEvaluatorsResponse,
     GetEvaluationProgressResponse,
     PublishResultsResponse,
+    GetExamAttemptsResponse,
 } from "../../../types/exams-types";
 import { FormExamRoomsResponse, GetExamRoomsResponse } from "../../../types/proctoring-types";
 
@@ -138,6 +139,13 @@ export const examsApiService = apiInstance.injectEndpoints({
             }),
             invalidatesTags: ['exams', 'exam-detail', 'evaluation-progress'],
         }),
+        getExamAttempts: build.query<GetExamAttemptsResponse, string>({
+            query: (examId) => ({
+                url: api.exams.getExamAttempts(examId),
+                method: "GET",
+            }),
+            providesTags: ['exam-attempts'],
+        }),
     }),
 });
 
@@ -156,4 +164,5 @@ export const {
     useAssignEvaluatorsMutation,
     useGetEvaluationProgressQuery,
     usePublishResultsMutation,
+    useGetExamAttemptsQuery,
 } = examsApiService;

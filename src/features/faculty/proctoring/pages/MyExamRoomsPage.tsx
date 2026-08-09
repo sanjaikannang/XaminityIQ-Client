@@ -24,7 +24,9 @@ const MyExamRoomsPage = () => {
                             className="flex items-center justify-between rounded-lg border border-borderLight bg-whiteColor p-4 shadow-sm"
                         >
                             <div>
-                                <p className="font-semibold text-textPrimary">{room.examName}</p>
+                                <p className="font-semibold text-textPrimary">
+                                    {room.exams.map((e) => e.examName).join(', ')}
+                                </p>
                                 <p className="text-sm text-textSecondary">
                                     {room.studentCount} student{room.studentCount === 1 ? '' : 's'} • {room.status}
                                 </p>

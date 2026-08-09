@@ -10,8 +10,9 @@ import {
     RecordChunkRequest,
     FinalizeRecordingResponse,
     GetMyResultResponse,
+    ReportViolationResponse,
 } from "../../../types/student-exam-types";
-import { RecordingMediaType, SubmissionTrigger } from "../../../utils/enum";
+import { RecordingMediaType, SubmissionTrigger, ViolationType } from "../../../utils/enum";
 
 export const studentExamsApiService = apiInstance.injectEndpoints({
     endpoints: (build) => ({
@@ -77,6 +78,13 @@ export const studentExamsApiService = apiInstance.injectEndpoints({
                 method: "GET",
             }),
         }),
+        reportViolation: build.mutation<ReportViolationResponse, { attemptId: string; type: ViolationType }>({
+            query: ({ attemptId, type }) => ({
+                url: api.studentExams.reportViolation(attemptId),
+                method: "POST",
+                data: { type },
+            }),
+        }),
     }),
 });
 
@@ -90,4 +98,5 @@ export const {
     useRecordChunkMutation,
     useFinalizeRecordingMutation,
     useGetMyResultQuery,
+    useReportViolationMutation,
 } = studentExamsApiService;

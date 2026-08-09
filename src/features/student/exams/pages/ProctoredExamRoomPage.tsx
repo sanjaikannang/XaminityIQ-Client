@@ -7,7 +7,9 @@ import Button from "../../../../common/ui/Button";
 import { QuestionType, SubmissionTrigger } from "../../../../utils/enum";
 import { examMediaStore } from "../utils/examMediaStore";
 import { useExamRecorder } from "../hooks/useExamRecorder";
+import { useIntegrityMonitor } from "../hooks/useIntegrityMonitor";
 import WrittenAnswerCapture from "../components/WrittenAnswerCapture";
+import { ReportViolationResponse } from "../../../../types/student-exam-types";
 import { encodeChatPayload, decodeChatPayload, LiveKitChatPayload } from "../../../../utils/liveKitDataMessage";
 import {
     useGetAttemptQuery,
@@ -162,29 +164,49 @@ const ProctoredExamRoomPage = () => {
 
     const questions = data?.data?.questions || [];
     const currentQuestion = questions[currentIndex];
+    const securitySettings = data?.data?.securitySettings;
+
+    // Stops recording, disconnects LiveKit, exits fullscreen, and redirects —
+    // shared by a normal submit and an integrity-violation auto-submit (the
+    // server has already finalized the attempt by the time either path calls this)
+    const finishAndRedirect = useCallback(async (totalScore?: number | null, message?: string) => {
+        await stopAndFinalize();
+        await roomRef.current?.disconnect();
+        examMediaStore.clear();
+        if (document.fullscreenElement) {
+            await document.exitFullscreen().catch(() => { });
+        }
+        toast.success(
+            message || (totalScore !== undefined && totalScore !== null
+                ? `Exam submitted. Score: ${totalScore}`
+                : 'Exam submitted successfully'),
+        );
+        navigate('/student/exams', { replace: true });
+    }, [stopAndFinalize, navigate]);
 
     const handleSubmit = useCallback(async (trigger: SubmissionTrigger) => {
         if (!attemptId || hasSubmittedRef.current) return;
         hasSubmittedRef.current = true;
         try {
             const response = await submitAttempt({ attemptId, trigger }).unwrap();
-            await stopAndFinalize();
-            await roomRef.current?.disconnect();
-            examMediaStore.clear();
-            if (document.fullscreenElement) {
-                await document.exitFullscreen().catch(() => { });
-            }
-            toast.success(
-                response.totalScore !== undefined && response.totalScore !== null
-                    ? `Exam submitted. Score: ${response.totalScore}`
-                    : 'Exam submitted successfully',
-            );
-            navigate('/student/exams', { replace: true });
+            await finishAndRedirect(response.totalScore);
         } catch (error: any) {
             hasSubmittedRef.current = false;
             toast.error(error.data?.message || 'Failed to submit exam');
         }
-    }, [attemptId, submitAttempt, stopAndFinalize, navigate]);
+    }, [attemptId, submitAttempt, finishAndRedirect]);
+
+    const handleIntegrityTermination = useCallback((response: ReportViolationResponse) => {
+        if (hasSubmittedRef.current) return;
+        hasSubmittedRef.current = true;
+        finishAndRedirect(response.totalScore, 'Your attempt was auto-submitted due to repeated policy violations.');
+    }, [finishAndRedirect]);
+
+    useIntegrityMonitor({
+        attemptId: attemptId as string,
+        securitySettings,
+        onTerminated: handleIntegrityTermination,
+    });
 
     useEffect(() => {
         if (remainingMs === null) return;
@@ -342,7 +364,7 @@ const ProctoredExamRoomPage = () => {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    disabled={currentIndex === 0}
+                                    disabled={currentIndex === 0 || !!securitySettings?.blockBackwardNavigation}
                                     onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
                                 >
                                     Previous
@@ -383,16 +405,20 @@ const ProctoredExamRoomPage = () => {
                     <div>
                         <p className="text-sm font-semibold text-textPrimary mb-2">Question Palette</p>
                         <div className="grid grid-cols-5 gap-2">
-                            {questions.map((q, index) => (
-                                <button
-                                    key={q._id}
-                                    type="button"
-                                    onClick={() => setCurrentIndex(index)}
-                                    className={`h-8 w-8 rounded text-sm font-medium ${paletteColor[paletteStatus(q._id)]} ${currentIndex === index ? 'ring-2 ring-primary' : ''}`}
-                                >
-                                    {index + 1}
-                                </button>
-                            ))}
+                            {questions.map((q, index) => {
+                                const isBlockedBackward = !!securitySettings?.blockBackwardNavigation && index < currentIndex;
+                                return (
+                                    <button
+                                        key={q._id}
+                                        type="button"
+                                        disabled={isBlockedBackward}
+                                        onClick={() => setCurrentIndex(index)}
+                                        className={`h-8 w-8 rounded text-sm font-medium ${paletteColor[paletteStatus(q._id)]} ${currentIndex === index ? 'ring-2 ring-primary' : ''} ${isBlockedBackward ? 'opacity-40 cursor-not-allowed' : ''}`}
+                                    >
+                                        {index + 1}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 
