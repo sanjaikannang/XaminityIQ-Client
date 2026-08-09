@@ -6,5 +6,5 @@ export const apiInstance = createApi({
     reducerPath: "api",
     baseQuery: axiosBaseQuery({ baseUrl: ENV.BASE_URL }),
     endpoints: () => ({}),
-    tagTypes: ["batches", "courses-with-departments", "courses", "departments", "all-departments", "students", "student", "faculty", "faculty-detail", "subjects"],
+    tagTypes: ["batches", "courses-with-departments", "courses", "departments", "all-departments", "students", "student", "faculty", "faculty-detail", "subjects", "exams", "exam-detail", "student-exams", "exam-rooms", "faculty-exam-rooms", "faculty-exam-room-detail", "evaluation-progress", "evaluation-exams", "evaluation-answers", "exam-attempts"],
 });

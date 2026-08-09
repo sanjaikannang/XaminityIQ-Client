@@ -3,6 +3,8 @@ import { UserRole } from "../../../utils/enum";
 import { RoleGuard } from "../../../hoc/withRoleGuard";
 import StudentDashboardPage from "../dashboard/pages/StudentDashboardPage";
 import SubjectsPage from "../subjects/pages/SubjectsPage";
+import MyExamsPage from "../exams/pages/MyExamsPage";
+import ExamResultPage from "../exams/pages/ExamResultPage";
 
 
 export const studentRoutes: RouteObject[] = [
@@ -19,6 +21,22 @@ export const studentRoutes: RouteObject[] = [
         element: (
             <RoleGuard allowedRoles={[UserRole.STUDENT]}>
                 <SubjectsPage />
+            </RoleGuard>
+        ),
+    },
+    {
+        path: "/student/exams",
+        element: (
+            <RoleGuard allowedRoles={[UserRole.STUDENT]}>
+                <MyExamsPage />
+            </RoleGuard>
+        ),
+    },
+    {
+        path: "/student/exams/results/:attemptId",
+        element: (
+            <RoleGuard allowedRoles={[UserRole.STUDENT]}>
+                <ExamResultPage />
             </RoleGuard>
         ),
     },

@@ -10,6 +10,9 @@ import SectionsPage from "../academics/pages/SectionsPage";
 import DepartmentSubjectsPage from "../academics/pages/DepartmentSubjectsPage";
 import SuperAdminDashboardPage from "../dashboard/pages/SuperAdminDashboardPage";
 import ExamsPage from "../exams/pages/ExamsPage";
+import CreateExamPage from "../exams/pages/CreateExamPage";
+import ExamDetailPage from "../exams/pages/ExamDetailPage";
+import EditExamPage from "../exams/pages/EditExamPage";
 import StudentDetailPage from "../students/pages/StudentDetailPage";
 import FacultyDetailPage from "../faculties/pages/FacultyDetailPage ";
 import CreateStudentPage from "../students/pages/CreateStudentPage";
@@ -139,6 +142,30 @@ export const superAdminRoutes: RouteObject[] = [
         element: (
             <RoleGuard allowedRoles={[UserRole.ADMIN]}>
                 <ExamsPage />
+            </RoleGuard>
+        ),
+    },
+    {
+        path: "/super-admin/exams/create",
+        element: (
+            <RoleGuard allowedRoles={[UserRole.ADMIN]}>
+                <CreateExamPage />
+            </RoleGuard>
+        ),
+    },
+    {
+        path: "/super-admin/exams/:id",
+        element: (
+            <RoleGuard allowedRoles={[UserRole.ADMIN]}>
+                <ExamDetailPage />
+            </RoleGuard>
+        ),
+    },
+    {
+        path: "/super-admin/exams/:id/edit",
+        element: (
+            <RoleGuard allowedRoles={[UserRole.ADMIN]}>
+                <EditExamPage />
             </RoleGuard>
         ),
     },
