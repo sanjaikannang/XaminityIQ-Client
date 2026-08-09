@@ -1,16 +1,33 @@
+import toast from "react-hot-toast";
+import { useState } from "react";
+import DeleteConfirmModal from "../../../../common/ui/DeleteConfirmModal";
 import Button from "../../../../common/ui/Button";
 import Timeline from "../../../../common/ui/Timeline";
 import { useParams, useNavigate } from "react-router-dom";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
 import FacultyDetailSkeleton from "../components/FacultyDetailSkeleton";
-import { useGetFacultyByIdQuery } from "../../../../state/services/endpoints/faculty";
+import { useGetFacultyByIdQuery, useDeleteFacultyMutation } from "../../../../state/services/endpoints/faculty";
 import { Calendar, Flag, GraduationCap, MapPin, Phone, User, Users, Briefcase } from "lucide-react";
 
 const FacultyDetailPage = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { data, isLoading, error } = useGetFacultyByIdQuery(id!);
+    const [deleteFaculty, { isLoading: isDeleting }] = useDeleteFacultyMutation();
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+    const handleDelete = async () => {
+        try {
+            const response = await deleteFaculty(id!).unwrap();
+            toast.success(response.message || 'Faculty deactivated successfully');
+            navigate("/super-admin/faculties");
+        } catch (error: any) {
+            toast.error(error.data?.message || 'Failed to delete faculty');
+        } finally {
+            setIsDeleteModalOpen(false);
+        }
+    };
 
     if (isLoading) {
         return (
@@ -52,7 +69,7 @@ const FacultyDetailPage = () => {
         <>
             <PageHeader>Faculty Details</PageHeader>
             <Container>
-                <div className="mb-6">
+                <div className="mb-6 flex items-center justify-between">
                     <Button
                         variant="primary"
                         size="sm"
@@ -60,6 +77,22 @@ const FacultyDetailPage = () => {
                     >
                         ← Back to Faculty
                     </Button>
+                    <div className="flex items-center gap-3">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate(`/super-admin/faculties/${id}/edit`)}
+                        >
+                            Edit
+                        </Button>
+                        <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() => setIsDeleteModalOpen(true)}
+                        >
+                            Delete
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="space-y-6 mb-6">
@@ -375,6 +408,19 @@ const FacultyDetailPage = () => {
                     </div>
                 </div>
             </Container>
+
+            <DeleteConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDelete}
+                isDeleting={isDeleting}
+                title="Delete Faculty"
+                message={
+                    <>
+                        Are you sure you want to delete <span className="font-semibold text-textPrimary">{fullName}</span>? This will deactivate their account and they will no longer be able to log in.
+                    </>
+                }
+            />
         </>
     );
 };

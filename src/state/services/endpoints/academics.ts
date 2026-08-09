@@ -16,6 +16,8 @@ import {
     GetAvailableDepartmentsResponse,
     AddDepartmentToBatchCourseRequest,
     AddDepartmentToBatchCourseResponse,
+    GetAllDepartmentsResponse,
+    GetDepartmentSectionsResponse,
 } from "../../../types/academics-types";
 
 export const academicsApiService = apiInstance.injectEndpoints({
@@ -28,6 +30,7 @@ export const academicsApiService = apiInstance.injectEndpoints({
                     page: params.page || 1,
                     limit: params.limit || 10,
                     ...(params.search && { search: params.search }),
+                    ...(params.sortBy && { sortBy: params.sortBy, sortOrder: params.sortOrder || 'asc' }),
                 },
             }),
             providesTags: ['batches'],
@@ -48,6 +51,7 @@ export const academicsApiService = apiInstance.injectEndpoints({
                     page: params.page || 1,
                     limit: params.limit || 10,
                     ...(params.search && { search: params.search }),
+                    ...(params.sortBy && { sortBy: params.sortBy, sortOrder: params.sortOrder || 'asc' }),
                 },
             }),
             providesTags: ['courses'],
@@ -74,6 +78,7 @@ export const academicsApiService = apiInstance.injectEndpoints({
                     page: params.page || 1,
                     limit: params.limit || 10,
                     ...(params.search && { search: params.search }),
+                    ...(params.sortBy && { sortBy: params.sortBy, sortOrder: params.sortOrder || 'asc' }),
                 },
             }),
             providesTags: ['departments'],
@@ -108,6 +113,20 @@ export const academicsApiService = apiInstance.injectEndpoints({
             }),
             providesTags: ['courses-with-departments'],
         }),
+        getAllDepartments: build.query<GetAllDepartmentsResponse, void>({
+            query: () => ({
+                url: api.academics.getAllDepartments(),
+                method: "GET",
+            }),
+            providesTags: ['all-departments'],
+        }),
+        getDepartmentSections: build.query<GetDepartmentSectionsResponse, string>({
+            query: (batchDepartmentId) => ({
+                url: api.academics.getDepartmentSections(batchDepartmentId),
+                method: "GET",
+            }),
+            providesTags: ['departments'],
+        }),
     }),
 });
 
@@ -127,4 +146,7 @@ export const {
     useAddDepartmentToBatchCourseMutation,
     useGetCoursesWithDepartmentsQuery,
     useLazyGetCoursesWithDepartmentsQuery,
+    useGetAllDepartmentsQuery,
+    useLazyGetAllDepartmentsQuery,
+    useGetDepartmentSectionsQuery,
 } = academicsApiService;

@@ -1,5 +1,6 @@
 import toast from "react-hot-toast";
-import { useParams, useSearchParams } from "react-router-dom";
+import { BookOpen, Layers } from "lucide-react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useState, useCallback } from "react";
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
@@ -15,20 +16,25 @@ import Modal from "../../../../common/ui/Modal";
 import CreateDepartmentForm, { CreateDepartmentFormValues } from "../components/CreateDepartmentForm";
 
 const DepartmentsPage = () => {
+    const navigate = useNavigate();
     const { courseId: batchCourseId } = useParams<{ courseId: string }>();
     const [searchParams] = useSearchParams();
     const courseId = searchParams.get('courseId'); // Get the actual courseId from query params
+    const batchId = searchParams.get('batchId'); // Get the batchId from query params, for back navigation
 
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [searchTerm, setSearchTerm] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [sortBy, setSortBy] = useState<string | undefined>(undefined);
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | undefined>(undefined);
 
     const { data, isLoading, isFetching } = useGetDepartmentsQuery({
         batchCourseId: batchCourseId!,
         page,
         limit: pageSize,
         ...(searchTerm && { search: searchTerm }),
+        ...(sortBy && { sortBy, sortOrder: sortOrder || 'asc' }),
     });
 
     const { data: availableDepartmentsData, isLoading: isLoadingAvailableDepartments } = useGetAvailableDepartmentsQuery(
@@ -51,6 +57,20 @@ const DepartmentsPage = () => {
         setPageSize(newPageSize);
         setPage(1);
     }, []);
+
+    const handleSortChange = useCallback((newSortBy: string, newSortOrder: 'asc' | 'desc') => {
+        setSortBy(newSortBy);
+        setSortOrder(newSortOrder);
+        setPage(1);
+    }, []);
+
+    const handleViewSections = useCallback((row: DepartmentData) => {
+        navigate(`/super-admin/academics/departments/${row.batchDepartmentId}/sections?batchCourseId=${batchCourseId}&courseId=${courseId}&batchId=${batchId}`);
+    }, [navigate, batchCourseId, courseId, batchId]);
+
+    const handleViewSubjects = useCallback((row: DepartmentData) => {
+        navigate(`/super-admin/academics/departments/${row.batchDepartmentId}/subjects?batchCourseId=${batchCourseId}&courseId=${courseId}&batchId=${batchId}`);
+    }, [navigate, batchCourseId, courseId, batchId]);
 
     const handleOpenModal = useCallback(() => {
         setIsModalOpen(true);
@@ -79,18 +99,22 @@ const DepartmentsPage = () => {
         {
             accessorKey: "deptCode",
             header: "Department Code",
+            sortKey: "deptCode",
         },
         {
             accessorKey: "deptName",
             header: "Department Name",
+            sortKey: "deptName",
         },
         {
             accessorKey: "totalSeats",
             header: "Total Seats",
+            sortKey: "totalSeats",
         },
         {
             accessorKey: "sectionCapacity",
             header: "Section Capacity",
+            sortKey: "sectionCapacity",
         },
         {
             accessorKey: "sections",
@@ -103,6 +127,7 @@ const DepartmentsPage = () => {
         {
             accessorKey: "createdAt",
             header: "Created At",
+            sortKey: "createdAt",
             cell: ({ getValue }: { getValue: () => string }) => {
                 const date = new Date(getValue());
                 return date.toLocaleDateString("en-US", {
@@ -112,12 +137,49 @@ const DepartmentsPage = () => {
                 });
             },
         },
+        {
+            header: "Actions",
+            cell: ({ row }: { row: { original: DepartmentData } }) => (
+                <div className="flex items-center gap-1">
+                    <button
+                        type="button"
+                        title="View Subjects"
+                        onClick={() => handleViewSubjects(row.original)}
+                        className="p-1.5 rounded hover:bg-bgSecondary cursor-pointer transition-colors text-blue-600 hover:text-blue-700"
+                    >
+                        <BookOpen className="h-4 w-4" />
+                    </button>
+                    <button
+                        type="button"
+                        title="View Sections"
+                        onClick={() => handleViewSections(row.original)}
+                        className="p-1.5 rounded hover:bg-bgSecondary cursor-pointer transition-colors text-textSecondary hover:text-textPrimary"
+                    >
+                        <Layers className="h-4 w-4" />
+                    </button>
+                </div>
+            ),
+        },
     ];
 
     return (
         <>
             <PageHeader>Departments</PageHeader>
             <Container>
+                <div className="mb-6">
+                    <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => navigate(
+                            batchId
+                                ? `/super-admin/academics/batches/${batchId}/courses`
+                                : "/super-admin/academics/batches"
+                        )}
+                    >
+                        ← Back to Courses
+                    </Button>
+                </div>
+
                 <div className="flex justify-end">
                     <Button
                         type="submit"
@@ -142,6 +204,9 @@ const DepartmentsPage = () => {
                         isLoading={isLoading || isFetching}
                         tableTitle="Departments"
                         onSearch={handleSearch}
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
+                        onSortChange={handleSortChange}
                     />
                 </div>
             </Container>

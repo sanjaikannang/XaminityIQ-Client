@@ -1,14 +1,20 @@
 import { api } from "../../../api";
 import { apiInstance } from "../api-instance";
+import { GetActivityResponse } from "../../../types/activity-types";
 import {
     GetAllStudentsResponse,
     GetStudentResponse,
-    BasePaginationParams,
+    GetAllStudentsParams,
+    CreateStudentRequest,
+    CreateStudentResponse,
+    EditStudentRequest,
+    EditStudentResponse,
+    DeleteStudentResponse,
 } from "../../../types/students-types";
 
 export const studentsApiService = apiInstance.injectEndpoints({
     endpoints: (build) => ({
-        getAllStudents: build.query<GetAllStudentsResponse, BasePaginationParams>({
+        getAllStudents: build.query<GetAllStudentsResponse, GetAllStudentsParams>({
             query: (params) => ({
                 url: api.students.getAllStudents(),
                 method: "GET",
@@ -16,6 +22,13 @@ export const studentsApiService = apiInstance.injectEndpoints({
                     page: params.page || 1,
                     limit: params.limit || 10,
                     ...(params.search && { search: params.search }),
+                    ...(params.batchId && { batchId: params.batchId }),
+                    ...(params.courseId && { courseId: params.courseId }),
+                    ...(params.departmentId && { departmentId: params.departmentId }),
+                    ...(params.sectionId && { sectionId: params.sectionId }),
+                    ...(params.status && { status: params.status }),
+                    ...(params.sortBy && { sortBy: params.sortBy }),
+                    ...(params.sortOrder && { sortOrder: params.sortOrder }),
                 },
             }),
             providesTags: ['students'],
@@ -27,6 +40,35 @@ export const studentsApiService = apiInstance.injectEndpoints({
             }),
             providesTags: ['student'],
         }),
+        createStudent: build.mutation<CreateStudentResponse, CreateStudentRequest>({
+            query: (data) => ({
+                url: api.students.createStudent(),
+                method: "POST",
+                data,
+            }),
+            invalidatesTags: ['students'],
+        }),
+        updateStudent: build.mutation<EditStudentResponse, { id: string; data: EditStudentRequest }>({
+            query: ({ id, data }) => ({
+                url: api.students.updateStudent(id),
+                method: "PATCH",
+                data,
+            }),
+            invalidatesTags: ['students', 'student'],
+        }),
+        deleteStudent: build.mutation<DeleteStudentResponse, string>({
+            query: (id) => ({
+                url: api.students.deleteStudent(id),
+                method: "DELETE",
+            }),
+            invalidatesTags: ['students', 'student'],
+        }),
+        getStudentActivity: build.query<GetActivityResponse, string>({
+            query: (id) => ({
+                url: api.students.getStudentActivity(id),
+                method: "GET",
+            }),
+        }),
     }),
 });
 
@@ -35,4 +77,8 @@ export const {
     useLazyGetAllStudentsQuery,
     useGetStudentByIdQuery,
     useLazyGetStudentByIdQuery,
+    useCreateStudentMutation,
+    useUpdateStudentMutation,
+    useDeleteStudentMutation,
+    useGetStudentActivityQuery,
 } = studentsApiService;

@@ -64,6 +64,8 @@ export interface BasePaginationParams {
     page?: number;
     limit?: number;
     search?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
 }
 
 export interface GetCoursesParams extends BasePaginationParams {
@@ -146,6 +148,32 @@ export interface GetAvailableDepartmentsResponse {
     success: boolean;
     message: string;
     data?: DepartmentInfo[];
+}
+
+// All Departments Types (unscoped - used for Faculty department dropdown)
+export interface GetAllDepartmentsResponse {
+    success: boolean;
+    message: string;
+    data?: DepartmentInfo[];
+}
+
+// Department Sections (single department detail + its sections) Types
+export interface DepartmentSectionsData {
+    batchDepartmentId: string;
+    batchId: string;
+    batchName: string;
+    courseId: string;
+    courseName: string;
+    deptId: string;
+    deptCode: string;
+    deptName: string;
+    sections: SectionData[];
+}
+
+export interface GetDepartmentSectionsResponse {
+    success: boolean;
+    message: string;
+    data?: DepartmentSectionsData;
 }
 
 // Add Department to Batch Course Types

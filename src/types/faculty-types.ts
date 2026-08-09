@@ -21,6 +21,15 @@ export interface BasePaginationParams {
     search?: string;
 }
 
+export interface GetAllFacultyParams extends BasePaginationParams {
+    departmentId?: string;
+    designation?: string;
+    employmentType?: string;
+    status?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+}
+
 // Faculty List Types
 export interface FacultyPersonalData {
     firstName: string;
@@ -149,4 +158,77 @@ export interface GetFacultyResponse {
     success: boolean;
     message: string;
     data?: FacultyDetailData;
+}
+
+// Create / Edit Faculty Types
+export interface FacultyEducationHistoryInput {
+    level: string;
+    qualification: string;
+    boardOrUniversity: string;
+    institutionName: string;
+    yearOfPassing: number;
+    percentageOrCGPA: number;
+    specialization?: string;
+}
+
+export interface FacultyWorkExperienceInput {
+    organization: string;
+    role: string;
+    department?: string;
+    fromDate: string;
+    toDate: string;
+    experienceYears: number;
+    jobDescription?: string;
+    reasonForLeaving?: string;
+    isCurrent?: boolean;
+}
+
+export interface CreateFacultyRequest {
+    firstName: string;
+    lastName: string;
+    gender: string;
+    dateOfBirth: string;
+    maritalStatus: string;
+    profilePhotoUrl: string;
+    religion?: string;
+
+    personalEmail: string;
+    phoneNumber: string;
+    alternatePhoneNumber?: string;
+    emergencyContact: EmergencyContact;
+
+    currentAddress: Address;
+    sameAsCurrent: boolean;
+    permanentAddress?: Address;
+
+    employeeId: string;
+    designation: string;
+    departmentId: string;
+    employmentType: string;
+    totalExperienceYears: number;
+    highestQualification: string;
+    remarks?: string;
+
+    educationHistory: FacultyEducationHistoryInput[];
+    workExperience?: FacultyWorkExperienceInput[];
+}
+
+export interface CreateFacultyResponse {
+    success: boolean;
+    message: string;
+}
+
+export type EditFacultyRequest = Omit<
+    CreateFacultyRequest,
+    "employeeId" | "designation" | "departmentId" | "employmentType" | "totalExperienceYears" | "highestQualification" | "remarks"
+>;
+
+export interface EditFacultyResponse {
+    success: boolean;
+    message: string;
+}
+
+export interface DeleteFacultyResponse {
+    success: boolean;
+    message: string;
 }

@@ -1,8 +1,9 @@
 import { ReactNode } from "react";
-import { logout } from "../../utils/logout";
+import { UserRole } from "../../utils/enum";
+import { useLogout } from "../../features/auth/logout/useLogout";
 import { getItemFromStorage } from "../../utils/storage";
-import { Outlet, useLocation, Link, useNavigate } from "react-router-dom";
-import { LogOut, Home, type LucideIcon, GraduationCap, Users, UserCog, ClipboardCheck } from "lucide-react";
+import { Outlet, useLocation, Link } from "react-router-dom";
+import { LogOut, Home, type LucideIcon, GraduationCap, Users, UserCog, ClipboardCheck, BookOpen, Video, ClipboardList } from "lucide-react";
 
 interface NavigationItem {
     id: string;
@@ -12,7 +13,7 @@ interface NavigationItem {
     matchPattern?: string;
 }
 
-const navigationItems: NavigationItem[] = [
+const adminNavItems: NavigationItem[] = [
     {
         id: "dashboard",
         label: "Dashboard",
@@ -49,13 +50,72 @@ const navigationItems: NavigationItem[] = [
     }
 ];
 
+const facultyNavItems: NavigationItem[] = [
+    {
+        id: "dashboard",
+        label: "Dashboard",
+        path: "/faculty/dashboard",
+        icon: Home,
+    },
+    {
+        id: "subjects",
+        label: "Subjects",
+        path: "/faculty/subjects",
+        icon: BookOpen,
+        matchPattern: "/faculty/subjects",
+    },
+    {
+        id: "proctoring",
+        label: "Proctoring",
+        path: "/faculty/proctoring",
+        icon: Video,
+        matchPattern: "/faculty/proctoring",
+    },
+    {
+        id: "evaluation",
+        label: "Evaluation",
+        path: "/faculty/evaluation",
+        icon: ClipboardList,
+        matchPattern: "/faculty/evaluation",
+    },
+];
+
+const studentNavItems: NavigationItem[] = [
+    {
+        id: "dashboard",
+        label: "Dashboard",
+        path: "/student/dashboard",
+        icon: Home,
+    },
+    {
+        id: "subjects",
+        label: "Subjects",
+        path: "/student/subjects",
+        icon: BookOpen,
+        matchPattern: "/student/subjects",
+    },
+    {
+        id: "exams",
+        label: "My Exams",
+        path: "/student/exams",
+        icon: ClipboardCheck,
+        matchPattern: "/student/exams",
+    },
+];
+
+const navigationItemsByRole: Record<string, NavigationItem[]> = {
+    [UserRole.ADMIN]: adminNavItems,
+    [UserRole.FACULTY]: facultyNavItems,
+    [UserRole.STUDENT]: studentNavItems,
+};
+
 export interface RootLayoutContext {
     infoBar?: ReactNode;
 }
 
 export function RootLayout() {
     const location = useLocation();
-    const navigate = useNavigate();
+    const { logout } = useLogout();
 
     const isActiveRoute = (item: NavigationItem): boolean => {
         // If matchPattern is defined, check if current path starts with it
@@ -67,7 +127,7 @@ export function RootLayout() {
     };
 
     const handleLogout = () => {
-        logout(navigate);
+        logout();
     };
 
     const userData = getItemFromStorage({ key: "user" }) as {
@@ -76,6 +136,7 @@ export function RootLayout() {
     };
 
     const roleInitial = userData.role?.charAt(0).toUpperCase();
+    const navigationItems = navigationItemsByRole[userData.role] || [];
 
     return (
         <>
@@ -122,7 +183,7 @@ export function RootLayout() {
                 </aside>
 
                 {/* Main Content Area */}
-                <div className="flex-1 flex flex-col">
+                <div className="flex-1 flex flex-col min-w-0">
                     <header className="h-16 bg-whiteColor border-b border-borderLight flex items-center justify-end px-6 flex-shrink-0 shadow-sm">
                         <div className="flex items-center gap-4">
                             <div className="flex flex-col text-right">
