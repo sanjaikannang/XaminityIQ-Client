@@ -8,4 +8,6 @@ export const exams = {
     addQuestion: (examId: string) => `/admin/exams/${examId}/questions`,
     updateQuestion: (examId: string, questionId: string) => `/admin/exams/${examId}/questions/${questionId}`,
     deleteQuestion: (examId: string, questionId: string) => `/admin/exams/${examId}/questions/${questionId}`,
+    formExamRooms: (examId: string) => `/admin/exams/${examId}/rooms`,
+    getExamRooms: (examId: string) => `/admin/exams/${examId}/rooms`,
 };

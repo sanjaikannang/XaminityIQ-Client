@@ -16,6 +16,7 @@ import {
     EditQuestionResponse,
     DeleteQuestionResponse,
 } from "../../../types/exams-types";
+import { FormExamRoomsResponse, GetExamRoomsResponse } from "../../../types/proctoring-types";
 
 export const examsApiService = apiInstance.injectEndpoints({
     endpoints: (build) => ({
@@ -97,6 +98,20 @@ export const examsApiService = apiInstance.injectEndpoints({
             }),
             invalidatesTags: ['exam-detail'],
         }),
+        formExamRooms: build.mutation<FormExamRoomsResponse, string>({
+            query: (examId) => ({
+                url: api.exams.formExamRooms(examId),
+                method: "POST",
+            }),
+            invalidatesTags: ['exam-rooms'],
+        }),
+        getExamRooms: build.query<GetExamRoomsResponse, string>({
+            query: (examId) => ({
+                url: api.exams.getExamRooms(examId),
+                method: "GET",
+            }),
+            providesTags: ['exam-rooms'],
+        }),
     }),
 });
 
@@ -110,4 +125,6 @@ export const {
     useAddQuestionMutation,
     useUpdateQuestionMutation,
     useDeleteQuestionMutation,
+    useFormExamRoomsMutation,
+    useGetExamRoomsQuery,
 } = examsApiService;

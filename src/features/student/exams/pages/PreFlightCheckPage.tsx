@@ -1,9 +1,10 @@
 import toast from "react-hot-toast";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
+import { ExamMode } from "../../../../utils/enum";
 import { examMediaStore } from "../utils/examMediaStore";
 import { runNetworkProbe, MIN_REQUIRED_MBPS } from "../utils/networkProbe";
 import { useStartExamMutation } from "../../../../state/services/endpoints/student-exams";
@@ -27,8 +28,10 @@ const INITIAL_CHECKS: CheckState[] = [
 
 const PreFlightCheckPage = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { examId } = useParams<{ examId: string }>();
     const [startExam, { isLoading: isStarting }] = useStartExamMutation();
+    const mode = (location.state as { mode?: ExamMode } | null)?.mode;
 
     const [checks, setChecks] = useState<CheckState[]>(INITIAL_CHECKS);
     const [isRunning, setIsRunning] = useState(false);
@@ -157,6 +160,13 @@ const PreFlightCheckPage = () => {
 
     const handleEnterExam = async () => {
         if (!examId) return;
+
+        if (mode === ExamMode.PROCTORING) {
+            examMediaStore.set(streamsRef.current);
+            navigate(`/student/exams/${examId}/lobby`, { replace: true });
+            return;
+        }
+
         try {
             const response = await startExam(examId).unwrap();
             if (!response.data) return;

@@ -156,3 +156,29 @@ export enum RecordingMediaType {
     AUDIO = "audio",
     SCREEN = "screen",
 }
+
+export enum ExamRoomStatus {
+    SCHEDULED = "SCHEDULED",
+    ACTIVE = "ACTIVE",
+    CLOSED = "CLOSED",
+}
+
+export enum RoomAssignmentStatus {
+    WAITING = "WAITING",
+    ADMITTED = "ADMITTED",
+    IN_PROGRESS = "IN_PROGRESS",
+    REJECTED = "REJECTED",
+    REMOVED = "REMOVED",
+    COMPLETED = "COMPLETED",
+}
+
+export enum ChatSenderRole {
+    FACULTY = "FACULTY",
+    STUDENT = "STUDENT",
+}
+
+export enum ChatRecipientType {
+    INDIVIDUAL = "INDIVIDUAL",
+    BROADCAST_ROOM = "BROADCAST_ROOM",
+    BROADCAST_EXAM = "BROADCAST_EXAM",
+}

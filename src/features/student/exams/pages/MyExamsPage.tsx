@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
-import { AttemptStatus } from "../../../../utils/enum";
+import { AttemptStatus, ExamMode } from "../../../../utils/enum";
 import { useGetMyExamsQuery } from "../../../../state/services/endpoints/student-exams";
 
 const MyExamsPage = () => {
@@ -15,11 +15,14 @@ const MyExamsPage = () => {
             return <span className="text-sm text-textSecondary font-medium">Completed</span>;
         }
         if (exam.myAttemptStatus === AttemptStatus.IN_PROGRESS && exam.myAttemptId) {
+            const roomPath = exam.mode === ExamMode.PROCTORING
+                ? `/student/exams/${exam._id}/proctored-room/${exam.myAttemptId}`
+                : `/student/exams/${exam._id}/room/${exam.myAttemptId}`;
             return (
                 <Button
                     variant="primary"
                     size="sm"
-                    onClick={() => navigate(`/student/exams/${exam._id}/room/${exam.myAttemptId}`)}
+                    onClick={() => navigate(roomPath)}
                 >
                     Resume
                 </Button>
@@ -29,9 +32,9 @@ const MyExamsPage = () => {
             <Button
                 variant="primary"
                 size="sm"
-                onClick={() => navigate(`/student/exams/${exam._id}/pre-flight`)}
+                onClick={() => navigate(`/student/exams/${exam._id}/pre-flight`, { state: { mode: exam.mode } })}
             >
-                Take Exam
+                {exam.mode === ExamMode.PROCTORING ? 'Join Lobby' : 'Take Exam'}
             </Button>
         );
     };

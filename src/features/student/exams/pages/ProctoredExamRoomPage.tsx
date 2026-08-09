@@ -1,17 +1,24 @@
 import toast from "react-hot-toast";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Room, RoomEvent, RemoteParticipant, RemoteTrackPublication, Track } from "livekit-client";
 import Modal from "../../../../common/ui/Modal";
 import Button from "../../../../common/ui/Button";
 import { QuestionType, SubmissionTrigger } from "../../../../utils/enum";
 import { examMediaStore } from "../utils/examMediaStore";
 import { useExamRecorder } from "../hooks/useExamRecorder";
 import WrittenAnswerCapture from "../components/WrittenAnswerCapture";
+import { encodeChatPayload, decodeChatPayload, LiveKitChatPayload } from "../../../../utils/liveKitDataMessage";
 import {
     useGetAttemptQuery,
     useSaveAnswerMutation,
     useSubmitAttemptMutation,
 } from "../../../../state/services/endpoints/student-exams";
+import {
+    useGetStudentLiveKitTokenMutation,
+    useSendStudentChatMutation,
+    useGetStudentChatHistoryQuery,
+} from "../../../../state/services/endpoints/student-proctoring";
 
 type LocalAnswer = { selectedOptionId?: string; selectedOptionIds?: string[] };
 
@@ -22,12 +29,14 @@ function formatTime(ms: number): string {
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
-const ExamRoomPage = () => {
+const ProctoredExamRoomPage = () => {
     const navigate = useNavigate();
     const { attemptId } = useParams<{ examId: string; attemptId: string }>();
     const { data, isLoading } = useGetAttemptQuery(attemptId as string, { skip: !attemptId });
     const [saveAnswer] = useSaveAnswerMutation();
     const [submitAttempt, { isLoading: isSubmitting }] = useSubmitAttemptMutation();
+    const [getLiveKitToken] = useGetStudentLiveKitTokenMutation();
+    const [sendChat] = useSendStudentChatMutation();
 
     const [answers, setAnswers] = useState<Record<string, LocalAnswer>>({});
     const [visited, setVisited] = useState<Set<string>>(new Set());
@@ -36,6 +45,14 @@ const ExamRoomPage = () => {
     const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
     const [remainingMs, setRemainingMs] = useState<number | null>(null);
     const hasSubmittedRef = useRef(false);
+
+    const [roomId, setRoomId] = useState<string | null>(null);
+    const [liveKitStatus, setLiveKitStatus] = useState<'CONNECTING' | 'CONNECTED' | 'FAILED'>('CONNECTING');
+    const [chatMessages, setChatMessages] = useState<LiveKitChatPayload[]>([]);
+    const [chatInput, setChatInput] = useState('');
+    const roomRef = useRef<Room | null>(null);
+    const facultyIdentityRef = useRef<string | null>(null);
+    const invigilatorVideoRef = useRef<HTMLVideoElement>(null);
 
     const streams = useMemo(() => examMediaStore.get(), []);
 
@@ -46,9 +63,22 @@ const ExamRoomPage = () => {
         screenStream: streams.screen,
     });
 
-    // A callback ref (not useRef+useEffect) so the stream attaches whenever the
-    // <video> element actually mounts — including after the loading-state gate
-    // below unmounts/remounts it once the attempt data arrives.
+    const { data: chatHistory } = useGetStudentChatHistoryQuery(roomId as string, { skip: !roomId });
+
+    useEffect(() => {
+        if (chatHistory?.data) {
+            setChatMessages(chatHistory.data.map((m) => ({
+                type: 'chat',
+                message: m.message,
+                senderRole: m.senderRole as 'STUDENT' | 'FACULTY',
+                senderIdentity: m.senderId,
+                sentAt: m.sentAt,
+            })));
+        }
+    }, [chatHistory]);
+
+    // A callback ref so the stream attaches whenever the <video> element mounts,
+    // regardless of prior render-gating (see ExamRoomPage.tsx for the same pattern).
     const videoPreviewCallbackRef = useCallback((node: HTMLVideoElement | null) => {
         if (node && streams.video) {
             node.srcObject = streams.video;
@@ -66,6 +96,70 @@ const ExamRoomPage = () => {
         }
     }, [data]);
 
+    // Connect to LiveKit, publish local tracks, and restrict subscription to the
+    // room's faculty only — the SFU itself never forwards our tracks to other students.
+    useEffect(() => {
+        if (!attemptId) return;
+        let cancelled = false;
+
+        (async () => {
+            try {
+                const response = await getLiveKitToken(attemptId).unwrap();
+                if (cancelled || !response.data) return;
+
+                const { token, liveKitUrl, roomId: dbRoomId, facultyIdentity } = response.data;
+                facultyIdentityRef.current = facultyIdentity;
+                setRoomId(dbRoomId);
+
+                const room = new Room();
+                roomRef.current = room;
+
+                room.on(RoomEvent.DataReceived, (payload) => {
+                    const parsed = decodeChatPayload(payload);
+                    if (parsed) setChatMessages((prev) => [...prev, parsed]);
+                });
+
+                room.on(RoomEvent.TrackSubscribed, (_track, publication: RemoteTrackPublication, participant: RemoteParticipant) => {
+                    if (participant.identity === facultyIdentity && publication.kind === Track.Kind.Video && invigilatorVideoRef.current) {
+                        publication.track?.attach(invigilatorVideoRef.current);
+                    }
+                });
+
+                room.on(RoomEvent.Disconnected, () => {
+                    if (!hasSubmittedRef.current) {
+                        toast.error('Disconnected from the proctoring session');
+                    }
+                });
+
+                await room.connect(liveKitUrl, token);
+                if (cancelled) {
+                    await room.disconnect();
+                    return;
+                }
+
+                if (streams.video) await room.localParticipant.publishTrack(streams.video.getVideoTracks()[0], { source: Track.Source.Camera });
+                if (streams.audio) await room.localParticipant.publishTrack(streams.audio.getAudioTracks()[0], { source: Track.Source.Microphone });
+                if (streams.screen) await room.localParticipant.publishTrack(streams.screen.getVideoTracks()[0], { source: Track.Source.ScreenShare });
+
+                room.localParticipant.setTrackSubscriptionPermissions(false, [
+                    { participantIdentity: facultyIdentity, allowAll: true },
+                ]);
+
+                setLiveKitStatus('CONNECTED');
+            } catch (error) {
+                console.error('LiveKit connection failed', error);
+                setLiveKitStatus('FAILED');
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+            roomRef.current?.disconnect();
+            roomRef.current = null;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [attemptId]);
+
     const questions = data?.data?.questions || [];
     const currentQuestion = questions[currentIndex];
 
@@ -75,6 +169,7 @@ const ExamRoomPage = () => {
         try {
             const response = await submitAttempt({ attemptId, trigger }).unwrap();
             await stopAndFinalize();
+            await roomRef.current?.disconnect();
             examMediaStore.clear();
             if (document.fullscreenElement) {
                 await document.exitFullscreen().catch(() => { });
@@ -91,7 +186,6 @@ const ExamRoomPage = () => {
         }
     }, [attemptId, submitAttempt, stopAndFinalize, navigate]);
 
-    // Countdown timer, resynced from the server's remainingMs on load
     useEffect(() => {
         if (remainingMs === null) return;
         const interval = setInterval(() => {
@@ -110,7 +204,6 @@ const ExamRoomPage = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [remainingMs === null]);
 
-    // Warn before closing/refreshing mid-exam
     useEffect(() => {
         const handler = (e: BeforeUnloadEvent) => {
             e.preventDefault();
@@ -142,6 +235,30 @@ const ExamRoomPage = () => {
             .catch(() => toast.error('Failed to save answer — check your connection'));
     };
 
+    const handleSendChat = () => {
+        const message = chatInput.trim();
+        if (!message || !roomId) return;
+        setChatInput('');
+
+        const payload: LiveKitChatPayload = {
+            type: 'chat',
+            message,
+            senderRole: 'STUDENT',
+            senderIdentity: roomRef.current?.localParticipant.identity || 'me',
+            sentAt: new Date().toISOString(),
+        };
+        setChatMessages((prev) => [...prev, payload]);
+
+        if (roomRef.current && facultyIdentityRef.current) {
+            roomRef.current.localParticipant.publishData(encodeChatPayload(payload), {
+                reliable: true,
+                destinationIdentities: [facultyIdentityRef.current],
+            }).catch(() => { });
+        }
+
+        sendChat({ roomId, message }).unwrap().catch(() => toast.error('Message may not have been saved'));
+    };
+
     const paletteStatus = (questionId: string): 'not-visited' | 'not-answered' | 'answered' | 'marked' => {
         if (markedForReview.has(questionId)) return 'marked';
         const answer = answers[questionId];
@@ -170,7 +287,12 @@ const ExamRoomPage = () => {
     return (
         <div className="h-screen flex flex-col bg-bgSecondary">
             <header className="h-16 bg-whiteColor border-b border-borderLight flex items-center justify-between px-6 shadow-sm flex-shrink-0">
-                <h1 className="font-semibold text-textPrimary">{data.data.examName}</h1>
+                <div className="flex items-center gap-3">
+                    <h1 className="font-semibold text-textPrimary">{data.data.examName}</h1>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${liveKitStatus === 'CONNECTED' ? 'bg-green-100 text-green-700' : liveKitStatus === 'FAILED' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                        {liveKitStatus === 'CONNECTED' ? 'Proctoring Live' : liveKitStatus === 'FAILED' ? 'Proctoring Offline' : 'Connecting...'}
+                    </span>
+                </div>
                 <div className="text-xl font-bold text-primary">{formatTime(remainingMs ?? 0)}</div>
             </header>
 
@@ -250,8 +372,13 @@ const ExamRoomPage = () => {
                     )}
                 </main>
 
-                <aside className="w-72 bg-whiteColor border-l border-borderLight p-4 flex-shrink-0 overflow-y-auto space-y-4">
+                <aside className="w-80 bg-whiteColor border-l border-borderLight p-4 flex-shrink-0 overflow-y-auto space-y-4">
                     <video ref={videoPreviewCallbackRef} autoPlay muted playsInline className="w-full rounded-md border border-borderLight" />
+
+                    <div className="rounded-md border border-borderLight overflow-hidden bg-bgSecondary">
+                        <p className="text-xs font-semibold text-textSecondary px-2 py-1 bg-bgTertiary">Invigilator</p>
+                        <video ref={invigilatorVideoRef} autoPlay playsInline className="w-full aspect-video bg-black" />
+                    </div>
 
                     <div>
                         <p className="text-sm font-semibold text-textPrimary mb-2">Question Palette</p>
@@ -266,6 +393,30 @@ const ExamRoomPage = () => {
                                     {index + 1}
                                 </button>
                             ))}
+                        </div>
+                    </div>
+
+                    <div className="border border-borderLight rounded-md flex flex-col h-56">
+                        <p className="text-xs font-semibold text-textSecondary px-2 py-1 bg-bgTertiary">Chat with Invigilator</p>
+                        <div className="flex-1 overflow-y-auto p-2 space-y-1 text-sm">
+                            {chatMessages.map((m, i) => (
+                                <div key={i} className={m.senderRole === 'STUDENT' ? 'text-right' : 'text-left'}>
+                                    <span className={`inline-block px-2 py-1 rounded-md ${m.senderRole === 'STUDENT' ? 'bg-primaryLighter text-primary' : 'bg-bgSecondary text-textPrimary'}`}>
+                                        {m.message}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="flex border-t border-borderLight">
+                            <input
+                                type="text"
+                                value={chatInput}
+                                onChange={(e) => setChatInput(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSendChat()}
+                                placeholder="Type a message..."
+                                className="flex-1 px-2 py-1 text-sm outline-none"
+                            />
+                            <button type="button" onClick={handleSendChat} className="px-3 text-sm font-medium text-primary">Send</button>
                         </div>
                     </div>
 
@@ -307,4 +458,4 @@ const ExamRoomPage = () => {
     );
 };
 
-export default ExamRoomPage;
+export default ProctoredExamRoomPage;

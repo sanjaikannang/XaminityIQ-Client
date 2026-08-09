@@ -5,6 +5,9 @@ import { faculty } from "./faculty.api";
 import { subjects } from "./subjects.api";
 import { exams } from "./exams.api";
 import { studentExams } from "./student-exams.api";
+import { studentProctoring } from "./student-proctoring.api";
+import { facultyProctoring } from "./faculty-proctoring.api";
+import { writtenAnswer } from "./written-answer.api";
 
 export const api = {
     auth,
@@ -13,5 +16,8 @@ export const api = {
     faculty,
     subjects,
     exams,
-    studentExams
+    studentExams,
+    studentProctoring,
+    facultyProctoring,
+    writtenAnswer
 };
