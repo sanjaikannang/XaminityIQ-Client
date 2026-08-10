@@ -5,9 +5,10 @@ import Button from '../../../../common/ui/Button';
 import InputField from '../../../../common/ui/Input';
 import Select from '../../../../common/ui/Select';
 import { QuestionType } from '../../../../utils/enum';
+import { toEnumOptions } from '../../../../utils/utils';
 import { questionValidationSchema } from '../formik/question.schema';
 
-const questionTypeOptions = Object.values(QuestionType).map((value) => ({ value, label: value }));
+const questionTypeOptions = toEnumOptions(QuestionType);
 
 export interface QuestionFormValues {
     type: string;

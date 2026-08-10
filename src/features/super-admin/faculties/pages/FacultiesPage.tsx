@@ -7,7 +7,10 @@ import RowActions from "../../../../common/ui/RowActions";
 import DeleteConfirmModal from "../../../../common/ui/DeleteConfirmModal";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
+import Chip from "../../../../common/ui/Chip";
 import { FacultyDesignation, EmploymentType, FacultyStatus } from "../../../../utils/enum";
+import { formatEnumLabel, getChipVariant, toEnumOptions } from "../../../../utils/utils";
+import { formatDate } from "../../../../utils/date";
 import { FacultyData } from "../../../../types/faculty-types";
 import { ColumnDef, Table } from "../../../../common/ui/Table";
 import UserActivityModal from "../../components/UserActivityModal";
@@ -18,9 +21,9 @@ import {
     useGetFacultyActivityQuery,
 } from "../../../../state/services/endpoints/faculty";
 
-const designationOptions = Object.values(FacultyDesignation).map((value) => ({ value, label: value }));
-const employmentTypeOptions = Object.values(EmploymentType).map((value) => ({ value, label: value }));
-const statusOptions = Object.values(FacultyStatus).map((value) => ({ value, label: value }));
+const designationOptions = toEnumOptions(FacultyDesignation);
+const employmentTypeOptions = toEnumOptions(EmploymentType);
+const statusOptions = toEnumOptions(FacultyStatus);
 
 const FacultiesPage = () => {
     const navigate = useNavigate();
@@ -109,6 +112,7 @@ const FacultiesPage = () => {
             accessorKey: "facultyId",
             header: "Employee ID",
             sortKey: "employeeId",
+            width: "200px",
             cell: ({ row }: { row: { original: FacultyData } }) => {
                 return `${row.original.employmentDetails.employeeId}`;
             },
@@ -117,6 +121,7 @@ const FacultiesPage = () => {
             accessorKey: "personalDetails.firstName",
             header: "Name",
             sortKey: "name",
+            width: "250px",
             cell: ({ row }: { row: { original: FacultyData } }) => {
                 return `${row.original.personalDetails.firstName} ${row.original.personalDetails.lastName}`;
             },
@@ -124,6 +129,7 @@ const FacultiesPage = () => {
         {
             accessorKey: "contactDetails.facultyEmail",
             header: "Personal Email",
+            width: "350px",
             cell: ({ row }: { row: { original: FacultyData } }) => {
                 return `${row.original.contactDetails.personalEmail}`;
             },
@@ -131,6 +137,7 @@ const FacultiesPage = () => {
         {
             accessorKey: "contactDetails.facultyEmail",
             header: "Faculty Email",
+            width: "350px",
             cell: ({ row }: { row: { original: FacultyData } }) => {
                 return `${row.original.contactDetails.facultyEmail}`;
             },
@@ -138,6 +145,7 @@ const FacultiesPage = () => {
         {
             accessorKey: "contactDetails.phoneNumber",
             header: "Phone",
+            width: "180px",
             cell: ({ row }: { row: { original: FacultyData } }) => {
                 return `${row.original.contactDetails.phoneNumber}`;
             },
@@ -146,13 +154,16 @@ const FacultiesPage = () => {
             accessorKey: "employmentDetails.designation",
             header: "Designation",
             sortKey: "designation",
+            width: "250px",
             cell: ({ row }: { row: { original: FacultyData } }) => {
-                return `${row.original.employmentDetails.designation}`;
+                const value = row.original.employmentDetails.designation;
+                return <Chip label={formatEnumLabel(value)} variant={getChipVariant(value)} />;
             },
         },
         {
             accessorKey: "employmentDetails.departmentName",
             header: "Department",
+            width: "280px",
             cell: ({ row }: { row: { original: FacultyData } }) => {
                 return `${row.original.employmentDetails.departmentName}`;
             },
@@ -161,27 +172,31 @@ const FacultiesPage = () => {
             accessorKey: "employmentDetails.employmentType",
             header: "Employment Type",
             sortKey: "employmentType",
+            width: "220px",
             cell: ({ row }: { row: { original: FacultyData } }) => {
-                return `${row.original.employmentDetails.employmentType}`;
+                const value = row.original.employmentDetails.employmentType;
+                return <Chip label={formatEnumLabel(value)} variant={getChipVariant(value)} />;
             },
         },
         {
             accessorKey: "employmentDetails.dateOfJoining",
             header: "Date of Joining",
-            cell: ({ row }: { row: { original: FacultyData } }) => {
-                return `${row.original.employmentDetails.dateOfJoining}`;
-            },
+            width: "250px",
+            cell: ({ row }: { row: { original: FacultyData } }) => formatDate(row.original.employmentDetails.dateOfJoining),
         },
         {
             accessorKey: "employmentDetails.status",
             header: "Status",
             sortKey: "status",
+            width: "150px",
             cell: ({ row }: { row: { original: FacultyData } }) => {
-                return `${row.original.employmentDetails.status}`;
+                const value = row.original.employmentDetails.status;
+                return <Chip label={formatEnumLabel(value)} variant={getChipVariant(value)} />;
             },
         },
         {
             header: "Actions",
+            width: "150px",
             cell: ({ row }: { row: { original: FacultyData } }) => (
                 <RowActions
                     onEdit={() => navigate(`/super-admin/faculties/${row.original.id}/edit`)}
@@ -209,67 +224,6 @@ const FacultiesPage = () => {
             </div>
 
             <Container>
-                <div className="pt-6 flex flex-wrap items-end gap-3">
-                    <Select
-                        id="filter-department"
-                        name="filter-department"
-                        label="Department"
-                        placeholder="All Departments"
-                        options={departmentOptions}
-                        value={departmentId}
-                        loading={isDepartmentsLoading}
-                        onChange={(value) => {
-                            setDepartmentId(value as string);
-                            setPage(1);
-                        }}
-                        className="w-44"
-                    />
-                    <Select
-                        id="filter-designation"
-                        name="filter-designation"
-                        label="Designation"
-                        placeholder="All Designations"
-                        options={designationOptions}
-                        value={designation}
-                        onChange={(value) => {
-                            setDesignation(value as string);
-                            setPage(1);
-                        }}
-                        className="w-48"
-                    />
-                    <Select
-                        id="filter-employment-type"
-                        name="filter-employment-type"
-                        label="Employment Type"
-                        placeholder="All Types"
-                        options={employmentTypeOptions}
-                        value={employmentType}
-                        onChange={(value) => {
-                            setEmploymentType(value as string);
-                            setPage(1);
-                        }}
-                        className="w-40"
-                    />
-                    <Select
-                        id="filter-status"
-                        name="filter-status"
-                        label="Status"
-                        placeholder="All Statuses"
-                        options={statusOptions}
-                        value={status}
-                        onChange={(value) => {
-                            setStatus(value as string);
-                            setPage(1);
-                        }}
-                        className="w-40"
-                    />
-                    {hasActiveFilters && (
-                        <Button type="button" variant="outline" size="md" onClick={handleClearFilters}>
-                            Clear Filters
-                        </Button>
-                    )}
-                </div>
-
                 <div className="py-6">
                     <Table
                         columns={columns}
@@ -287,6 +241,69 @@ const FacultiesPage = () => {
                         sortBy={sortBy}
                         sortOrder={sortOrder}
                         onSortChange={handleSortChange}
+                        hasActiveFilters={hasActiveFilters}
+                        filters={
+                            <>
+                                <Select
+                                    id="filter-department"
+                                    name="filter-department"
+                                    label="Department"
+                                    placeholder="All Departments"
+                                    options={departmentOptions}
+                                    value={departmentId}
+                                    loading={isDepartmentsLoading}
+                                    onChange={(value) => {
+                                        setDepartmentId(value as string);
+                                        setPage(1);
+                                    }}
+                                    className="w-44"
+                                />
+                                <Select
+                                    id="filter-designation"
+                                    name="filter-designation"
+                                    label="Designation"
+                                    placeholder="All Designations"
+                                    options={designationOptions}
+                                    value={designation}
+                                    onChange={(value) => {
+                                        setDesignation(value as string);
+                                        setPage(1);
+                                    }}
+                                    className="w-48"
+                                />
+                                <Select
+                                    id="filter-employment-type"
+                                    name="filter-employment-type"
+                                    label="Employment Type"
+                                    placeholder="All Types"
+                                    options={employmentTypeOptions}
+                                    value={employmentType}
+                                    onChange={(value) => {
+                                        setEmploymentType(value as string);
+                                        setPage(1);
+                                    }}
+                                    className="w-40"
+                                />
+                                <Select
+                                    id="filter-status"
+                                    name="filter-status"
+                                    label="Status"
+                                    placeholder="All Statuses"
+                                    options={statusOptions}
+                                    value={status}
+                                    onChange={(value) => {
+                                        setStatus(value as string);
+                                        setPage(1);
+                                    }}
+                                    className="w-40"
+                                />
+                                {hasActiveFilters && (
+                                    <Button type="button" variant="outline" size="md" onClick={handleClearFilters}>
+                                        Clear Filters
+                                    </Button>
+                                )}
+                            </>
+                        }
                     />
                 </div>
             </Container>

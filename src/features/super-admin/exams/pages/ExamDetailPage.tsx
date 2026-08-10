@@ -1,14 +1,18 @@
 import toast from "react-hot-toast";
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Info, HelpCircle, ShieldAlert, Building2, Users, Award, CheckCircle2, Circle, UserCheck, Clock, ClipboardList } from "lucide-react";
 import Modal from "../../../../common/ui/Modal";
 import Button from "../../../../common/ui/Button";
 import RowActions from "../../../../common/ui/RowActions";
 import DeleteConfirmModal from "../../../../common/ui/DeleteConfirmModal";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
-import { ColumnDef, Table } from "../../../../common/ui/Table";
-import { ExamMode, ExamStatus } from "../../../../utils/enum";
+import Chip from "../../../../common/ui/Chip";
+import { Accordion, AccordionItem } from "../../../../common/ui/Accordion";
+import { ExamMode, ExamStatus, QuestionType } from "../../../../utils/enum";
+import { formatEnumLabel, getChipVariant } from "../../../../utils/utils";
+import { formatDate, formatDateTime } from "../../../../utils/date";
 import { QuestionData } from "../../../../types/exams-types";
 import QuestionForm, { QuestionFormValues } from "../components/QuestionForm";
 import { useGetAllFacultyQuery } from "../../../../state/services/endpoints/faculty";
@@ -186,24 +190,6 @@ const ExamDetailPage = () => {
         }
     };
 
-    const questionColumns: ColumnDef<QuestionData, any>[] = [
-        { accessorKey: "order", header: "#" },
-        { accessorKey: "type", header: "Type" },
-        { accessorKey: "text", header: "Question" },
-        { accessorKey: "marks", header: "Marks" },
-        {
-            header: "Actions",
-            cell: ({ row }: { row: { original: QuestionData } }) => (
-                isDraft ? (
-                    <RowActions
-                        onEdit={() => handleOpenEditQuestion(row.original)}
-                        onDelete={() => setDeleteQuestionTarget(row.original)}
-                    />
-                ) : null
-            ),
-        },
-    ];
-
     if (isLoading || !exam) {
         return (
             <>
@@ -242,47 +228,129 @@ const ExamDetailPage = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-6 border-b border-borderLight">
-                    <div><span className="text-sm text-textSecondary">Mode</span><p className="font-medium">{exam.mode}</p></div>
-                    <div><span className="text-sm text-textSecondary">Status</span><p className="font-medium">{exam.status}</p></div>
-                    <div><span className="text-sm text-textSecondary">Duration</span><p className="font-medium">{exam.durationMinutes} minutes</p></div>
-                    <div><span className="text-sm text-textSecondary">Batch / Course</span><p className="font-medium">{exam.batchName} / {exam.courseName}</p></div>
-                    <div><span className="text-sm text-textSecondary">Department / Section</span><p className="font-medium">{exam.deptName} / {exam.sectionName}</p></div>
-                    <div><span className="text-sm text-textSecondary">Semester / Subject</span><p className="font-medium">Semester {exam.semester} - {exam.subjectName}</p></div>
-                    <div><span className="text-sm text-textSecondary">Schedule</span><p className="font-medium">{new Date(exam.startDate).toLocaleDateString()} {exam.startTime || ''} - {new Date(exam.endDate).toLocaleDateString()} {exam.endTime || ''}</p></div>
-                    <div><span className="text-sm text-textSecondary">Total / Passing Marks</span><p className="font-medium">{exam.totalMarks} / {exam.passingMarks}</p></div>
-                    <div><span className="text-sm text-textSecondary">Matched Students</span><p className="font-medium">{exam.matchedStudentCount}</p></div>
-                </div>
+                <div className="space-y-6">
+                    <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <Info className="w-5 h-5 text-primary" />
+                            </div>
+                            <h2 className="text-lg font-bold text-textPrimary">Overview</h2>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div><span className="text-sm text-textSecondary">Mode</span><p className="font-medium">{exam.mode}</p></div>
+                            <div><span className="text-sm text-textSecondary">Status</span><p className="font-medium">{exam.status}</p></div>
+                            <div><span className="text-sm text-textSecondary">Duration</span><p className="font-medium">{exam.durationMinutes} minutes</p></div>
+                            <div><span className="text-sm text-textSecondary">Batch / Course</span><p className="font-medium">{exam.batchName} / {exam.courseName}</p></div>
+                            <div><span className="text-sm text-textSecondary">Department / Section</span><p className="font-medium">{exam.deptName} / {exam.sectionName}</p></div>
+                            <div><span className="text-sm text-textSecondary">Semester / Subject</span><p className="font-medium">Semester {exam.semester} - {exam.subjectName}</p></div>
+                            <div><span className="text-sm text-textSecondary">Schedule</span><p className="font-medium">{formatDate(exam.startDate)} {exam.startTime || ''} - {formatDate(exam.endDate)} {exam.endTime || ''}</p></div>
+                            <div><span className="text-sm text-textSecondary">Total / Passing Marks</span><p className="font-medium">{exam.totalMarks} / {exam.passingMarks}</p></div>
+                            <div><span className="text-sm text-textSecondary">Matched Students</span><p className="font-medium">{exam.matchedStudentCount}</p></div>
+                        </div>
+                    </section>
 
-                <div className="flex items-center justify-between pt-6">
-                    <h3 className="text-lg font-semibold text-textPrimary">
-                        Questions ({exam.questions.length}, {exam.totalQuestionMarks} marks)
-                    </h3>
-                    {isDraft && (
-                        <Button variant="primary" size="sm" onClick={handleOpenAddQuestion}>
-                            Add Question
-                        </Button>
-                    )}
-                </div>
+                    <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                    <HelpCircle className="w-5 h-5 text-primary" />
+                                </div>
+                                <h2 className="text-lg font-bold text-textPrimary">
+                                    Questions ({exam.questions.length}, {exam.totalQuestionMarks} marks)
+                                </h2>
+                            </div>
+                            {isDraft && (
+                                <Button variant="primary" size="sm" onClick={handleOpenAddQuestion}>
+                                    Add Question
+                                </Button>
+                            )}
+                        </div>
+                        {exam.questions.length === 0 ? (
+                            <p className="text-sm text-textSecondary">No questions added yet.</p>
+                        ) : (
+                            <Accordion>
+                                {exam.questions.map((question) => (
+                                    <AccordionItem
+                                        key={question._id}
+                                        header={
+                                            <div className="flex items-center gap-3 flex-wrap">
+                                                <span className="text-xs font-semibold text-textSecondary shrink-0">#{question.order}</span>
+                                                <Chip label={formatEnumLabel(question.type)} variant={getChipVariant(question.type)} />
+                                                <span className="text-sm text-textPrimary truncate flex-1 min-w-[160px]">{question.text}</span>
+                                                <span className="text-xs font-medium text-textSecondary shrink-0">{question.marks} marks</span>
+                                            </div>
+                                        }
+                                        actions={
+                                            isDraft ? (
+                                                <RowActions
+                                                    onEdit={() => handleOpenEditQuestion(question)}
+                                                    onDelete={() => setDeleteQuestionTarget(question)}
+                                                />
+                                            ) : undefined
+                                        }
+                                    >
+                                        <div className="space-y-3 pt-2">
+                                            <div>
+                                                <span className="text-xs font-medium text-textSecondary uppercase tracking-wide">Question</span>
+                                                <p className="text-sm text-textPrimary mt-1">{question.text}</p>
+                                            </div>
 
-                <div className="py-6">
-                    <Table
-                        columns={questionColumns}
-                        data={exam.questions}
-                        totalCount={exam.questions.length}
-                        pageNumber={1}
-                        pageLimit={exam.questions.length || 10}
-                        totalPages={1}
-                        onPageChange={() => { }}
-                        onPageSizeChange={() => { }}
-                        isLoading={false}
-                        tableTitle="Questions"
-                    />
-                </div>
+                                            {question.type === QuestionType.WRITTEN ? (
+                                                <p className="text-sm text-textSecondary italic">
+                                                    Written answer — evaluated manually by an assigned faculty member.
+                                                </p>
+                                            ) : (
+                                                <div>
+                                                    <span className="text-xs font-medium text-textSecondary uppercase tracking-wide">
+                                                        Options & Correct Answer{(question.correctOptionIds?.length ?? 0) > 1 ? "s" : ""}
+                                                    </span>
+                                                    <div className="mt-2 space-y-1.5">
+                                                        {question.options?.map((option) => {
+                                                            const isCorrect = !!question.correctOptionIds?.includes(option.optionId);
+                                                            return (
+                                                                <div
+                                                                    key={option.optionId}
+                                                                    className={`flex items-center gap-2 px-3 py-2 rounded-md border text-sm ${isCorrect
+                                                                        ? "border-green-200 bg-green-50 text-green-800"
+                                                                        : "border-borderLight text-textPrimary"
+                                                                        }`}
+                                                                >
+                                                                    {isCorrect ? (
+                                                                        <CheckCircle2 size={16} className="text-green-600 shrink-0" />
+                                                                    ) : (
+                                                                        <Circle size={16} className="text-textTertiary shrink-0" />
+                                                                    )}
+                                                                    <span className="flex-1">{option.text}</span>
+                                                                    {isCorrect && (
+                                                                        <span className="text-xs font-semibold text-green-700 shrink-0">Correct</span>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div className="flex items-center gap-6 text-xs text-textSecondary pt-1">
+                                                <span>Type: <span className="font-medium text-textPrimary">{formatEnumLabel(question.type)}</span></span>
+                                                <span>Marks: <span className="font-medium text-textPrimary">{question.marks}</span></span>
+                                                <span>Added: <span className="font-medium text-textPrimary">{formatDate(question.createdAt)}</span></span>
+                                            </div>
+                                        </div>
+                                    </AccordionItem>
+                                ))}
+                            </Accordion>
+                        )}
+                    </section>
 
                 {(isLoadingAttempts || attempts.length > 0) && (
-                    <div className="pt-6 border-t border-borderLight">
-                        <h3 className="text-lg font-semibold text-textPrimary mb-3">Attempts &amp; Integrity</h3>
+                    <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <ShieldAlert className="w-5 h-5 text-primary" />
+                            </div>
+                            <h2 className="text-lg font-bold text-textPrimary">Attempts &amp; Integrity</h2>
+                        </div>
                         {isLoadingAttempts && <p className="text-sm text-textSecondary">Loading attempts...</p>}
                         {!isLoadingAttempts && attempts.length > 0 && (
                             <div className="overflow-x-auto rounded-md border border-borderLight">
@@ -299,7 +367,11 @@ const ExamDetailPage = () => {
                                     <tbody className="divide-y divide-borderLight">
                                         {attempts.map((attempt) => (
                                             <tr key={attempt.attemptId}>
-                                                <td className="px-3 py-2 text-textPrimary">{attempt.studentCode}</td>
+                                                <td className="px-3 py-2">
+                                                    <div className="font-medium text-textPrimary">{attempt.studentName || '—'}</div>
+                                                    <div className="text-xs text-textSecondary">{attempt.studentEmail}</div>
+                                                    <div className="text-xs text-textTertiary">{attempt.studentCode}</div>
+                                                </td>
                                                 <td className="px-3 py-2 text-textPrimary">{attempt.status}</td>
                                                 <td className="px-3 py-2 text-textPrimary">
                                                     {attempt.totalScore !== undefined && attempt.totalScore !== null ? attempt.totalScore : '—'}
@@ -326,13 +398,18 @@ const ExamDetailPage = () => {
                                 </table>
                             </div>
                         )}
-                    </div>
+                    </section>
                 )}
 
                 {canFormRooms && (
-                    <div className="pt-6 border-t border-borderLight">
-                        <div className="flex items-center justify-between mb-3">
-                            <h3 className="text-lg font-semibold text-textPrimary">Exam Rooms</h3>
+                    <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                    <Building2 className="w-5 h-5 text-primary" />
+                                </div>
+                                <h2 className="text-lg font-bold text-textPrimary">Exam Rooms</h2>
+                            </div>
                             {rooms.length === 0 && (
                                 <Button
                                     variant="primary"
@@ -364,7 +441,11 @@ const ExamDetailPage = () => {
                                     <tbody className="divide-y divide-borderLight">
                                         {rooms.map((room) => (
                                             <tr key={room.roomId}>
-                                                <td className="px-3 py-2 text-textPrimary">{room.facultyCode}</td>
+                                                <td className="px-3 py-2">
+                                                    <div className="font-medium text-textPrimary">{room.facultyName || '—'}</div>
+                                                    <div className="text-xs text-textSecondary">{room.facultyEmail}</div>
+                                                    <div className="text-xs text-textTertiary">{room.facultyCode}</div>
+                                                </td>
                                                 <td className="px-3 py-2 text-textPrimary">{room.totalCount}</td>
                                                 <td className="px-3 py-2 text-textPrimary">{room.roomTotalOccupancy}</td>
                                                 <td className="px-3 py-2 text-textPrimary">{room.status}</td>
@@ -377,12 +458,134 @@ const ExamDetailPage = () => {
                                 </table>
                             </div>
                         )}
-                    </div>
+                    </section>
+                )}
+
+                {canFormRooms && rooms.length > 0 && (
+                    <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <ClipboardList className="w-5 h-5 text-primary" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-bold text-textPrimary">Room Information</h2>
+                                <p className="text-sm text-textSecondary">
+                                    Every formed room for this exam, with its invigilating faculty and assigned students.
+                                </p>
+                            </div>
+                        </div>
+                        <Accordion>
+                            {rooms.map((room, index) => (
+                                <AccordionItem
+                                    key={room.roomId}
+                                    header={
+                                        <div className="flex items-center gap-3 flex-wrap">
+                                            <span className="text-sm font-semibold text-textPrimary shrink-0">Room {index + 1}</span>
+                                            <Chip label={formatEnumLabel(room.status)} variant={getChipVariant(room.status)} />
+                                            <span className="text-sm text-textSecondary truncate flex-1 min-w-[120px]">
+                                                {room.facultyName || room.facultyCode}
+                                            </span>
+                                            <span className="text-xs text-textSecondary shrink-0">
+                                                {room.roomTotalOccupancy} student{room.roomTotalOccupancy !== 1 ? 's' : ''}
+                                            </span>
+                                        </div>
+                                    }
+                                >
+                                    <div className="space-y-4 pt-2">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="rounded-md border border-borderLight p-3 bg-whiteColor">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <UserCheck size={16} className="text-primary" />
+                                                    <span className="text-xs font-semibold text-textSecondary uppercase tracking-wide">
+                                                        Invigilating Faculty
+                                                    </span>
+                                                </div>
+                                                <p className="text-sm font-medium text-textPrimary">{room.facultyName || '—'}</p>
+                                                <p className="text-xs text-textSecondary">{room.facultyEmail}</p>
+                                                <p className="text-xs text-textTertiary">{room.facultyCode}</p>
+                                            </div>
+                                            <div className="rounded-md border border-borderLight p-3 bg-whiteColor">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Clock size={16} className="text-primary" />
+                                                    <span className="text-xs font-semibold text-textSecondary uppercase tracking-wide">
+                                                        Session
+                                                    </span>
+                                                </div>
+                                                <p className="text-sm text-textPrimary">
+                                                    {formatDateTime(room.startDateTime)} — {formatDateTime(room.endDateTime)}
+                                                </p>
+                                                <p className="text-xs text-textTertiary mt-1">LiveKit session: {room.liveKitSessionId}</p>
+                                                {room.pooledWithExamNames.length > 0 && (
+                                                    <p className="text-xs text-textSecondary mt-1">
+                                                        Pooled with: {room.pooledWithExamNames.join(', ')}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <span className="text-xs font-semibold text-textSecondary uppercase tracking-wide">
+                                                Assigned Students ({room.assignments.length})
+                                            </span>
+                                            <div className="mt-2 overflow-x-auto rounded-md border border-borderLight">
+                                                <table className="w-full text-sm">
+                                                    <thead className="bg-bgSecondary">
+                                                        <tr>
+                                                            <th className="px-3 py-2 text-left font-medium text-textSecondary">Student</th>
+                                                            {room.pooledWithExamNames.length > 0 && (
+                                                                <th className="px-3 py-2 text-left font-medium text-textSecondary">Exam</th>
+                                                            )}
+                                                            <th className="px-3 py-2 text-left font-medium text-textSecondary">Status</th>
+                                                            <th className="px-3 py-2 text-left font-medium text-textSecondary">Timeline</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-borderLight">
+                                                        {room.assignments.map((a) => (
+                                                            <tr key={a.assignmentId}>
+                                                                <td className="px-3 py-2">
+                                                                    <div className="font-medium text-textPrimary">{a.studentName || '—'}</div>
+                                                                    <div className="text-xs text-textSecondary">{a.studentEmail}</div>
+                                                                    <div className="text-xs text-textTertiary">{a.studentCode}</div>
+                                                                </td>
+                                                                {room.pooledWithExamNames.length > 0 && (
+                                                                    <td className="px-3 py-2 text-textSecondary">{a.examName}</td>
+                                                                )}
+                                                                <td className="px-3 py-2">
+                                                                    <Chip label={formatEnumLabel(a.status)} variant={getChipVariant(a.status)} />
+                                                                </td>
+                                                                <td className="px-3 py-2 text-xs text-textSecondary">
+                                                                    {a.admittedAt && <div>Admitted: {formatDateTime(a.admittedAt)}</div>}
+                                                                    {a.removedAt && (
+                                                                        <div className="text-red-600">
+                                                                            Removed: {formatDateTime(a.removedAt)}
+                                                                            {a.removalReason ? ` (${a.removalReason})` : ''}
+                                                                        </div>
+                                                                    )}
+                                                                    {!a.admittedAt && !a.removedAt && a.enteredWaitingRoomAt && (
+                                                                        <div>Waiting since {formatDateTime(a.enteredWaitingRoomAt)}</div>
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </AccordionItem>
+                            ))}
+                        </Accordion>
+                    </section>
                 )}
 
                 {!isResultsPublished && (
-                    <div className="pt-6 border-t border-borderLight">
-                        <h3 className="text-lg font-semibold text-textPrimary mb-3">Evaluators</h3>
+                    <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <Users className="w-5 h-5 text-primary" />
+                            </div>
+                            <h2 className="text-lg font-bold text-textPrimary">Evaluators</h2>
+                        </div>
                         <p className="text-sm text-textSecondary mb-3">
                             Faculty selected here can grade this exam's WRITTEN answers once it reaches COMPLETED.
                         </p>
@@ -414,12 +617,17 @@ const ExamDetailPage = () => {
                                 {isAssigningEvaluators ? '' : 'Save Evaluators'}
                             </Button>
                         </div>
-                    </div>
+                    </section>
                 )}
 
                 {isCompleted && (
-                    <div className="pt-6 border-t border-borderLight">
-                        <h3 className="text-lg font-semibold text-textPrimary mb-3">Publish Results</h3>
+                    <section className="bg-whiteColor rounded-xl border border-borderDefault p-6 mb-6">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <Award className="w-5 h-5 text-primary" />
+                            </div>
+                            <h2 className="text-lg font-bold text-textPrimary">Publish Results</h2>
+                        </div>
                         {evaluationProgress ? (
                             <p className="text-sm text-textSecondary mb-3">
                                 {evaluationProgress.evaluatedCount} of {evaluationProgress.totalWrittenAnswers} written answers graded
@@ -437,14 +645,20 @@ const ExamDetailPage = () => {
                         >
                             {isPublishingResults ? '' : 'Publish Results'}
                         </Button>
-                    </div>
+                    </section>
                 )}
 
                 {isResultsPublished && (
-                    <div className="pt-6 border-t border-borderLight">
-                        <p className="text-sm font-medium text-green-700">✓ Results have been published to students.</p>
-                    </div>
+                    <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                                <CheckCircle2 className="w-5 h-5 text-green-700" />
+                            </div>
+                            <p className="text-sm font-medium text-green-700">Results have been published to students.</p>
+                        </div>
+                    </section>
                 )}
+                </div>
             </Container>
 
             <Modal

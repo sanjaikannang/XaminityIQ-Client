@@ -1,6 +1,7 @@
 import toast from "react-hot-toast";
 import { Formik, Form } from 'formik';
 import { useNavigate } from 'react-router-dom';
+import { Info, GraduationCap, CalendarClock, ShieldCheck } from 'lucide-react';
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
@@ -61,6 +62,12 @@ const CreateExamPage = () => {
         <>
             <PageHeader>Create Exam</PageHeader>
             <Container>
+                <div className="mb-6">
+                    <Button variant="primary" size="sm" onClick={() => navigate('/super-admin/exams')}>
+                        ← Back to Exams
+                    </Button>
+                </div>
+
                 <div className="py-6">
                     <Formik
                         initialValues={initialValues}
@@ -68,28 +75,48 @@ const CreateExamPage = () => {
                         onSubmit={handleSubmit}
                     >
                         {({ values, errors, touched, handleChange, handleBlur, setFieldValue, isSubmitting }) => (
-                            <Form className="space-y-10">
-                                <section className="space-y-4">
-                                    <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">Basic Info</h3>
+                            <Form className="space-y-6">
+                                <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                            <Info className="w-5 h-5 text-primary" />
+                                        </div>
+                                        <h2 className="text-lg font-bold text-textPrimary">Basic Info</h2>
+                                    </div>
                                     <ExamBasicFields values={values} errors={errors} touched={touched} handleChange={handleChange} handleBlur={handleBlur} setFieldValue={setFieldValue} />
                                 </section>
 
-                                <section className="space-y-4">
-                                    <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">Academic Hierarchy</h3>
+                                <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                            <GraduationCap className="w-5 h-5 text-primary" />
+                                        </div>
+                                        <h2 className="text-lg font-bold text-textPrimary">Academic Hierarchy</h2>
+                                    </div>
                                     <ExamHierarchyFields values={values} errors={errors} touched={touched} setFieldValue={setFieldValue} />
                                 </section>
 
-                                <section className="space-y-4">
-                                    <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">Schedule & Marks</h3>
+                                <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                            <CalendarClock className="w-5 h-5 text-primary" />
+                                        </div>
+                                        <h2 className="text-lg font-bold text-textPrimary">Schedule & Marks</h2>
+                                    </div>
                                     <ExamScheduleFields values={values} errors={errors} touched={touched} handleChange={handleChange} handleBlur={handleBlur} />
                                 </section>
 
-                                <section className="space-y-4">
-                                    <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">Security & Shuffling</h3>
+                                <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                            <ShieldCheck className="w-5 h-5 text-primary" />
+                                        </div>
+                                        <h2 className="text-lg font-bold text-textPrimary">Security & Shuffling</h2>
+                                    </div>
                                     <ExamSecurityFields values={values} setFieldValue={setFieldValue} handleChange={handleChange} handleBlur={handleBlur} />
                                 </section>
 
-                                <div className="flex justify-end gap-3 pt-4 border-t border-borderLight">
+                                <div className="flex justify-end gap-3 pt-2">
                                     <Button type="button" variant="outline" onClick={() => navigate('/super-admin/exams')}>
                                         Cancel
                                     </Button>

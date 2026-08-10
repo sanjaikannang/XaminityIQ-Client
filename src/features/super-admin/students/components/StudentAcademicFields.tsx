@@ -1,6 +1,7 @@
 import InputField from "../../../../common/ui/Input";
 import Select from "../../../../common/ui/Select";
 import { AdmissionType } from "../../../../utils/enum";
+import { toEnumOptions } from "../../../../utils/utils";
 import { useGetBatchesQuery, useGetCoursesQuery, useGetDepartmentsQuery } from "../../../../state/services/endpoints/academics";
 
 interface StudentAcademicFieldsProps {
@@ -12,7 +13,7 @@ interface StudentAcademicFieldsProps {
     setFieldValue: (field: string, value: any) => void;
 }
 
-const admissionTypeOptions = Object.values(AdmissionType).map((value) => ({ value, label: value }));
+const admissionTypeOptions = toEnumOptions(AdmissionType);
 
 const StudentAcademicFields = ({ values, errors, touched, handleChange, handleBlur, setFieldValue }: StudentAcademicFieldsProps) => {
     const { data: batchesData, isFetching: isBatchesLoading } = useGetBatchesQuery({ limit: 100 });

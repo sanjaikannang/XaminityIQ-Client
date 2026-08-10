@@ -165,6 +165,13 @@ export interface GetStudentResponse {
     data?: StudentData;
 }
 
+// Student Self-Profile Types
+export interface GetMyStudentProfileResponse {
+    success: boolean;
+    message: string;
+    data?: StudentData;
+}
+
 // Create / Edit Student Types
 export interface EducationHistoryInput {
     level: string;

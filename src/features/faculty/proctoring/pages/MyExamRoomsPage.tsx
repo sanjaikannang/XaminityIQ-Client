@@ -3,6 +3,7 @@ import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
 import { useGetMyExamRoomsQuery } from "../../../../state/services/endpoints/faculty-proctoring";
+import { formatDateTime } from "../../../../utils/date";
 
 const MyExamRoomsPage = () => {
     const navigate = useNavigate();
@@ -31,7 +32,7 @@ const MyExamRoomsPage = () => {
                                     {room.studentCount} student{room.studentCount === 1 ? '' : 's'} • {room.status}
                                 </p>
                                 <p className="text-xs text-textSecondary">
-                                    {new Date(room.startDateTime).toLocaleString()} - {new Date(room.endDateTime).toLocaleString()}
+                                    {formatDateTime(room.startDateTime)} - {formatDateTime(room.endDateTime)}
                                 </p>
                             </div>
                             <Button

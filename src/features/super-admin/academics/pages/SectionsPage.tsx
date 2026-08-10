@@ -7,7 +7,9 @@ import RowActions from "../../../../common/ui/RowActions";
 import DeleteConfirmModal from "../../../../common/ui/DeleteConfirmModal";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
+import Chip from "../../../../common/ui/Chip";
 import { StudentStatus } from "../../../../utils/enum";
+import { formatEnumLabel, getChipVariant, toEnumOptions } from "../../../../utils/utils";
 import { StudentsData } from "../../../../types/students-types";
 import { ColumnDef, Table } from "../../../../common/ui/Table";
 import UserActivityModal from "../../components/UserActivityModal";
@@ -18,7 +20,7 @@ import {
     useGetStudentActivityQuery,
 } from "../../../../state/services/endpoints/students";
 
-const statusOptions = Object.values(StudentStatus).map((value) => ({ value, label: value }));
+const statusOptions = toEnumOptions(StudentStatus);
 
 const SectionsPage = () => {
     const navigate = useNavigate();
@@ -114,6 +116,7 @@ const SectionsPage = () => {
             accessorKey: "academicDetails.rollNumber",
             header: "Roll Number",
             sortKey: "rollNumber",
+            width: "140px",
             cell: ({ row }: { row: { original: StudentsData } }) => {
                 return `${row.original.academicDetails.rollNumber}`;
             },
@@ -122,6 +125,7 @@ const SectionsPage = () => {
             accessorKey: "personalDetails.firstName",
             header: "Name",
             sortKey: "name",
+            width: "180px",
             cell: ({ row }: { row: { original: StudentsData } }) => {
                 return `${row.original.personalDetails.firstName} ${row.original.personalDetails.lastName}`;
             },
@@ -129,6 +133,7 @@ const SectionsPage = () => {
         {
             accessorKey: "contactDetails.personalEmail",
             header: "Personal Email",
+            width: "220px",
             cell: ({ row }: { row: { original: StudentsData } }) => {
                 return `${row.original.contactDetails.personalEmail}`;
             },
@@ -136,6 +141,7 @@ const SectionsPage = () => {
         {
             accessorKey: "contactDetails.phoneNumber",
             header: "Phone",
+            width: "140px",
             cell: ({ row }: { row: { original: StudentsData } }) => {
                 return `${row.original.contactDetails.phoneNumber}`;
             },
@@ -144,6 +150,7 @@ const SectionsPage = () => {
             accessorKey: "academicDetails.currentSemester",
             header: "Semester",
             sortKey: "semester",
+            width: "120px",
             cell: ({ row }: { row: { original: StudentsData } }) => {
                 return `${row.original.academicDetails.currentSemester}`;
             },
@@ -152,12 +159,15 @@ const SectionsPage = () => {
             accessorKey: "academicDetails.status",
             header: "Status",
             sortKey: "status",
+            width: "120px",
             cell: ({ row }: { row: { original: StudentsData } }) => {
-                return `${row.original.academicDetails.status}`;
+                const value = row.original.academicDetails.status;
+                return <Chip label={formatEnumLabel(value)} variant={getChipVariant(value)} />;
             },
         },
         {
             header: "Actions",
+            width: "100px",
             cell: ({ row }: { row: { original: StudentsData } }) => (
                 <RowActions
                     onEdit={() => navigate(`/super-admin/students/${row.original.id}/edit`)}
@@ -213,42 +223,40 @@ const SectionsPage = () => {
                 )}
 
                 {sections.length > 0 && (
-                    <>
-                        <div className="pt-6 flex flex-wrap items-end gap-3">
-                            <Select
-                                id="filter-status"
-                                name="filter-status"
-                                label="Status"
-                                placeholder="All Statuses"
-                                options={statusOptions}
-                                value={status}
-                                onChange={(value) => {
-                                    setStatus(value as string);
-                                    setPage(1);
-                                }}
-                                className="w-40"
-                            />
-                        </div>
-
-                        <div className="py-6">
-                            <Table
-                                columns={columns}
-                                data={data?.data || []}
-                                onRowClick={handleRowClick}
-                                totalCount={data?.pagination?.totalItems || 0}
-                                pageNumber={page}
-                                pageLimit={pageSize}
-                                totalPages={data?.pagination?.totalPages || 1}
-                                onPageChange={handlePageChange}
-                                onPageSizeChange={handlePageSizeChange}
-                                isLoading={isLoading || isFetching}
-                                tableTitle="Students"
-                                sortBy={sortBy}
-                                sortOrder={sortOrder}
-                                onSortChange={handleSortChange}
-                            />
-                        </div>
-                    </>
+                    <div className="py-6">
+                        <Table
+                            columns={columns}
+                            data={data?.data || []}
+                            onRowClick={handleRowClick}
+                            totalCount={data?.pagination?.totalItems || 0}
+                            pageNumber={page}
+                            pageLimit={pageSize}
+                            totalPages={data?.pagination?.totalPages || 1}
+                            onPageChange={handlePageChange}
+                            onPageSizeChange={handlePageSizeChange}
+                            isLoading={isLoading || isFetching}
+                            tableTitle="Students"
+                            sortBy={sortBy}
+                            sortOrder={sortOrder}
+                            onSortChange={handleSortChange}
+                            hasActiveFilters={!!status}
+                            filters={
+                                <Select
+                                    id="filter-status"
+                                    name="filter-status"
+                                    label="Status"
+                                    placeholder="All Statuses"
+                                    options={statusOptions}
+                                    value={status}
+                                    onChange={(value) => {
+                                        setStatus(value as string);
+                                        setPage(1);
+                                    }}
+                                    className="w-40"
+                                />
+                            }
+                        />
+                    </div>
                 )}
             </Container>
 

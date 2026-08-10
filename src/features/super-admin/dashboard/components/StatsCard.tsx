@@ -1,51 +1,41 @@
-import { TrendingDown, TrendingUp } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
-interface StatCardProps {
+export type StatsCardVariant = "primary" | "success" | "warning" | "danger" | "purple" | "indigo";
+
+interface StatsCardProps {
     title: string;
-    value: number;
-    icon: React.ReactNode;
-    trend?: number;
-    color: string;
+    value: number | string;
+    icon: LucideIcon;
+    variant?: StatsCardVariant;
+    subtitle?: string;
 }
 
-const StatsCard: React.FC<StatCardProps> = ({
-    title,
-    value,
-    icon,
-    trend,
-    color,
-}) => {
+const variantStyles: Record<StatsCardVariant, string> = {
+    primary: "bg-primary/10 text-primary",
+    success: "bg-green-100 text-green-700",
+    warning: "bg-yellow-100 text-yellow-700",
+    danger: "bg-red-100 text-red-700",
+    purple: "bg-purple-100 text-purple-700",
+    indigo: "bg-indigo-100 text-indigo-700",
+};
+
+const StatsCard = ({ title, value, icon: Icon, variant = "primary", subtitle }: StatsCardProps) => {
     return (
-        <>
-            <div className="bg-whiteColor rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-start justify-between">
-                    <div>
-                        <p className="text-gray-500 text-sm font-medium">{title}</p>
-                        <h3 className="text-3xl font-bold mt-2 text-gray-800">
-                            {value.toLocaleString()}
-                        </h3>
-                        {trend !== undefined && (
-                            <div className="flex items-center mt-2">
-                                {trend >= 0 ? (
-                                    <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-                                ) : (
-                                    <TrendingDown className="w-4 h-4 text-red-500 mr-1" />
-                                )}
-                                <span
-                                    className={`text-sm font-medium ${trend >= 0 ? "text-green-500" : "text-red-500"
-                                        }`}
-                                >
-                                    {Math.abs(trend)}%
-                                </span>
-                                <span className="text-gray-400 text-xs ml-1">vs last month</span>
-                            </div>
-                        )}
-                    </div>
-                    <div className={`${color} p-3 rounded-lg`}>{icon}</div>
+        <div className="bg-whiteColor rounded-xl border border-borderDefault p-5 hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                    <p className="text-sm font-medium text-textSecondary truncate">{title}</p>
+                    <h3 className="text-2xl font-bold text-textPrimary mt-1">
+                        {typeof value === "number" ? value.toLocaleString() : value}
+                    </h3>
+                    {subtitle && <p className="text-xs text-textTertiary mt-1">{subtitle}</p>}
+                </div>
+                <div className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 ${variantStyles[variant]}`}>
+                    <Icon className="w-5 h-5" />
                 </div>
             </div>
-        </>
-    )
-}
+        </div>
+    );
+};
 
-export default StatsCard
+export default StatsCard;

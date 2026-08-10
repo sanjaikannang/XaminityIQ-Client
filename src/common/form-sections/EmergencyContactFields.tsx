@@ -1,6 +1,7 @@
 import InputField from "../ui/Input";
 import Select from "../ui/Select";
 import { RelationType } from "../../utils/enum";
+import { toEnumOptions } from "../../utils/utils";
 
 interface EmergencyContactFieldsProps {
     values: any;
@@ -11,7 +12,7 @@ interface EmergencyContactFieldsProps {
     setFieldValue: (field: string, value: any) => void;
 }
 
-const relationOptions = Object.values(RelationType).map((value) => ({ value, label: value }));
+const relationOptions = toEnumOptions(RelationType);
 
 const EmergencyContactFields = ({ values, errors, touched, handleChange, handleBlur, setFieldValue }: EmergencyContactFieldsProps) => {
     const contact = values?.emergencyContact || {};

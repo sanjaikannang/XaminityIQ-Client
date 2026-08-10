@@ -7,6 +7,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
 import FacultyDetailSkeleton from "../components/FacultyDetailSkeleton";
+import { formatDate } from "../../../../utils/date";
 import { useGetFacultyByIdQuery, useDeleteFacultyMutation } from "../../../../state/services/endpoints/faculty";
 import { Calendar, Flag, GraduationCap, MapPin, Phone, User, Users, Briefcase } from "lucide-react";
 
@@ -129,11 +130,7 @@ const FacultyDetailPage = () => {
                                         <div>
                                             <p className="text-xs text-textTertiary">Date of Birth</p>
                                             <p className="text-sm font-semibold text-textPrimary">
-                                                {new Date(faculty.personalDetails.dateOfBirth).toLocaleDateString("en-US", {
-                                                    year: "numeric",
-                                                    month: "short",
-                                                    day: "numeric",
-                                                })}
+                                                {formatDate(faculty.personalDetails.dateOfBirth)}
                                             </p>
                                         </div>
                                     </div>
@@ -213,22 +210,14 @@ const FacultyDetailPage = () => {
                                 <div className="flex justify-between items-start py-3 border-b border-borderLight">
                                     <span className="text-sm text-textSecondary">Date of Joining</span>
                                     <span className="text-sm font-semibold text-textPrimary">
-                                        {new Date(faculty.employmentDetails.dateOfJoining).toLocaleDateString("en-US", {
-                                            year: "numeric",
-                                            month: "short",
-                                            day: "numeric",
-                                        })}
+                                        {formatDate(faculty.employmentDetails.dateOfJoining)}
                                     </span>
                                 </div>
                                 {faculty.employmentDetails.dateOfLeaving && (
                                     <div className="flex justify-between items-start py-3 border-b border-borderLight">
                                         <span className="text-sm text-textSecondary">Date of Leaving</span>
                                         <span className="text-sm font-semibold text-textPrimary">
-                                            {new Date(faculty.employmentDetails.dateOfLeaving).toLocaleDateString("en-US", {
-                                                year: "numeric",
-                                                month: "short",
-                                                day: "numeric",
-                                            })}
+                                            {formatDate(faculty.employmentDetails.dateOfLeaving)}
                                         </span>
                                     </div>
                                 )}

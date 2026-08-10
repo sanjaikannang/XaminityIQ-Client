@@ -19,10 +19,29 @@ export interface FormExamRoomsResponse {
     data?: { rooms: FormedRoomData[] };
 }
 
+export interface AdminRoomAssignmentData {
+    assignmentId: string;
+    // Own exam identity — a pooled room mixes students from multiple exams,
+    // so exam identity is read per-assignment, not inherited from the room
+    examId: string;
+    examName: string;
+    studentId: string;
+    studentCode: string;
+    studentName: string;
+    studentEmail: string;
+    status: RoomAssignmentStatus;
+    enteredWaitingRoomAt?: string;
+    admittedAt?: string;
+    removedAt?: string;
+    removalReason?: string;
+}
+
 export interface ExamRoomSummaryData {
     roomId: string;
     facultyId: string;
     facultyCode: string;
+    facultyName: string;
+    facultyEmail: string;
     liveKitSessionId: string;
     startDateTime: string;
     endDateTime: string;
@@ -38,6 +57,8 @@ export interface ExamRoomSummaryData {
     roomTotalOccupancy: number;
     // Names of other exams sharing this room, empty if it wasn't pooled
     pooledWithExamNames: string[];
+    // Every student assigned to this room, across all pooled exams
+    assignments: AdminRoomAssignmentData[];
 }
 
 export interface GetExamRoomsResponse {

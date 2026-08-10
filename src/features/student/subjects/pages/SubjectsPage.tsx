@@ -1,7 +1,9 @@
+import Chip from "../../../../common/ui/Chip";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
 import { ColumnDef, Table } from "../../../../common/ui/Table";
 import { SubjectData } from "../../../../types/subjects-types";
+import { formatEnumLabel, getChipVariant } from "../../../../utils/utils";
 import { useGetStudentSubjectsQuery } from "../../../../state/services/endpoints/subjects";
 
 const SubjectsPage = () => {
@@ -9,13 +11,22 @@ const SubjectsPage = () => {
     const subjects = data?.data || [];
 
     const columns: ColumnDef<SubjectData, any>[] = [
-        { accessorKey: "subjectCode", header: "Subject Code" },
-        { accessorKey: "subjectName", header: "Subject Name" },
-        { accessorKey: "credits", header: "Credits" },
-        { accessorKey: "subjectType", header: "Type" },
+        { accessorKey: "subjectCode", header: "Subject Code", width: "150px" },
+        { accessorKey: "subjectName", header: "Subject Name", width: "220px" },
+        { accessorKey: "credits", header: "Credits", width: "110px" },
+        {
+            accessorKey: "subjectType",
+            header: "Type",
+            width: "140px",
+            cell: ({ getValue }: { getValue: () => string }) => {
+                const value = getValue();
+                return <Chip label={formatEnumLabel(value)} variant={getChipVariant(value)} />;
+            },
+        },
         {
             accessorKey: "description",
             header: "Description",
+            width: "320px",
             cell: ({ getValue }: { getValue: () => string }) => getValue() || '-',
         },
     ];

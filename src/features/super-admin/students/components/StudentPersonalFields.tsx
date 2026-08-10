@@ -1,6 +1,7 @@
 import InputField from "../../../../common/ui/Input";
 import Select from "../../../../common/ui/Select";
 import { Gender } from "../../../../utils/enum";
+import { toEnumOptions } from "../../../../utils/utils";
 
 interface StudentPersonalFieldsProps {
     values: any;
@@ -11,7 +12,7 @@ interface StudentPersonalFieldsProps {
     setFieldValue: (field: string, value: any) => void;
 }
 
-const genderOptions = Object.values(Gender).map((value) => ({ value, label: value }));
+const genderOptions = toEnumOptions(Gender);
 
 const StudentPersonalFields = ({ values, errors, touched, handleChange, handleBlur, setFieldValue }: StudentPersonalFieldsProps) => {
     return (
