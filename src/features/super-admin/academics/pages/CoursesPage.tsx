@@ -6,6 +6,7 @@ import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
 import { CourseData } from "../../../../types/academics-types";
 import { ColumnDef, Table } from "../../../../common/ui/Table";
+import { formatDate } from "../../../../utils/date";
 import {
     useGetCoursesQuery,
     useGetAvailableCoursesQuery,
@@ -89,49 +90,50 @@ const CoursesPage = () => {
             accessorKey: "courseCode",
             header: "Course Code",
             sortKey: "courseCode",
+            width: "150px",
         },
         {
             accessorKey: "courseName",
             header: "Course Name",
             sortKey: "courseName",
+            width: "250px",
         },
         {
             accessorKey: "streamCode",
             header: "Stream Code",
             sortKey: "streamCode",
+            width: "150px",
         },
         {
             accessorKey: "streamName",
             header: "Stream Name",
             sortKey: "streamName",
+            width: "300px",
         },
         {
             accessorKey: "level",
             header: "Level",
             sortKey: "level",
+            width: "120px",
         },
         {
             accessorKey: "duration",
             header: "Duration",
             sortKey: "duration",
+            width: "120px",
         },
         {
             accessorKey: "semesters",
             header: "Semesters",
             sortKey: "semesters",
+            width: "120px",
         },
         {
             accessorKey: "createdAt",
             header: "Created At",
             sortKey: "createdAt",
-            cell: ({ getValue }: { getValue: () => string }) => {
-                const date = new Date(getValue());
-                return date.toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                });
-            },
+            width: "150px",
+            cell: ({ getValue }: { getValue: () => string }) => formatDate(getValue()),
         },
     ];
 

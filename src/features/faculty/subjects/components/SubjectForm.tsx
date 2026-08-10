@@ -5,9 +5,10 @@ import Button from '../../../../common/ui/Button';
 import InputField from '../../../../common/ui/Input';
 import Select from '../../../../common/ui/Select';
 import { SubjectType } from '../../../../utils/enum';
+import { toEnumOptions } from '../../../../utils/utils';
 import { subjectValidationSchema } from '../formik/subject.schema';
 
-const subjectTypeOptions = Object.values(SubjectType).map((value) => ({ value, label: value }));
+const subjectTypeOptions = toEnumOptions(SubjectType);
 
 export interface SubjectFormValues {
     subjectCode: string;

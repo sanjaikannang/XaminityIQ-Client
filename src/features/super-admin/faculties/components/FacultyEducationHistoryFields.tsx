@@ -4,6 +4,7 @@ import Button from "../../../../common/ui/Button";
 import InputField from "../../../../common/ui/Input";
 import Select from "../../../../common/ui/Select";
 import { EducationLevel } from "../../../../utils/enum";
+import { toEnumOptions } from "../../../../utils/utils";
 
 interface FacultyEducationHistoryFieldsProps {
     values: any;
@@ -24,7 +25,7 @@ const emptyEducationRecord = {
     specialization: "",
 };
 
-const levelOptions = Object.values(EducationLevel).map((value) => ({ value, label: value }));
+const levelOptions = toEnumOptions(EducationLevel);
 
 const FacultyEducationHistoryFields = ({ values, errors, touched, handleChange, handleBlur, setFieldValue }: FacultyEducationHistoryFieldsProps) => {
     const educationHistory = values.educationHistory || [];

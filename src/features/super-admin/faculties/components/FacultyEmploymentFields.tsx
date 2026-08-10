@@ -1,6 +1,7 @@
 import InputField from "../../../../common/ui/Input";
 import Select from "../../../../common/ui/Select";
 import { FacultyDesignation, EmploymentType, HighestQualification } from "../../../../utils/enum";
+import { toEnumOptions } from "../../../../utils/utils";
 import { useGetAllDepartmentsQuery } from "../../../../state/services/endpoints/academics";
 
 interface FacultyEmploymentFieldsProps {
@@ -12,9 +13,9 @@ interface FacultyEmploymentFieldsProps {
     setFieldValue: (field: string, value: any) => void;
 }
 
-const designationOptions = Object.values(FacultyDesignation).map((value) => ({ value, label: value }));
-const employmentTypeOptions = Object.values(EmploymentType).map((value) => ({ value, label: value }));
-const highestQualificationOptions = Object.values(HighestQualification).map((value) => ({ value, label: value }));
+const designationOptions = toEnumOptions(FacultyDesignation);
+const employmentTypeOptions = toEnumOptions(EmploymentType);
+const highestQualificationOptions = toEnumOptions(HighestQualification);
 
 const FacultyEmploymentFields = ({ values, errors, touched, handleChange, handleBlur, setFieldValue }: FacultyEmploymentFieldsProps) => {
     const { data: departmentsData, isFetching: isDepartmentsLoading } = useGetAllDepartmentsQuery();

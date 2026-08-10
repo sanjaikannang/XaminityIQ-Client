@@ -7,6 +7,7 @@ import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
 import { DepartmentData } from "../../../../types/academics-types";
 import { ColumnDef, Table } from "../../../../common/ui/Table";
+import { formatDate } from "../../../../utils/date";
 import {
     useGetDepartmentsQuery,
     useGetAvailableDepartmentsQuery,
@@ -100,25 +101,30 @@ const DepartmentsPage = () => {
             accessorKey: "deptCode",
             header: "Department Code",
             sortKey: "deptCode",
+            width: "180px",
         },
         {
             accessorKey: "deptName",
             header: "Department Name",
             sortKey: "deptName",
+            width: "300px",
         },
         {
             accessorKey: "totalSeats",
             header: "Total Seats",
             sortKey: "totalSeats",
+            width: "130px",
         },
         {
             accessorKey: "sectionCapacity",
             header: "Section Capacity",
             sortKey: "sectionCapacity",
+            width: "200px",
         },
         {
             accessorKey: "sections",
             header: "Sections",
+            width: "120px",
             cell: ({ getValue }: { getValue: () => any[] }) => {
                 const sections = getValue();
                 return sections?.length || 0;
@@ -128,17 +134,12 @@ const DepartmentsPage = () => {
             accessorKey: "createdAt",
             header: "Created At",
             sortKey: "createdAt",
-            cell: ({ getValue }: { getValue: () => string }) => {
-                const date = new Date(getValue());
-                return date.toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                });
-            },
+            width: "150px",
+            cell: ({ getValue }: { getValue: () => string }) => formatDate(getValue()),
         },
         {
             header: "Actions",
+            width: "100px",
             cell: ({ row }: { row: { original: DepartmentData } }) => (
                 <div className="flex items-center gap-1">
                     <button

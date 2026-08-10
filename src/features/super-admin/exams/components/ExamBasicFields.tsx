@@ -1,8 +1,9 @@
 import InputField from "../../../../common/ui/Input";
 import Select from "../../../../common/ui/Select";
 import { ExamMode } from "../../../../utils/enum";
+import { toEnumOptions } from "../../../../utils/utils";
 
-const modeOptions = Object.values(ExamMode).map((value) => ({ value, label: value }));
+const modeOptions = toEnumOptions(ExamMode);
 
 interface ExamBasicFieldsProps {
     values: any;

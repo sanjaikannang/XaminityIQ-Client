@@ -1,4 +1,8 @@
 export const faculty = {
+    // Faculty (self) endpoint
+    getMyProfile: () => "/faculty/profile",
+
+    // Admin endpoints
     getAllFaculty: () => "/admin/faculty",
     getFacultyById: (id: string) => `/admin/faculty/${id}`,
     createFaculty: () => "/admin/faculty",

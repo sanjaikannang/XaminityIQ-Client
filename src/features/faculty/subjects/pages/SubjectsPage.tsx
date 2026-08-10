@@ -6,8 +6,10 @@ import RowActions from "../../../../common/ui/RowActions";
 import DeleteConfirmModal from "../../../../common/ui/DeleteConfirmModal";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
+import Chip from "../../../../common/ui/Chip";
 import { ColumnDef, Table } from "../../../../common/ui/Table";
 import { SubjectData } from "../../../../types/subjects-types";
+import { formatEnumLabel, getChipVariant } from "../../../../utils/utils";
 import SubjectForm, { SubjectFormValues } from "../components/SubjectForm";
 import {
     useGetMySubjectsQuery,
@@ -110,17 +112,28 @@ const SubjectsPage = () => {
     };
 
     const columns: ColumnDef<SubjectData, any>[] = [
-        { accessorKey: "subjectCode", header: "Subject Code", sortKey: "subjectCode" },
-        { accessorKey: "subjectName", header: "Subject Name", sortKey: "subjectName" },
-        { accessorKey: "credits", header: "Credits", sortKey: "credits" },
-        { accessorKey: "subjectType", header: "Type", sortKey: "subjectType" },
+        { accessorKey: "subjectCode", header: "Subject Code", sortKey: "subjectCode", width: "150px" },
+        { accessorKey: "subjectName", header: "Subject Name", sortKey: "subjectName", width: "200px" },
+        { accessorKey: "credits", header: "Credits", sortKey: "credits", width: "110px" },
+        {
+            accessorKey: "subjectType",
+            header: "Type",
+            sortKey: "subjectType",
+            width: "140px",
+            cell: ({ getValue }: { getValue: () => string }) => {
+                const value = getValue();
+                return <Chip label={formatEnumLabel(value)} variant={getChipVariant(value)} />;
+            },
+        },
         {
             accessorKey: "description",
             header: "Description",
+            width: "280px",
             cell: ({ getValue }: { getValue: () => string }) => getValue() || '-',
         },
         {
             header: "Actions",
+            width: "100px",
             cell: ({ row }: { row: { original: SubjectData } }) => (
                 <RowActions
                     onEdit={() => handleOpenEdit(row.original)}

@@ -1,3 +1,5 @@
+import { SubjectData } from "./subjects-types";
+
 // Base Types
 export interface PaginationMeta {
     currentPage: number;
@@ -158,6 +160,19 @@ export interface GetFacultyResponse {
     success: boolean;
     message: string;
     data?: FacultyDetailData;
+}
+
+// Faculty Self-Profile Types
+export interface FacultyProfileData extends FacultyDetailData {
+    // Subjects offered in this faculty's department — not personally assigned
+    // (subjects aren't modeled per-faculty), reflects the department catalog
+    departmentSubjects: SubjectData[];
+}
+
+export interface GetMyFacultyProfileResponse {
+    success: boolean;
+    message: string;
+    data?: FacultyProfileData;
 }
 
 // Create / Edit Faculty Types

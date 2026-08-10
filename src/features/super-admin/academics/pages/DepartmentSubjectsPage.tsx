@@ -3,8 +3,11 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
+import Chip from "../../../../common/ui/Chip";
 import { ColumnDef, Table } from "../../../../common/ui/Table";
 import { SubjectData } from "../../../../types/subjects-types";
+import { formatEnumLabel, getChipVariant } from "../../../../utils/utils";
+import { formatDate } from "../../../../utils/date";
 import { useGetDepartmentSectionsQuery } from "../../../../state/services/endpoints/academics";
 import { useGetAllSubjectsAdminQuery } from "../../../../state/services/endpoints/subjects";
 
@@ -67,23 +70,31 @@ const DepartmentSubjectsPage = () => {
     }, [navigate, batchCourseId, courseId, batchId]);
 
     const columns: ColumnDef<SubjectData, any>[] = [
-        { accessorKey: "subjectCode", header: "Subject Code", sortKey: "subjectCode" },
-        { accessorKey: "subjectName", header: "Subject Name", sortKey: "subjectName" },
-        { accessorKey: "credits", header: "Credits", sortKey: "credits" },
-        { accessorKey: "subjectType", header: "Type", sortKey: "subjectType" },
+        { accessorKey: "subjectCode", header: "Subject Code", sortKey: "subjectCode", width: "150px" },
+        { accessorKey: "subjectName", header: "Subject Name", sortKey: "subjectName", width: "200px" },
+        { accessorKey: "credits", header: "Credits", sortKey: "credits", width: "110px" },
+        {
+            accessorKey: "subjectType",
+            header: "Type",
+            sortKey: "subjectType",
+            width: "140px",
+            cell: ({ getValue }: { getValue: () => string }) => {
+                const value = getValue();
+                return <Chip label={formatEnumLabel(value)} variant={getChipVariant(value)} />;
+            },
+        },
         {
             accessorKey: "description",
             header: "Description",
+            width: "280px",
             cell: ({ getValue }: { getValue: () => string }) => getValue() || '-',
         },
         {
             accessorKey: "createdAt",
             header: "Created At",
             sortKey: "createdAt",
-            cell: ({ getValue }: { getValue: () => string }) => {
-                const date = new Date(getValue());
-                return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
-            },
+            width: "150px",
+            cell: ({ getValue }: { getValue: () => string }) => formatDate(getValue()),
         },
     ];
 

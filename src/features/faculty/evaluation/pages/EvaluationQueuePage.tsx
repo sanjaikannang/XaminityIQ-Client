@@ -5,6 +5,7 @@ import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
 import { ExamStatus } from "../../../../utils/enum";
+import { formatDateTime } from "../../../../utils/date";
 import {
     useGetMyEvaluationExamsQuery,
     useGetExamAnswersForEvaluationQuery,
@@ -126,7 +127,7 @@ const EvaluationQueuePage = () => {
                             </div>
 
                             {answer.evaluatedAt && (
-                                <p className="text-xs text-green-600">Graded {new Date(answer.evaluatedAt).toLocaleString()}</p>
+                                <p className="text-xs text-green-600">Graded {formatDateTime(answer.evaluatedAt)}</p>
                             )}
                         </div>
                     ))}

@@ -7,6 +7,7 @@ import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
 import { BatchData } from "../../../../types/academics-types";
 import { ColumnDef, Table } from "../../../../common/ui/Table";
+import { formatDate } from "../../../../utils/date";
 import CreateBatchForm, { CreateBatchFormValues } from "../components/CreateBatchForm";
 import { useGetBatchesQuery, useCreateBatchMutation } from "../../../../state/services/endpoints/academics";
 
@@ -76,29 +77,26 @@ const BatchesPage = () => {
             accessorKey: "batchName",
             header: "Batch Name",
             sortKey: "batchName",
+            width: "240px",
         },
         {
             accessorKey: "startYear",
             header: "Start Year",
             sortKey: "startYear",
+            width: "150px",
         },
         {
             accessorKey: "endYear",
             header: "End Year",
             sortKey: "endYear",
+            width: "150px",
         },
         {
             accessorKey: "createdAt",
             header: "Created At",
             sortKey: "createdAt",
-            cell: ({ getValue }: { getValue: () => string }) => {
-                const date = new Date(getValue());
-                return date.toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                });
-            },
+            width: "150px",
+            cell: ({ getValue }: { getValue: () => string }) => formatDate(getValue()),
         },
     ];
 
