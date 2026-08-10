@@ -206,6 +206,8 @@ export interface ExamAttemptSummaryData {
     attemptId: string;
     studentId: string;
     studentCode: string;
+    studentName: string;
+    studentEmail: string;
     status: string;
     isFlagged: boolean;
     violationCounts: Record<string, number>;
