@@ -119,33 +119,41 @@ const SuperAdminDashboardPage = () => {
         {
             accessorKey: "streamCode",
             header: "Stream Code",
+            width: "150px",
         },
         {
             accessorKey: "streamName",
             header: "Stream",
+            width: "180px",
         },
         {
             accessorKey: "courseCode",
             header: "Course Code",
+            width: "150px",
         },
         {
             accessorKey: "courseName",
             header: "Course",
+            width: "200px",
         },
         {
             accessorKey: "level",
             header: "Level",
+            width: "120px",
         },
         {
             accessorKey: "duration",
             header: "Duration",
+            width: "120px",
         },
         {
             accessorKey: "semesters",
             header: "Semesters",
+            width: "120px",
         },
         {
             header: "Departments",
+            width: "160px",
             cell: ({ row }: { row: { original: CourseWithDepartments } }) => (
                 <Button
                     variant="primary"

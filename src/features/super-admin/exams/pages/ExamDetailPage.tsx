@@ -1,14 +1,18 @@
 import toast from "react-hot-toast";
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Info, HelpCircle, ShieldAlert, Building2, Users, Award, CheckCircle2 } from "lucide-react";
 import Modal from "../../../../common/ui/Modal";
 import Button from "../../../../common/ui/Button";
 import RowActions from "../../../../common/ui/RowActions";
 import DeleteConfirmModal from "../../../../common/ui/DeleteConfirmModal";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
+import Chip from "../../../../common/ui/Chip";
 import { ColumnDef, Table } from "../../../../common/ui/Table";
 import { ExamMode, ExamStatus } from "../../../../utils/enum";
+import { formatEnumLabel, getChipVariant } from "../../../../utils/utils";
+import { formatDate } from "../../../../utils/date";
 import { QuestionData } from "../../../../types/exams-types";
 import QuestionForm, { QuestionFormValues } from "../components/QuestionForm";
 import { useGetAllFacultyQuery } from "../../../../state/services/endpoints/faculty";
@@ -187,12 +191,21 @@ const ExamDetailPage = () => {
     };
 
     const questionColumns: ColumnDef<QuestionData, any>[] = [
-        { accessorKey: "order", header: "#" },
-        { accessorKey: "type", header: "Type" },
-        { accessorKey: "text", header: "Question" },
-        { accessorKey: "marks", header: "Marks" },
+        { accessorKey: "order", header: "#", width: "60px" },
+        {
+            accessorKey: "type",
+            header: "Type",
+            width: "140px",
+            cell: ({ getValue }: { getValue: () => string }) => {
+                const value = getValue();
+                return <Chip label={formatEnumLabel(value)} variant={getChipVariant(value)} />;
+            },
+        },
+        { accessorKey: "text", header: "Question", width: "420px" },
+        { accessorKey: "marks", header: "Marks", width: "100px" },
         {
             header: "Actions",
+            width: "100px",
             cell: ({ row }: { row: { original: QuestionData } }) => (
                 isDraft ? (
                     <RowActions
@@ -242,47 +255,65 @@ const ExamDetailPage = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-6 border-b border-borderLight">
-                    <div><span className="text-sm text-textSecondary">Mode</span><p className="font-medium">{exam.mode}</p></div>
-                    <div><span className="text-sm text-textSecondary">Status</span><p className="font-medium">{exam.status}</p></div>
-                    <div><span className="text-sm text-textSecondary">Duration</span><p className="font-medium">{exam.durationMinutes} minutes</p></div>
-                    <div><span className="text-sm text-textSecondary">Batch / Course</span><p className="font-medium">{exam.batchName} / {exam.courseName}</p></div>
-                    <div><span className="text-sm text-textSecondary">Department / Section</span><p className="font-medium">{exam.deptName} / {exam.sectionName}</p></div>
-                    <div><span className="text-sm text-textSecondary">Semester / Subject</span><p className="font-medium">Semester {exam.semester} - {exam.subjectName}</p></div>
-                    <div><span className="text-sm text-textSecondary">Schedule</span><p className="font-medium">{new Date(exam.startDate).toLocaleDateString()} {exam.startTime || ''} - {new Date(exam.endDate).toLocaleDateString()} {exam.endTime || ''}</p></div>
-                    <div><span className="text-sm text-textSecondary">Total / Passing Marks</span><p className="font-medium">{exam.totalMarks} / {exam.passingMarks}</p></div>
-                    <div><span className="text-sm text-textSecondary">Matched Students</span><p className="font-medium">{exam.matchedStudentCount}</p></div>
-                </div>
+                <div className="space-y-6">
+                    <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <Info className="w-5 h-5 text-primary" />
+                            </div>
+                            <h2 className="text-lg font-bold text-textPrimary">Overview</h2>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div><span className="text-sm text-textSecondary">Mode</span><p className="font-medium">{exam.mode}</p></div>
+                            <div><span className="text-sm text-textSecondary">Status</span><p className="font-medium">{exam.status}</p></div>
+                            <div><span className="text-sm text-textSecondary">Duration</span><p className="font-medium">{exam.durationMinutes} minutes</p></div>
+                            <div><span className="text-sm text-textSecondary">Batch / Course</span><p className="font-medium">{exam.batchName} / {exam.courseName}</p></div>
+                            <div><span className="text-sm text-textSecondary">Department / Section</span><p className="font-medium">{exam.deptName} / {exam.sectionName}</p></div>
+                            <div><span className="text-sm text-textSecondary">Semester / Subject</span><p className="font-medium">Semester {exam.semester} - {exam.subjectName}</p></div>
+                            <div><span className="text-sm text-textSecondary">Schedule</span><p className="font-medium">{formatDate(exam.startDate)} {exam.startTime || ''} - {formatDate(exam.endDate)} {exam.endTime || ''}</p></div>
+                            <div><span className="text-sm text-textSecondary">Total / Passing Marks</span><p className="font-medium">{exam.totalMarks} / {exam.passingMarks}</p></div>
+                            <div><span className="text-sm text-textSecondary">Matched Students</span><p className="font-medium">{exam.matchedStudentCount}</p></div>
+                        </div>
+                    </section>
 
-                <div className="flex items-center justify-between pt-6">
-                    <h3 className="text-lg font-semibold text-textPrimary">
-                        Questions ({exam.questions.length}, {exam.totalQuestionMarks} marks)
-                    </h3>
-                    {isDraft && (
-                        <Button variant="primary" size="sm" onClick={handleOpenAddQuestion}>
-                            Add Question
-                        </Button>
-                    )}
-                </div>
-
-                <div className="py-6">
-                    <Table
-                        columns={questionColumns}
-                        data={exam.questions}
-                        totalCount={exam.questions.length}
-                        pageNumber={1}
-                        pageLimit={exam.questions.length || 10}
-                        totalPages={1}
-                        onPageChange={() => { }}
-                        onPageSizeChange={() => { }}
-                        isLoading={false}
-                        tableTitle="Questions"
-                    />
-                </div>
+                    <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                    <HelpCircle className="w-5 h-5 text-primary" />
+                                </div>
+                                <h2 className="text-lg font-bold text-textPrimary">
+                                    Questions ({exam.questions.length}, {exam.totalQuestionMarks} marks)
+                                </h2>
+                            </div>
+                            {isDraft && (
+                                <Button variant="primary" size="sm" onClick={handleOpenAddQuestion}>
+                                    Add Question
+                                </Button>
+                            )}
+                        </div>
+                        <Table
+                            columns={questionColumns}
+                            data={exam.questions}
+                            totalCount={exam.questions.length}
+                            pageNumber={1}
+                            pageLimit={exam.questions.length || 10}
+                            totalPages={1}
+                            onPageChange={() => { }}
+                            onPageSizeChange={() => { }}
+                            isLoading={false}
+                            tableTitle="Questions"
+                        />
+                    </section>
 
                 {(isLoadingAttempts || attempts.length > 0) && (
-                    <div className="pt-6 border-t border-borderLight">
-                        <h3 className="text-lg font-semibold text-textPrimary mb-3">Attempts &amp; Integrity</h3>
+                    <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <ShieldAlert className="w-5 h-5 text-primary" />
+                            </div>
+                            <h2 className="text-lg font-bold text-textPrimary">Attempts &amp; Integrity</h2>
+                        </div>
                         {isLoadingAttempts && <p className="text-sm text-textSecondary">Loading attempts...</p>}
                         {!isLoadingAttempts && attempts.length > 0 && (
                             <div className="overflow-x-auto rounded-md border border-borderLight">
@@ -326,13 +357,18 @@ const ExamDetailPage = () => {
                                 </table>
                             </div>
                         )}
-                    </div>
+                    </section>
                 )}
 
                 {canFormRooms && (
-                    <div className="pt-6 border-t border-borderLight">
-                        <div className="flex items-center justify-between mb-3">
-                            <h3 className="text-lg font-semibold text-textPrimary">Exam Rooms</h3>
+                    <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                    <Building2 className="w-5 h-5 text-primary" />
+                                </div>
+                                <h2 className="text-lg font-bold text-textPrimary">Exam Rooms</h2>
+                            </div>
                             {rooms.length === 0 && (
                                 <Button
                                     variant="primary"
@@ -377,12 +413,17 @@ const ExamDetailPage = () => {
                                 </table>
                             </div>
                         )}
-                    </div>
+                    </section>
                 )}
 
                 {!isResultsPublished && (
-                    <div className="pt-6 border-t border-borderLight">
-                        <h3 className="text-lg font-semibold text-textPrimary mb-3">Evaluators</h3>
+                    <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <Users className="w-5 h-5 text-primary" />
+                            </div>
+                            <h2 className="text-lg font-bold text-textPrimary">Evaluators</h2>
+                        </div>
                         <p className="text-sm text-textSecondary mb-3">
                             Faculty selected here can grade this exam's WRITTEN answers once it reaches COMPLETED.
                         </p>
@@ -414,12 +455,17 @@ const ExamDetailPage = () => {
                                 {isAssigningEvaluators ? '' : 'Save Evaluators'}
                             </Button>
                         </div>
-                    </div>
+                    </section>
                 )}
 
                 {isCompleted && (
-                    <div className="pt-6 border-t border-borderLight">
-                        <h3 className="text-lg font-semibold text-textPrimary mb-3">Publish Results</h3>
+                    <section className="bg-whiteColor rounded-xl border border-borderDefault p-6 mb-6">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <Award className="w-5 h-5 text-primary" />
+                            </div>
+                            <h2 className="text-lg font-bold text-textPrimary">Publish Results</h2>
+                        </div>
                         {evaluationProgress ? (
                             <p className="text-sm text-textSecondary mb-3">
                                 {evaluationProgress.evaluatedCount} of {evaluationProgress.totalWrittenAnswers} written answers graded
@@ -437,14 +483,20 @@ const ExamDetailPage = () => {
                         >
                             {isPublishingResults ? '' : 'Publish Results'}
                         </Button>
-                    </div>
+                    </section>
                 )}
 
                 {isResultsPublished && (
-                    <div className="pt-6 border-t border-borderLight">
-                        <p className="text-sm font-medium text-green-700">✓ Results have been published to students.</p>
-                    </div>
+                    <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                                <CheckCircle2 className="w-5 h-5 text-green-700" />
+                            </div>
+                            <p className="text-sm font-medium text-green-700">Results have been published to students.</p>
+                        </div>
+                    </section>
                 )}
+                </div>
             </Container>
 
             <Modal

@@ -1,10 +1,11 @@
-import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, ChevronsUpDown, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, ChevronsUpDown, Search, ListFilter } from "lucide-react";
 import { useState } from "react";
 
 export interface ColumnDef<TData, TValue> {
     accessorKey?: string;
     header: string | (() => React.ReactNode);
     sortKey?: string;
+    width?: string;
     cell?: (info: {
         row: { original: TData };
         getValue: () => TValue;
@@ -25,6 +26,8 @@ interface TableProps<TData, TValue> {
     tableTitle: string;
     onSearch?: (searchTerm: string) => void;
     onFilterApply?: (filters: Record<string, any>) => void;
+    filters?: React.ReactNode;
+    hasActiveFilters?: boolean;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
     onSortChange?: (sortBy: string, sortOrder: 'asc' | 'desc') => void;
@@ -41,11 +44,14 @@ export function Table<TData, TValue>({
     isLoading,
     tableTitle,
     onSearch,
+    filters,
+    hasActiveFilters,
     sortBy,
     sortOrder,
     onSortChange,
 }: TableProps<TData, TValue>) {
     const [searchTerm, setSearchTerm] = useState("");
+    const [showFilters, setShowFilters] = useState(false);
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -91,13 +97,43 @@ export function Table<TData, TValue>({
                                 />
                             </div>
                         )}
+
+                        {/* Filter Toggle Button */}
+                        {filters && (
+                            <button
+                                type="button"
+                                onClick={() => setShowFilters((prev) => !prev)}
+                                title="Filters"
+                                className={`relative flex items-center justify-center h-10 w-10 border rounded-lg cursor-pointer transition-colors ${showFilters
+                                    ? "bg-primary text-whiteColor border-primary"
+                                    : "border-borderLight text-textSecondary hover:bg-bgSecondary"
+                                    }`}
+                            >
+                                <ListFilter size={18} />
+                                {hasActiveFilters && (
+                                    <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-whiteColor" />
+                                )}
+                            </button>
+                        )}
                     </div>
                 </div>
+
+                {/* Filters Section - Collapsed by default, opens below title/search bar */}
+                {filters && showFilters && (
+                    <div className="flex flex-wrap items-end gap-3 px-4 py-4 bg-whiteColor border-l border-r border-borderLight">
+                        {filters}
+                    </div>
+                )}
 
                 {/* Table Section - Show Skeleton when Loading */}
                 {isLoading ? (
                     <div className="overflow-x-auto border border-borderLight border-t">
-                        <table className="w-full border-collapse">
+                        <table className="w-full border-collapse" style={{ tableLayout: "fixed" }}>
+                            <colgroup>
+                                {columns.map((column, i) => (
+                                    <col key={i} style={{ width: column.width }} />
+                                ))}
+                            </colgroup>
                             <thead className="bg-bgSecondary">
                                 <tr>
                                     {columns.map((_, i) => (
@@ -125,7 +161,12 @@ export function Table<TData, TValue>({
                     </div>
                 ) : (
                     <div className="overflow-x-auto border border-borderLight border-t">
-                        <table className="w-full border-collapse">
+                        <table className="w-full border-collapse" style={{ tableLayout: "fixed" }}>
+                            <colgroup>
+                                {columns.map((column, i) => (
+                                    <col key={i} style={{ width: column.width }} />
+                                ))}
+                            </colgroup>
                             <thead className="bg-bgSecondary">
                                 <tr>
                                     {columns.map((column, index) => {
@@ -137,7 +178,7 @@ export function Table<TData, TValue>({
                                             return (
                                                 <th
                                                     key={index}
-                                                    className="px-4 py-4 text-left text-md font-semibold text-textSecondary"
+                                                    className="px-4 py-4 text-left text-md font-semibold text-textSecondary break-words"
                                                 >
                                                     {label}
                                                 </th>
@@ -149,7 +190,7 @@ export function Table<TData, TValue>({
                                         return (
                                             <th
                                                 key={index}
-                                                className="px-4 py-4 text-left text-md font-semibold text-textSecondary"
+                                                className="px-4 py-4 text-left text-md font-semibold text-textSecondary break-words"
                                             >
                                                 <button
                                                     type="button"
@@ -186,7 +227,7 @@ export function Table<TData, TValue>({
                                                     ? (row as any)[column.accessorKey]
                                                     : null;
                                                 return (
-                                                    <td key={colIndex} className="px-4 py-4 text-sm text-textPrimary">
+                                                    <td key={colIndex} className="px-4 py-4 text-sm text-textPrimary break-words">
                                                         {column.cell
                                                             ? column.cell({
                                                                 row: { original: row },

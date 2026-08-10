@@ -4,6 +4,7 @@ import Button from "../../../../common/ui/Button";
 import InputField from "../../../../common/ui/Input";
 import Select from "../../../../common/ui/Select";
 import { EducationLevel, Qualification, BoardType } from "../../../../utils/enum";
+import { toEnumOptions } from "../../../../utils/utils";
 
 interface StudentEducationHistoryFieldsProps {
     values: any;
@@ -23,9 +24,9 @@ const emptyEducationRecord = {
     percentageOrCGPA: "",
 };
 
-const levelOptions = Object.values(EducationLevel).map((value) => ({ value, label: value }));
-const qualificationOptions = Object.values(Qualification).map((value) => ({ value, label: value }));
-const boardOptions = Object.values(BoardType).map((value) => ({ value, label: value }));
+const levelOptions = toEnumOptions(EducationLevel);
+const qualificationOptions = toEnumOptions(Qualification);
+const boardOptions = toEnumOptions(BoardType);
 
 const StudentEducationHistoryFields = ({ values, errors, touched, handleChange, handleBlur, setFieldValue }: StudentEducationHistoryFieldsProps) => {
     const educationHistory = values.educationHistory || [];

@@ -4,6 +4,7 @@ import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
 import { AttemptStatus, ExamMode, ExamStatus } from "../../../../utils/enum";
 import { useGetMyExamsQuery } from "../../../../state/services/endpoints/student-exams";
+import { formatDate } from "../../../../utils/date";
 
 const MyExamsPage = () => {
     const navigate = useNavigate();
@@ -70,7 +71,7 @@ const MyExamsPage = () => {
                                     {exam.subjectName} • {exam.durationMinutes} min • {exam.totalMarks} marks
                                 </p>
                                 <p className="text-xs text-textSecondary">
-                                    {new Date(exam.startDate).toLocaleDateString()} - {new Date(exam.endDate).toLocaleDateString()}
+                                    {formatDate(exam.startDate)} - {formatDate(exam.endDate)}
                                 </p>
                             </div>
                             {renderAction(exam)}

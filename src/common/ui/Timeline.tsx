@@ -1,4 +1,5 @@
 import { Award, Building2, Calendar, GraduationCap, Briefcase } from "lucide-react"
+import { formatDate } from "../../utils/date"
 
 // Education Interface
 interface Education {
@@ -130,8 +131,8 @@ const Timeline = ({ type, data, isLast }: TimelineProps) => {
                                     <div className="flex items-center gap-2 text-textSecondary">
                                         <Calendar className="w-4 h-4" />
                                         <span>
-                                            {new Date(data.fromDate).toLocaleDateString("en-US", { year: "numeric", month: "short" })} -{" "}
-                                            {data.isCurrent ? "Present" : new Date(data.toDate!).toLocaleDateString("en-US", { year: "numeric", month: "short" })}
+                                            {formatDate(data.fromDate)} -{" "}
+                                            {data.isCurrent ? "Present" : formatDate(data.toDate!)}
                                         </span>
                                     </div>
 

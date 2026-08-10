@@ -1,6 +1,7 @@
 import InputField from "../../../../common/ui/Input";
 import Select from "../../../../common/ui/Select";
 import { Gender, MaritalStatus } from "../../../../utils/enum";
+import { toEnumOptions } from "../../../../utils/utils";
 
 interface FacultyPersonalFieldsProps {
     values: any;
@@ -11,8 +12,8 @@ interface FacultyPersonalFieldsProps {
     setFieldValue: (field: string, value: any) => void;
 }
 
-const genderOptions = Object.values(Gender).map((value) => ({ value, label: value }));
-const maritalStatusOptions = Object.values(MaritalStatus).map((value) => ({ value, label: value }));
+const genderOptions = toEnumOptions(Gender);
+const maritalStatusOptions = toEnumOptions(MaritalStatus);
 
 const FacultyPersonalFields = ({ values, errors, touched, handleChange, handleBlur, setFieldValue }: FacultyPersonalFieldsProps) => {
     return (

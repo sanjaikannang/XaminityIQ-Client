@@ -1,6 +1,7 @@
 import Modal from "../../../common/ui/Modal";
 import { LogIn, LogOut } from "lucide-react";
 import { UserActivityRecord } from "../../../types/activity-types";
+import { formatDateTime } from "../../../utils/date";
 
 interface UserActivityModalProps {
     isOpen: boolean;
@@ -8,16 +9,6 @@ interface UserActivityModalProps {
     isLoading: boolean;
     records: UserActivityRecord[];
     title?: string;
-}
-
-function formatTimestamp(value: string) {
-    return new Date(value).toLocaleString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-    });
 }
 
 function formatUserAgent(userAgent?: string) {
@@ -62,7 +53,7 @@ const UserActivityModal = ({ isOpen, onClose, isLoading, records, title = "Login
                                         <span className={`text-sm font-semibold ${isLogin ? 'text-green-700' : 'text-textPrimary'}`}>
                                             {record.action}
                                         </span>
-                                        <span className="text-xs text-textTertiary">{formatTimestamp(record.createdAt)}</span>
+                                        <span className="text-xs text-textTertiary">{formatDateTime(record.createdAt)}</span>
                                     </div>
                                     <p className="text-xs text-textSecondary mt-1">
                                         IP: {record.ipAddress || "Unknown"}

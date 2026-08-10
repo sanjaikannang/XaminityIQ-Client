@@ -7,6 +7,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
 import StudentDetailSkeleton from "../components/StudentDetailSkeleton";
+import { formatDate } from "../../../../utils/date";
 import { useGetStudentByIdQuery, useDeleteStudentMutation } from "../../../../state/services/endpoints/students";
 import { BookOpen, Calendar, Flag, GraduationCap, MapPin, Phone, User, Users } from "lucide-react";
 
@@ -129,11 +130,7 @@ const StudentDetailPage = () => {
                                         <div>
                                             <p className="text-xs text-textTertiary">Date of Birth</p>
                                             <p className="text-sm font-semibold text-textPrimary">
-                                                {new Date(student.personalDetails.dateOfBirth).toLocaleDateString("en-US", {
-                                                    year: "numeric",
-                                                    month: "short",
-                                                    day: "numeric",
-                                                })}
+                                                {formatDate(student.personalDetails.dateOfBirth)}
                                             </p>
                                         </div>
                                     </div>
