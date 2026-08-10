@@ -3,7 +3,7 @@ import { UserRole } from "../../utils/enum";
 import { useLogout } from "../../features/auth/logout/useLogout";
 import { getItemFromStorage } from "../../utils/storage";
 import { Outlet, useLocation, Link } from "react-router-dom";
-import { LogOut, Home, type LucideIcon, GraduationCap, Users, UserCog, ClipboardCheck, BookOpen, Video, ClipboardList } from "lucide-react";
+import { LogOut, Home, type LucideIcon, GraduationCap, Users, UserCog, ClipboardCheck, BookOpen, Video, ClipboardList, User } from "lucide-react";
 
 interface NavigationItem {
     id: string;
@@ -78,6 +78,12 @@ const facultyNavItems: NavigationItem[] = [
         icon: ClipboardList,
         matchPattern: "/faculty/evaluation",
     },
+    {
+        id: "profile",
+        label: "Profile",
+        path: "/faculty/profile",
+        icon: User,
+    },
 ];
 
 const studentNavItems: NavigationItem[] = [
@@ -100,6 +106,12 @@ const studentNavItems: NavigationItem[] = [
         path: "/student/exams",
         icon: ClipboardCheck,
         matchPattern: "/student/exams",
+    },
+    {
+        id: "profile",
+        label: "Profile",
+        path: "/student/profile",
+        icon: User,
     },
 ];
 
