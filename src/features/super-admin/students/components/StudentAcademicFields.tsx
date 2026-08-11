@@ -1,8 +1,13 @@
+import { useMemo, useState } from "react";
 import InputField from "../../../../common/ui/Input";
 import Select from "../../../../common/ui/Select";
+import AsyncSelect, { type AsyncSelectOption } from "../../../../common/ui/AsyncSelect";
 import { AdmissionType } from "../../../../utils/enum";
 import { toEnumOptions } from "../../../../utils/utils";
-import { useGetBatchesQuery, useGetCoursesQuery, useGetDepartmentsQuery } from "../../../../state/services/endpoints/academics";
+import { useAppDispatch } from "../../../../app/store/hooks";
+import { createPaginatedLoadOptions } from "../../../../utils/asyncSelectHelpers";
+import { academicsApiService } from "../../../../state/services/endpoints/academics";
+import type { BatchData, CourseData, DepartmentData } from "../../../../types/academics-types";
 
 interface StudentAcademicFieldsProps {
     values: any;
@@ -16,35 +21,49 @@ interface StudentAcademicFieldsProps {
 const admissionTypeOptions = toEnumOptions(AdmissionType);
 
 const StudentAcademicFields = ({ values, errors, touched, handleChange, handleBlur, setFieldValue }: StudentAcademicFieldsProps) => {
-    const { data: batchesData, isFetching: isBatchesLoading } = useGetBatchesQuery({ limit: 100 });
-    const { data: coursesData, isFetching: isCoursesLoading } = useGetCoursesQuery(
-        { batchId: values.batchId, limit: 100 },
-        { skip: !values.batchId }
-    );
+    const dispatch = useAppDispatch();
 
-    const selectedCourse = coursesData?.data?.find((c) => c._id === values.courseId);
+    // This form only ever creates new students (editing a student omits
+    // academic fields entirely), so every selection here starts empty —
+    // no need to seed initial labels for an existing value.
+    const [batchOption, setBatchOption] = useState<AsyncSelectOption | null>(null);
+    const [courseOption, setCourseOption] = useState<AsyncSelectOption | null>(null);
+    const [departmentOption, setDepartmentOption] = useState<AsyncSelectOption | null>(null);
 
-    const { data: departmentsData, isFetching: isDepartmentsLoading } = useGetDepartmentsQuery(
-        { batchCourseId: selectedCourse?.batchCourseId as string, limit: 100 },
-        { skip: !selectedCourse?.batchCourseId }
-    );
+    const loadBatchOptions = useMemo(() => createPaginatedLoadOptions<BatchData, any>({
+        dispatch,
+        initiate: academicsApiService.endpoints.getBatches.initiate,
+        extraParams: {},
+        mapItem: (b) => ({ value: b._id, label: b.batchName, raw: b }),
+    }), [dispatch]);
 
-    const batchOptions = (batchesData?.data || []).map((b) => ({ value: b._id, label: b.batchName }));
-    const courseOptions = (coursesData?.data || []).map((c) => ({ value: c._id, label: c.courseName }));
-    const departmentOptions = (departmentsData?.data || []).map((d) => ({ value: d._id, label: d.deptName }));
+    const loadCourseOptions = useMemo(() => createPaginatedLoadOptions<CourseData, any>({
+        dispatch,
+        initiate: academicsApiService.endpoints.getCourses.initiate,
+        extraParams: { batchId: values.batchId },
+        mapItem: (c) => ({ value: c._id, label: c.courseName, raw: c }),
+    }), [dispatch, values.batchId]);
+
+    const loadDepartmentOptions = useMemo(() => createPaginatedLoadOptions<DepartmentData, any>({
+        dispatch,
+        initiate: academicsApiService.endpoints.getDepartments.initiate,
+        extraParams: { batchCourseId: courseOption?.raw?.batchCourseId },
+        mapItem: (d) => ({ value: d._id, label: d.deptName, raw: d }),
+    }), [dispatch, courseOption?.raw?.batchCourseId]);
 
     return (
         <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Select
+                <AsyncSelect
                     id="batchId"
-                    name="batchId"
                     label="Batch"
-                    options={batchOptions}
-                    value={values.batchId}
-                    loading={isBatchesLoading}
-                    onChange={(value) => {
-                        setFieldValue("batchId", value);
+                    value={batchOption}
+                    loadOptions={loadBatchOptions}
+                    onChange={(option) => {
+                        setBatchOption(option);
+                        setFieldValue("batchId", option?.value || "");
+                        setCourseOption(null);
+                        setDepartmentOption(null);
                         setFieldValue("courseId", "");
                         setFieldValue("departmentId", "");
                     }}
@@ -52,16 +71,17 @@ const StudentAcademicFields = ({ values, errors, touched, handleChange, handleBl
                     touched={touched.batchId}
                     required
                 />
-                <Select
+                <AsyncSelect
+                    key={values.batchId}
                     id="courseId"
-                    name="courseId"
                     label="Course"
-                    options={courseOptions}
-                    value={values.courseId}
-                    loading={isCoursesLoading}
+                    value={courseOption}
+                    loadOptions={loadCourseOptions}
                     disabled={!values.batchId}
-                    onChange={(value) => {
-                        setFieldValue("courseId", value);
+                    onChange={(option) => {
+                        setCourseOption(option);
+                        setFieldValue("courseId", option?.value || "");
+                        setDepartmentOption(null);
                         setFieldValue("departmentId", "");
                     }}
                     error={errors.courseId}
@@ -70,15 +90,17 @@ const StudentAcademicFields = ({ values, errors, touched, handleChange, handleBl
                 />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Select
+                <AsyncSelect
+                    key={courseOption?.raw?.batchCourseId || values.courseId}
                     id="departmentId"
-                    name="departmentId"
                     label="Department"
-                    options={departmentOptions}
-                    value={values.departmentId}
-                    loading={isDepartmentsLoading}
+                    value={departmentOption}
+                    loadOptions={loadDepartmentOptions}
                     disabled={!values.courseId}
-                    onChange={(value) => setFieldValue("departmentId", value)}
+                    onChange={(option) => {
+                        setDepartmentOption(option);
+                        setFieldValue("departmentId", option?.value || "");
+                    }}
                     error={errors.departmentId}
                     touched={touched.departmentId}
                     required

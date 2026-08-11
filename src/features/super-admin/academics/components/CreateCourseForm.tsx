@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { Formik, Form } from 'formik';
 import Button from '../../../../common/ui/Button';
 import { CourseInfo } from '../../../../types/academics-types';
-import Select, { SelectOption } from '../../../../common/ui/Select';
+import AsyncSelect, { type AsyncSelectOption } from '../../../../common/ui/AsyncSelect';
 import { createCourseValidationSchema } from '../formik/create-course.schema';
 
 interface CreateCourseFormProps {
@@ -42,11 +42,20 @@ const CreateCourseForm: React.FC<CreateCourseFormProps> = ({
         }
     };
 
-    // Convert CourseInfo[] to SelectOption[]
-    const courseOptions: SelectOption[] = availableCourses.map((course) => ({
+    // The parent already fetched the full (unpaginated) available-courses
+    // list — loadOptions here just filters that in-memory array client-side.
+    const mapOption = (course: CourseInfo): AsyncSelectOption => ({
         value: course._id,
         label: `${course.courseCode} - ${course.courseName}`,
-    }));
+    });
+
+    const loadOptions = useMemo(() => async (search: string) => {
+        const filtered = search
+            ? availableCourses.filter((course) => mapOption(course).label.toLowerCase().includes(search.toLowerCase()))
+            : availableCourses;
+        return { options: filtered.map(mapOption), hasMore: false };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [availableCourses]);
 
     return (
         <>
@@ -59,17 +68,20 @@ const CreateCourseForm: React.FC<CreateCourseFormProps> = ({
                     <Form>
                         <div className="space-y-4">
                             {/* Course Selection Dropdown */}
-                            <Select
+                            <AsyncSelect
                                 id="courseId"
-                                name="courseId"
                                 label="Select Course"
-                                options={courseOptions}
-                                value={values.courseId}
-                                onChange={(value) => setFieldValue('courseId', value)}
-                                onBlur={() => setFieldTouched('courseId', true)}
+                                value={(() => {
+                                    const course = availableCourses.find((c) => c._id === values.courseId);
+                                    return course ? mapOption(course) : null;
+                                })()}
+                                loadOptions={loadOptions}
+                                onChange={(option) => {
+                                    setFieldValue('courseId', option?.value || '');
+                                    setFieldTouched('courseId', true);
+                                }}
                                 placeholder={isLoadingCourses ? 'Loading courses...' : 'Select a course'}
                                 required
-                                loading={isLoadingCourses}
                                 disabled={isSubmitting || isLoading || isLoadingCourses}
                                 error={errors.courseId}
                                 touched={touched.courseId}

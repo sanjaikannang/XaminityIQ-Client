@@ -220,3 +220,35 @@ export interface GetExamAttemptsResponse {
     message: string;
     data?: { attempts: ExamAttemptSummaryData[] };
 }
+
+// Attempt Recording (admin viewer) Types
+export interface RecordingChunkData {
+    sequence: number;
+    cloudinaryUrl: string;
+    uploadedAt: string;
+}
+
+export interface RecordingStreamData {
+    status: string;
+    chunks: RecordingChunkData[];
+}
+
+export interface AttemptRecordingData {
+    attemptId: string;
+    examId: string;
+    examName: string;
+    studentId: string;
+    studentCode: string;
+    studentName: string;
+    studentEmail: string;
+    attemptStatus: string;
+    mediaStatus: string;
+    video: RecordingStreamData;
+    screen: RecordingStreamData;
+}
+
+export interface GetAttemptRecordingResponse {
+    success: boolean;
+    message: string;
+    data?: AttemptRecordingData;
+}

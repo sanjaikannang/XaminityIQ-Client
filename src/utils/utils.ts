@@ -52,6 +52,7 @@ const CHIP_VARIANTS: Record<string, ChipVariant> = {
     RESULTS_PUBLISHED: "purple",
     SCHEDULED: "blue",
     CLOSED: "gray",
+    UPCOMING: "blue",
     WAITING: "yellow",
     ADMITTED: "green",
     REJECTED: "red",

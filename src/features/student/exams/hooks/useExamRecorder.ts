@@ -8,7 +8,7 @@ import {
 } from "../../../../state/services/endpoints/student-exams";
 
 const CHUNK_INTERVAL_MS = 30000;
-const MEDIA_TYPES: RecordingMediaType[] = [RecordingMediaType.VIDEO, RecordingMediaType.AUDIO, RecordingMediaType.SCREEN];
+const MEDIA_TYPES: RecordingMediaType[] = [RecordingMediaType.VIDEO, RecordingMediaType.SCREEN];
 
 function pickMimeType(): string {
     const candidates = ['video/webm;codecs=vp8,opus', 'video/webm', 'audio/webm'];
@@ -30,12 +30,10 @@ export function useExamRecorder({ attemptId, videoStream, audioStream, screenStr
     const recordersRef = useRef<Partial<Record<RecordingMediaType, MediaRecorder>>>({});
     const sequenceRef = useRef<Record<RecordingMediaType, number>>({
         [RecordingMediaType.VIDEO]: 0,
-        [RecordingMediaType.AUDIO]: 0,
         [RecordingMediaType.SCREEN]: 0,
     });
     const pendingUploadsRef = useRef<Record<RecordingMediaType, Promise<void>[]>>({
         [RecordingMediaType.VIDEO]: [],
-        [RecordingMediaType.AUDIO]: [],
         [RecordingMediaType.SCREEN]: [],
     });
 
@@ -73,9 +71,17 @@ export function useExamRecorder({ attemptId, videoStream, audioStream, screenStr
         recordersRef.current[mediaType] = recorder;
     }, [uploadChunk]);
 
+    // The video stream is recorded together with the microphone audio track
+    // (one combined webm file) rather than as two separate uploads — the
+    // camera/mic permission checks on the pre-flight page still capture them
+    // as two separate getUserMedia() streams, so they're merged into one
+    // MediaStream here purely for recording purposes.
     useEffect(() => {
-        startStream(RecordingMediaType.VIDEO, videoStream);
-        startStream(RecordingMediaType.AUDIO, audioStream);
+        const videoTracks = videoStream?.getVideoTracks() || [];
+        const audioTracks = audioStream?.getAudioTracks() || [];
+        const combined = videoTracks.length > 0 ? new MediaStream([...videoTracks, ...audioTracks]) : null;
+
+        startStream(RecordingMediaType.VIDEO, combined);
         startStream(RecordingMediaType.SCREEN, screenStream);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [videoStream, audioStream, screenStream]);

@@ -4,6 +4,7 @@ export const facultyProctoring = {
     admitStudent: (roomId: string, assignmentId: string) => `/faculty/exam-rooms/${roomId}/assignments/${assignmentId}/admit`,
     rejectStudent: (roomId: string, assignmentId: string) => `/faculty/exam-rooms/${roomId}/assignments/${assignmentId}/reject`,
     removeStudent: (roomId: string, assignmentId: string) => `/faculty/exam-rooms/${roomId}/assignments/${assignmentId}/remove`,
+    setStudentMic: (roomId: string, assignmentId: string) => `/faculty/exam-rooms/${roomId}/assignments/${assignmentId}/mic`,
     sendChat: (roomId: string) => `/faculty/exam-rooms/${roomId}/chat`,
     getChatHistory: (roomId: string) => `/faculty/exam-rooms/${roomId}/chat`,
     getLiveKitToken: (roomId: string) => `/faculty/exam-rooms/${roomId}/livekit-token`,
