@@ -14,4 +14,5 @@ export const exams = {
     getEvaluationProgress: (examId: string) => `/admin/exams/${examId}/evaluation-progress`,
     publishResults: (examId: string) => `/admin/exams/${examId}/publish-results`,
     getExamAttempts: (examId: string) => `/admin/exams/${examId}/attempts`,
+    getAllExamRooms: () => "/admin/exam-rooms",
 };

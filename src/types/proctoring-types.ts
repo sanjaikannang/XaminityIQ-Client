@@ -36,6 +36,71 @@ export interface AdminRoomAssignmentData {
     removalReason?: string;
 }
 
+// Exam Room Allocation Overview (admin, all exams) Types
+export type EffectiveRoomStatus = 'UPCOMING' | 'IN_PROGRESS' | 'COMPLETED';
+
+export interface RoomOverviewAssignment {
+    assignmentId: string;
+    examId: string;
+    examName: string;
+    studentId: string;
+    studentCode: string;
+    studentName: string;
+    studentEmail: string;
+    status: RoomAssignmentStatus;
+    enteredWaitingRoomAt?: string;
+    admittedAt?: string;
+    removedAt?: string;
+    removalReason?: string;
+}
+
+export interface RoomOverviewData {
+    roomId: string;
+    facultyId: string;
+    facultyCode: string;
+    facultyName: string;
+    facultyEmail: string;
+    liveKitSessionId: string;
+    startDateTime: string;
+    endDateTime: string;
+    durationMinutes: number;
+    status: ExamRoomStatus;
+    effectiveStatus: EffectiveRoomStatus;
+    examNames: string[];
+    waitingCount: number;
+    admittedCount: number;
+    inProgressCount: number;
+    completedCount: number;
+    removedOrRejectedCount: number;
+    totalOccupancy: number;
+    assignments: RoomOverviewAssignment[];
+}
+
+export interface RoomOverviewPaginationMeta {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+}
+
+export interface GetAllExamRoomsParams {
+    page?: number;
+    limit?: number;
+    effectiveStatus?: EffectiveRoomStatus;
+}
+
+export interface GetAllExamRoomsResponse {
+    success: boolean;
+    message: string;
+    data?: {
+        rooms: RoomOverviewData[];
+        pagination: RoomOverviewPaginationMeta;
+        statusCounts: { upcoming: number; inProgress: number; completed: number };
+    };
+}
+
 export interface ExamRoomSummaryData {
     roomId: string;
     facultyId: string;
