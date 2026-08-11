@@ -1,6 +1,12 @@
+import { useMemo, useState } from "react";
 import Select from "../../../../common/ui/Select";
-import { useGetBatchesQuery, useGetCoursesQuery, useGetDepartmentsQuery } from "../../../../state/services/endpoints/academics";
-import { useGetAllSubjectsAdminQuery } from "../../../../state/services/endpoints/subjects";
+import AsyncSelect, { type AsyncSelectOption } from "../../../../common/ui/AsyncSelect";
+import { useAppDispatch } from "../../../../app/store/hooks";
+import { createPaginatedLoadOptions } from "../../../../utils/asyncSelectHelpers";
+import { academicsApiService } from "../../../../state/services/endpoints/academics";
+import { subjectsApiService } from "../../../../state/services/endpoints/subjects";
+import type { BatchData, CourseData, DepartmentData } from "../../../../types/academics-types";
+import type { SubjectData } from "../../../../types/subjects-types";
 
 interface ExamHierarchyFieldsProps {
     values: any;
@@ -8,53 +14,98 @@ interface ExamHierarchyFieldsProps {
     touched: any;
     setFieldValue: (field: string, value: any) => void;
     disabled?: boolean;
+    // Display names for the exam's current hierarchy selections — only
+    // available in edit mode, since the exam already has ids but this
+    // component otherwise has no way to know their labels until re-selected
+    initialNames?: {
+        batchName?: string;
+        courseName?: string;
+        departmentName?: string;
+        sectionName?: string;
+        subjectName?: string;
+    };
 }
 
-const ExamHierarchyFields = ({ values, errors, touched, setFieldValue, disabled }: ExamHierarchyFieldsProps) => {
-    const { data: batchesData, isFetching: isBatchesLoading } = useGetBatchesQuery({ limit: 100 });
-    const { data: coursesData, isFetching: isCoursesLoading } = useGetCoursesQuery(
-        { batchId: values.batchId, limit: 100 },
-        { skip: !values.batchId }
+const toOption = (value: string, label?: string): AsyncSelectOption | null =>
+    value && label ? { value, label } : null;
+
+const ExamHierarchyFields = ({ values, errors, touched, setFieldValue, disabled, initialNames }: ExamHierarchyFieldsProps) => {
+    const dispatch = useAppDispatch();
+
+    const [batchOption, setBatchOption] = useState<AsyncSelectOption | null>(
+        () => toOption(values.batchId, initialNames?.batchName),
+    );
+    const [courseOption, setCourseOption] = useState<AsyncSelectOption | null>(
+        () => toOption(values.courseId, initialNames?.courseName),
+    );
+    const [departmentOption, setDepartmentOption] = useState<AsyncSelectOption | null>(
+        () => toOption(values.departmentId, initialNames?.departmentName),
+    );
+    const [subjectOption, setSubjectOption] = useState<AsyncSelectOption | null>(
+        () => toOption(values.subjectId, initialNames?.subjectName),
     );
 
-    const selectedCourse = coursesData?.data?.find((c) => c._id === values.courseId);
+    const loadBatchOptions = useMemo(() => createPaginatedLoadOptions<BatchData, any>({
+        dispatch,
+        initiate: academicsApiService.endpoints.getBatches.initiate,
+        extraParams: {},
+        mapItem: (b) => ({ value: b._id, label: b.batchName, raw: b }),
+    }), [dispatch]);
 
-    const { data: departmentsData, isFetching: isDepartmentsLoading } = useGetDepartmentsQuery(
-        { batchCourseId: selectedCourse?.batchCourseId as string, limit: 100 },
-        { skip: !selectedCourse?.batchCourseId }
-    );
+    const loadCourseOptions = useMemo(() => createPaginatedLoadOptions<CourseData, any>({
+        dispatch,
+        initiate: academicsApiService.endpoints.getCourses.initiate,
+        extraParams: { batchId: values.batchId },
+        mapItem: (c) => ({ value: c._id, label: c.courseName, raw: c }),
+    }), [dispatch, values.batchId]);
 
-    const selectedDepartment = departmentsData?.data?.find((d) => d._id === values.departmentId);
-    const sections = selectedDepartment?.sections || [];
+    const loadDepartmentOptions = useMemo(() => createPaginatedLoadOptions<DepartmentData, any>({
+        dispatch,
+        initiate: academicsApiService.endpoints.getDepartments.initiate,
+        extraParams: { batchCourseId: courseOption?.raw?.batchCourseId },
+        mapItem: (d) => ({ value: d._id, label: d.deptName, raw: d }),
+    }), [dispatch, courseOption?.raw?.batchCourseId]);
 
-    const { data: subjectsData, isFetching: isSubjectsLoading } = useGetAllSubjectsAdminQuery(
-        { departmentId: values.departmentId, semester: Number(values.semester), limit: 100 },
-        { skip: !values.departmentId || !values.semester }
-    );
+    const loadSubjectOptions = useMemo(() => createPaginatedLoadOptions<SubjectData, any>({
+        dispatch,
+        initiate: subjectsApiService.endpoints.getAllSubjectsAdmin.initiate,
+        extraParams: { departmentId: values.departmentId, semester: Number(values.semester) },
+        mapItem: (s) => ({ value: s._id, label: `${s.subjectCode} - ${s.subjectName}`, raw: s }),
+        supportsSearch: false,
+    }), [dispatch, values.departmentId, values.semester]);
 
-    const batchOptions = (batchesData?.data || []).map((b) => ({ value: b._id, label: b.batchName }));
-    const courseOptions = (coursesData?.data || []).map((c) => ({ value: c._id, label: c.courseName }));
-    const departmentOptions = (departmentsData?.data || []).map((d) => ({ value: d._id, label: d.deptName }));
-    const sectionOptions = sections.map((s) => ({ value: s._id, label: s.sectionName }));
-    const semesterOptions = Array.from({ length: selectedCourse?.semesters || 0 }, (_, i) => ({
-        value: i + 1,
-        label: `Semester ${i + 1}`,
-    }));
-    const subjectOptions = (subjectsData?.data || []).map((s) => ({ value: s._id, label: `${s.subjectCode} - ${s.subjectName}` }));
+    // Sections come nested in the selected department's own record, not a
+    // separate paginated endpoint — a plain Select, but with the currently
+    // selected section injected synthetically so it still displays correctly
+    // in edit mode before the department has been actively re-selected.
+    const sectionsFromDept: { _id: string; sectionName: string }[] = departmentOption?.raw?.sections || [];
+    const sectionOptions = (
+        !values.sectionId || sectionsFromDept.some((s) => s._id === values.sectionId)
+            ? sectionsFromDept
+            : [{ _id: values.sectionId, sectionName: initialNames?.sectionName || "Current Section" }, ...sectionsFromDept]
+    ).map((s) => ({ value: s._id, label: s.sectionName }));
+
+    const courseSemesters: number = courseOption?.raw?.semesters || 0;
+    const semesterOptions = Array.from({ length: courseSemesters }, (_, i) => ({ value: i + 1, label: `Semester ${i + 1}` }));
+    const semesterValue = Number(values.semester);
+    if (semesterValue && !semesterOptions.some((o) => o.value === semesterValue)) {
+        semesterOptions.unshift({ value: semesterValue, label: `Semester ${semesterValue}` });
+    }
 
     return (
         <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Select
+                <AsyncSelect
                     id="batchId"
-                    name="batchId"
                     label="Batch"
-                    options={batchOptions}
-                    value={values.batchId}
-                    loading={isBatchesLoading}
+                    value={batchOption}
+                    loadOptions={loadBatchOptions}
                     disabled={disabled}
-                    onChange={(value) => {
-                        setFieldValue("batchId", value);
+                    onChange={(option) => {
+                        setBatchOption(option);
+                        setFieldValue("batchId", option?.value || "");
+                        setCourseOption(null);
+                        setDepartmentOption(null);
                         setFieldValue("courseId", "");
                         setFieldValue("departmentId", "");
                         setFieldValue("sectionId", "");
@@ -65,16 +116,17 @@ const ExamHierarchyFields = ({ values, errors, touched, setFieldValue, disabled 
                     touched={touched.batchId}
                     required
                 />
-                <Select
+                <AsyncSelect
+                    key={values.batchId}
                     id="courseId"
-                    name="courseId"
                     label="Course"
-                    options={courseOptions}
-                    value={values.courseId}
-                    loading={isCoursesLoading}
+                    value={courseOption}
+                    loadOptions={loadCourseOptions}
                     disabled={disabled || !values.batchId}
-                    onChange={(value) => {
-                        setFieldValue("courseId", value);
+                    onChange={(option) => {
+                        setCourseOption(option);
+                        setFieldValue("courseId", option?.value || "");
+                        setDepartmentOption(null);
                         setFieldValue("departmentId", "");
                         setFieldValue("sectionId", "");
                         setFieldValue("semester", "");
@@ -86,16 +138,16 @@ const ExamHierarchyFields = ({ values, errors, touched, setFieldValue, disabled 
                 />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Select
+                <AsyncSelect
+                    key={courseOption?.raw?.batchCourseId || values.courseId}
                     id="departmentId"
-                    name="departmentId"
                     label="Department"
-                    options={departmentOptions}
-                    value={values.departmentId}
-                    loading={isDepartmentsLoading}
+                    value={departmentOption}
+                    loadOptions={loadDepartmentOptions}
                     disabled={disabled || !values.courseId}
-                    onChange={(value) => {
-                        setFieldValue("departmentId", value);
+                    onChange={(option) => {
+                        setDepartmentOption(option);
+                        setFieldValue("departmentId", option?.value || "");
                         setFieldValue("sectionId", "");
                         setFieldValue("subjectId", "");
                     }}
@@ -132,15 +184,17 @@ const ExamHierarchyFields = ({ values, errors, touched, setFieldValue, disabled 
                     touched={touched.semester}
                     required
                 />
-                <Select
+                <AsyncSelect
+                    key={`${values.departmentId}-${values.semester}`}
                     id="subjectId"
-                    name="subjectId"
                     label="Subject"
-                    options={subjectOptions}
-                    value={values.subjectId}
-                    loading={isSubjectsLoading}
+                    value={subjectOption}
+                    loadOptions={loadSubjectOptions}
                     disabled={disabled || !values.departmentId || !values.semester}
-                    onChange={(value) => setFieldValue("subjectId", value)}
+                    onChange={(option) => {
+                        setSubjectOption(option);
+                        setFieldValue("subjectId", option?.value || "");
+                    }}
                     error={errors.subjectId}
                     touched={touched.subjectId}
                     required

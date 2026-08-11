@@ -1,8 +1,9 @@
 import toast from "react-hot-toast";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../../../../common/ui/Button";
 import Select from "../../../../common/ui/Select";
+import AsyncSelect, { type AsyncSelectOption } from "../../../../common/ui/AsyncSelect";
 import RowActions from "../../../../common/ui/RowActions";
 import DeleteConfirmModal from "../../../../common/ui/DeleteConfirmModal";
 import { Container } from "../../../../common/ui/Container";
@@ -12,9 +13,12 @@ import { FacultyDesignation, EmploymentType, FacultyStatus } from "../../../../u
 import { formatEnumLabel, getChipVariant, toEnumOptions } from "../../../../utils/utils";
 import { formatDate } from "../../../../utils/date";
 import { FacultyData } from "../../../../types/faculty-types";
+import type { DepartmentInfo } from "../../../../types/academics-types";
 import { ColumnDef, Table } from "../../../../common/ui/Table";
 import UserActivityModal from "../../components/UserActivityModal";
-import { useGetAllDepartmentsQuery } from "../../../../state/services/endpoints/academics";
+import { useAppDispatch } from "../../../../app/store/hooks";
+import { createFlatLoadOptions } from "../../../../utils/asyncSelectHelpers";
+import { academicsApiService } from "../../../../state/services/endpoints/academics";
 import {
     useGetAllFacultyQuery,
     useDeleteFacultyMutation,
@@ -34,6 +38,7 @@ const FacultiesPage = () => {
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | undefined>(undefined);
 
     const [departmentId, setDepartmentId] = useState("");
+    const [departmentOption, setDepartmentOption] = useState<AsyncSelectOption | null>(null);
     const [designation, setDesignation] = useState("");
     const [employmentType, setEmploymentType] = useState("");
     const [status, setStatus] = useState("");
@@ -58,13 +63,18 @@ const FacultiesPage = () => {
         { skip: !activityTarget }
     );
 
-    const { data: departmentsData, isFetching: isDepartmentsLoading } = useGetAllDepartmentsQuery();
-    const departmentOptions = (departmentsData?.data || []).map((d) => ({ value: d._id, label: d.deptName }));
+    const dispatch = useAppDispatch();
+    const loadDepartmentOptions = useMemo(() => createFlatLoadOptions<DepartmentInfo>({
+        dispatch,
+        initiate: academicsApiService.endpoints.getAllDepartments.initiate,
+        mapItem: (d) => ({ value: d._id, label: d.deptName }),
+    }), [dispatch]);
 
     const hasActiveFilters = !!(departmentId || designation || employmentType || status);
 
     const handleClearFilters = useCallback(() => {
         setDepartmentId("");
+        setDepartmentOption(null);
         setDesignation("");
         setEmploymentType("");
         setStatus("");
@@ -244,16 +254,15 @@ const FacultiesPage = () => {
                         hasActiveFilters={hasActiveFilters}
                         filters={
                             <>
-                                <Select
+                                <AsyncSelect
                                     id="filter-department"
-                                    name="filter-department"
                                     label="Department"
                                     placeholder="All Departments"
-                                    options={departmentOptions}
-                                    value={departmentId}
-                                    loading={isDepartmentsLoading}
-                                    onChange={(value) => {
-                                        setDepartmentId(value as string);
+                                    value={departmentOption}
+                                    loadOptions={loadDepartmentOptions}
+                                    onChange={(option) => {
+                                        setDepartmentOption(option);
+                                        setDepartmentId(option?.value || "");
                                         setPage(1);
                                     }}
                                     className="w-44"

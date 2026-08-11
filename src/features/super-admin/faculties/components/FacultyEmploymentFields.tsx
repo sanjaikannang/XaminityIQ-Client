@@ -1,8 +1,13 @@
+import { useMemo, useState } from "react";
 import InputField from "../../../../common/ui/Input";
 import Select from "../../../../common/ui/Select";
+import AsyncSelect, { type AsyncSelectOption } from "../../../../common/ui/AsyncSelect";
 import { FacultyDesignation, EmploymentType, HighestQualification } from "../../../../utils/enum";
 import { toEnumOptions } from "../../../../utils/utils";
-import { useGetAllDepartmentsQuery } from "../../../../state/services/endpoints/academics";
+import { useAppDispatch } from "../../../../app/store/hooks";
+import { createFlatLoadOptions } from "../../../../utils/asyncSelectHelpers";
+import { academicsApiService } from "../../../../state/services/endpoints/academics";
+import type { DepartmentInfo } from "../../../../types/academics-types";
 
 interface FacultyEmploymentFieldsProps {
     values: any;
@@ -11,15 +16,28 @@ interface FacultyEmploymentFieldsProps {
     handleChange: (e: React.ChangeEvent<any>) => void;
     handleBlur: (e: React.FocusEvent<any>) => void;
     setFieldValue: (field: string, value: any) => void;
+    // Display name for the faculty's current department — only available in
+    // edit mode, since this component otherwise has no way to know it until
+    // the (unpaginated) department list has loaded
+    initialDepartmentName?: string;
 }
 
 const designationOptions = toEnumOptions(FacultyDesignation);
 const employmentTypeOptions = toEnumOptions(EmploymentType);
 const highestQualificationOptions = toEnumOptions(HighestQualification);
 
-const FacultyEmploymentFields = ({ values, errors, touched, handleChange, handleBlur, setFieldValue }: FacultyEmploymentFieldsProps) => {
-    const { data: departmentsData, isFetching: isDepartmentsLoading } = useGetAllDepartmentsQuery();
-    const departmentOptions = (departmentsData?.data || []).map((d) => ({ value: d._id, label: d.deptName }));
+const FacultyEmploymentFields = ({ values, errors, touched, handleChange, handleBlur, setFieldValue, initialDepartmentName }: FacultyEmploymentFieldsProps) => {
+    const dispatch = useAppDispatch();
+
+    const [departmentOption, setDepartmentOption] = useState<AsyncSelectOption | null>(
+        () => (values.departmentId && initialDepartmentName ? { value: values.departmentId, label: initialDepartmentName } : null),
+    );
+
+    const loadDepartmentOptions = useMemo(() => createFlatLoadOptions<DepartmentInfo>({
+        dispatch,
+        initiate: academicsApiService.endpoints.getAllDepartments.initiate,
+        mapItem: (d) => ({ value: d._id, label: d.deptName }),
+    }), [dispatch]);
 
     return (
         <div className="space-y-4">
@@ -36,14 +54,15 @@ const FacultyEmploymentFields = ({ values, errors, touched, handleChange, handle
                     touched={touched.employeeId}
                     required
                 />
-                <Select
+                <AsyncSelect
                     id="departmentId"
-                    name="departmentId"
                     label="Department"
-                    options={departmentOptions}
-                    value={values.departmentId}
-                    loading={isDepartmentsLoading}
-                    onChange={(value) => setFieldValue("departmentId", value)}
+                    value={departmentOption}
+                    loadOptions={loadDepartmentOptions}
+                    onChange={(option) => {
+                        setDepartmentOption(option);
+                        setFieldValue("departmentId", option?.value || "");
+                    }}
                     error={errors.departmentId}
                     touched={touched.departmentId}
                     required
