@@ -20,6 +20,7 @@ import {
     GetEvaluationProgressResponse,
     PublishResultsResponse,
     GetExamAttemptsResponse,
+    GetAttemptRecordingResponse,
 } from "../../../types/exams-types";
 import { FormExamRoomsResponse, GetExamRoomsResponse, GetAllExamRoomsParams, GetAllExamRoomsResponse } from "../../../types/proctoring-types";
 
@@ -158,6 +159,12 @@ export const examsApiService = apiInstance.injectEndpoints({
             }),
             providesTags: ['all-exam-rooms'],
         }),
+        getAttemptRecording: build.query<GetAttemptRecordingResponse, string>({
+            query: (attemptId) => ({
+                url: api.exams.getAttemptRecording(attemptId),
+                method: "GET",
+            }),
+        }),
     }),
 });
 
@@ -178,4 +185,5 @@ export const {
     usePublishResultsMutation,
     useGetExamAttemptsQuery,
     useGetAllExamRoomsQuery,
+    useGetAttemptRecordingQuery,
 } = examsApiService;

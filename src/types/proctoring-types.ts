@@ -227,6 +227,8 @@ export interface RoomAssignmentData {
     examName: string;
     studentId: string;
     studentCode: string;
+    studentName: string;
+    studentEmail: string;
     attemptId: string | null;
     status: RoomAssignmentStatus;
     enteredWaitingRoomAt?: string;
@@ -264,6 +266,16 @@ export interface RejectStudentRequest {
 
 export interface RemoveStudentRequest {
     reason?: string;
+}
+
+export interface SetStudentMicRequest {
+    muted: boolean;
+}
+
+export interface SetStudentMicResponse {
+    success: boolean;
+    message: string;
+    data?: { muted: boolean | null };
 }
 
 export interface FacultySendChatRequest {

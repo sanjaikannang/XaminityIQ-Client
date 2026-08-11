@@ -1,13 +1,16 @@
 import toast from "react-hot-toast";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Modal from "../../../../common/ui/Modal";
+import { AlertTriangle } from "lucide-react";
 import Button from "../../../../common/ui/Button";
-import { QuestionType, SubmissionTrigger } from "../../../../utils/enum";
+import { CountdownTimer } from "../../../../common/ui/CountdownTimer";
+import { SubmissionTrigger } from "../../../../utils/enum";
 import { examMediaStore } from "../utils/examMediaStore";
 import { useExamRecorder } from "../hooks/useExamRecorder";
 import { useIntegrityMonitor } from "../hooks/useIntegrityMonitor";
-import WrittenAnswerCapture from "../components/WrittenAnswerCapture";
+import QuestionCard from "../components/QuestionCard";
+import QuestionPalette, { type PaletteStatus } from "../components/QuestionPalette";
+import SubmitExamModal from "../components/SubmitExamModal";
 import { ReportViolationResponse } from "../../../../types/student-exam-types";
 import {
     useGetAttemptQuery,
@@ -16,13 +19,6 @@ import {
 } from "../../../../state/services/endpoints/student-exams";
 
 type LocalAnswer = { selectedOptionId?: string; selectedOptionIds?: string[] };
-
-function formatTime(ms: number): string {
-    const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-}
 
 const ExamRoomPage = () => {
     const navigate = useNavigate();
@@ -107,7 +103,7 @@ const ExamRoomPage = () => {
         finishAndRedirect(response.totalScore, 'Your attempt was auto-submitted due to repeated policy violations.');
     }, [finishAndRedirect]);
 
-    useIntegrityMonitor({
+    const { violationCount } = useIntegrityMonitor({
         attemptId: attemptId as string,
         securitySettings,
         onTerminated: handleIntegrityTermination,
@@ -164,20 +160,13 @@ const ExamRoomPage = () => {
             .catch(() => toast.error('Failed to save answer — check your connection'));
     };
 
-    const paletteStatus = (questionId: string): 'not-visited' | 'not-answered' | 'answered' | 'marked' => {
+    const paletteStatus = (questionId: string): PaletteStatus => {
         if (markedForReview.has(questionId)) return 'marked';
         const answer = answers[questionId];
         const isAnswered = !!(answer?.selectedOptionId || (answer?.selectedOptionIds && answer.selectedOptionIds.length > 0));
         if (isAnswered) return 'answered';
         if (visited.has(questionId)) return 'not-answered';
         return 'not-visited';
-    };
-
-    const paletteColor: Record<string, string> = {
-        'not-visited': 'bg-bgSecondary text-textPrimary',
-        'not-answered': 'bg-red-100 text-red-700',
-        'answered': 'bg-green-100 text-green-700',
-        'marked': 'bg-purple-100 text-purple-700',
     };
 
     const answeredCount = questions.filter((q) => {
@@ -191,144 +180,74 @@ const ExamRoomPage = () => {
 
     return (
         <div className="h-screen flex flex-col bg-bgSecondary">
-            <header className="h-16 bg-whiteColor border-b border-borderLight flex items-center justify-between px-6 shadow-sm flex-shrink-0">
-                <h1 className="font-semibold text-textPrimary">{data.data.examName}</h1>
-                <div className="text-xl font-bold text-primary">{formatTime(remainingMs ?? 0)}</div>
+            <header className="h-16 bg-whiteColor border-b border-borderLight flex items-center justify-between px-4 sm:px-6 shadow-sm flex-shrink-0 gap-3">
+                <h1 className="font-semibold text-textPrimary truncate">{data.data.examName}</h1>
+                <div className="flex items-center gap-3 shrink-0">
+                    {violationCount > 0 && (
+                        <span className="hidden sm:inline-flex items-center gap-1 text-xs font-medium text-yellow-800 bg-yellow-50 border border-yellow-200 px-2 py-1 rounded-full">
+                            <AlertTriangle className="w-3.5 h-3.5" /> {violationCount} warning{violationCount !== 1 ? 's' : ''}
+                        </span>
+                    )}
+                    <CountdownTimer remainingMs={remainingMs ?? 0} />
+                </div>
             </header>
 
             <div className="flex-1 flex overflow-hidden">
-                <main className="flex-1 overflow-y-auto p-6">
+                <main className="flex-1 overflow-y-auto p-4 md:p-6">
                     {currentQuestion && (
-                        <div className="bg-whiteColor rounded-lg border border-borderLight p-6 space-y-4">
-                            <p className="text-sm text-textSecondary">
-                                Question {currentIndex + 1} of {questions.length} • {currentQuestion.marks} marks
-                            </p>
-                            <p className="text-lg text-textPrimary">{currentQuestion.text}</p>
-
-                            {currentQuestion.type === QuestionType.WRITTEN && (
-                                <WrittenAnswerCapture
-                                    key={currentQuestion._id}
-                                    attemptId={attemptId as string}
-                                    questionId={currentQuestion._id}
-                                />
-                            )}
-
-                            {currentQuestion.type === QuestionType.MCQ && currentQuestion.options?.map((option) => (
-                                <label key={option.optionId} className="flex items-center gap-3 p-2 rounded-md hover:bg-bgSecondary cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        name={`q-${currentQuestion._id}`}
-                                        checked={answers[currentQuestion._id]?.selectedOptionId === option.optionId}
-                                        onChange={() => handleSelectMcq(currentQuestion._id, option.optionId)}
-                                        className="h-4 w-4"
-                                    />
-                                    <span className="text-textPrimary">{option.text}</span>
-                                </label>
-                            ))}
-
-                            {currentQuestion.type === QuestionType.MSQ && currentQuestion.options?.map((option) => (
-                                <label key={option.optionId} className="flex items-center gap-3 p-2 rounded-md hover:bg-bgSecondary cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={(answers[currentQuestion._id]?.selectedOptionIds || []).includes(option.optionId)}
-                                        onChange={() => handleToggleMsq(currentQuestion._id, option.optionId)}
-                                        className="h-4 w-4"
-                                    />
-                                    <span className="text-textPrimary">{option.text}</span>
-                                </label>
-                            ))}
-
-                            <div className="flex justify-between pt-4 border-t border-borderLight">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={currentIndex === 0 || !!securitySettings?.blockBackwardNavigation}
-                                    onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
-                                >
-                                    Previous
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setMarkedForReview((prev) => {
-                                        const next = new Set(prev);
-                                        if (next.has(currentQuestion._id)) next.delete(currentQuestion._id);
-                                        else next.add(currentQuestion._id);
-                                        return next;
-                                    })}
-                                >
-                                    {markedForReview.has(currentQuestion._id) ? 'Unmark Review' : 'Mark for Review'}
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={currentIndex === questions.length - 1}
-                                    onClick={() => setCurrentIndex((i) => Math.min(questions.length - 1, i + 1))}
-                                >
-                                    Next
-                                </Button>
-                            </div>
+                        <div className="max-w-3xl mx-auto">
+                            <QuestionCard
+                                question={currentQuestion}
+                                index={currentIndex}
+                                total={questions.length}
+                                attemptId={attemptId as string}
+                                answer={answers[currentQuestion._id]}
+                                onSelectMcq={(optionId) => handleSelectMcq(currentQuestion._id, optionId)}
+                                onToggleMsq={(optionId) => handleToggleMsq(currentQuestion._id, optionId)}
+                                isMarked={markedForReview.has(currentQuestion._id)}
+                                onToggleMark={() => setMarkedForReview((prev) => {
+                                    const next = new Set(prev);
+                                    if (next.has(currentQuestion._id)) next.delete(currentQuestion._id);
+                                    else next.add(currentQuestion._id);
+                                    return next;
+                                })}
+                                onPrev={() => setCurrentIndex((i) => Math.max(0, i - 1))}
+                                onNext={() => setCurrentIndex((i) => Math.min(questions.length - 1, i + 1))}
+                                canGoPrev={currentIndex > 0 && !securitySettings?.blockBackwardNavigation}
+                                canGoNext={currentIndex < questions.length - 1}
+                            />
                         </div>
                     )}
                 </main>
 
-                <aside className="w-72 bg-whiteColor border-l border-borderLight p-4 flex-shrink-0 overflow-y-auto space-y-4">
-                    <video ref={videoPreviewCallbackRef} autoPlay muted playsInline className="w-full rounded-md border border-borderLight" />
-
-                    <div>
-                        <p className="text-sm font-semibold text-textPrimary mb-2">Question Palette</p>
-                        <div className="grid grid-cols-5 gap-2">
-                            {questions.map((q, index) => {
-                                const isBlockedBackward = !!securitySettings?.blockBackwardNavigation && index < currentIndex;
-                                return (
-                                    <button
-                                        key={q._id}
-                                        type="button"
-                                        disabled={isBlockedBackward}
-                                        onClick={() => setCurrentIndex(index)}
-                                        className={`h-8 w-8 rounded text-sm font-medium ${paletteColor[paletteStatus(q._id)]} ${currentIndex === index ? 'ring-2 ring-primary' : ''} ${isBlockedBackward ? 'opacity-40 cursor-not-allowed' : ''}`}
-                                    >
-                                        {index + 1}
-                                    </button>
-                                );
-                            })}
-                        </div>
+                <aside className="w-72 bg-whiteColor border-l border-borderLight p-4 flex-shrink-0 overflow-y-auto space-y-5">
+                    <div className="relative rounded-lg border border-borderLight overflow-hidden bg-black aspect-video">
+                        <video ref={videoPreviewCallbackRef} autoPlay muted playsInline className="w-full h-full object-cover" />
+                        <span className="absolute bottom-1.5 left-1.5 text-[10px] px-1.5 py-0.5 rounded bg-black/60 text-whiteColor">You</span>
                     </div>
 
-                    <Button
-                        variant="primary"
-                        fullWidth
-                        onClick={() => setIsSubmitModalOpen(true)}
-                        disabled={isSubmitting}
-                    >
+                    <QuestionPalette
+                        questionIds={questions.map((q) => q._id)}
+                        currentIndex={currentIndex}
+                        statusFor={paletteStatus}
+                        blockBackwardNavigation={securitySettings?.blockBackwardNavigation}
+                        onNavigate={setCurrentIndex}
+                    />
+
+                    <Button variant="primary" fullWidth onClick={() => setIsSubmitModalOpen(true)} disabled={isSubmitting}>
                         Submit Exam
                     </Button>
                 </aside>
             </div>
 
-            <Modal
+            <SubmitExamModal
                 isOpen={isSubmitModalOpen}
                 onClose={() => setIsSubmitModalOpen(false)}
-                title="Submit Exam"
-                size="sm"
-            >
-                <div className="space-y-4">
-                    <p className="text-textPrimary">
-                        {answeredCount} of {questions.length} questions answered. Submit anyway?
-                    </p>
-                    <div className="flex justify-end gap-3">
-                        <Button variant="outline" onClick={() => setIsSubmitModalOpen(false)}>Cancel</Button>
-                        <Button
-                            variant="primary"
-                            loading={isSubmitting}
-                            disabled={isSubmitting}
-                            onClick={() => handleSubmit(SubmissionTrigger.MANUAL)}
-                        >
-                            {isSubmitting ? '' : 'Submit'}
-                        </Button>
-                    </div>
-                </div>
-            </Modal>
+                answeredCount={answeredCount}
+                totalCount={questions.length}
+                isSubmitting={isSubmitting}
+                onConfirm={() => handleSubmit(SubmissionTrigger.MANUAL)}
+            />
         </div>
     );
 };

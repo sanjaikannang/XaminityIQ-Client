@@ -1,7 +1,7 @@
 import toast from "react-hot-toast";
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Info, HelpCircle, ShieldAlert, Building2, Users, Award, CheckCircle2, Circle, UserCheck, Clock, ClipboardList } from "lucide-react";
+import { Info, HelpCircle, ShieldAlert, Building2, Users, Award, CheckCircle2, Circle, UserCheck, Clock, ClipboardList, Video } from "lucide-react";
 import Modal from "../../../../common/ui/Modal";
 import Button from "../../../../common/ui/Button";
 import RowActions from "../../../../common/ui/RowActions";
@@ -15,6 +15,7 @@ import { formatEnumLabel, getChipVariant } from "../../../../utils/utils";
 import { formatDate, formatDateTime } from "../../../../utils/date";
 import { QuestionData } from "../../../../types/exams-types";
 import QuestionForm, { QuestionFormValues } from "../components/QuestionForm";
+import RecordingViewerModal from "../components/RecordingViewerModal";
 import { useGetAllFacultyQuery } from "../../../../state/services/endpoints/faculty";
 import {
     useGetExamQuery,
@@ -42,6 +43,7 @@ const ExamDetailPage = () => {
     const [editingQuestion, setEditingQuestion] = useState<QuestionData | null>(null);
     const [deleteQuestionTarget, setDeleteQuestionTarget] = useState<QuestionData | null>(null);
     const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+    const [recordingAttemptId, setRecordingAttemptId] = useState<string | null>(null);
 
     const [publishExam, { isLoading: isPublishing }] = usePublishExamMutation();
     const [cancelExam, { isLoading: isCancelling }] = useDeleteExamMutation();
@@ -362,6 +364,7 @@ const ExamDetailPage = () => {
                                             <th className="px-3 py-2 text-left font-medium text-textSecondary">Score</th>
                                             <th className="px-3 py-2 text-left font-medium text-textSecondary">Flagged</th>
                                             <th className="px-3 py-2 text-left font-medium text-textSecondary">Violations</th>
+                                            <th className="px-3 py-2 text-left font-medium text-textSecondary">Recording</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-borderLight">
@@ -391,6 +394,15 @@ const ExamDetailPage = () => {
                                                             .map(([type, count]) => `${type}: ${count}`)
                                                             .join(', ')
                                                         : '—'}
+                                                </td>
+                                                <td className="px-3 py-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setRecordingAttemptId(attempt.attemptId)}
+                                                        className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline cursor-pointer"
+                                                    >
+                                                        <Video className="w-3.5 h-3.5" /> View
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))}
@@ -699,6 +711,8 @@ const ExamDetailPage = () => {
                 title="Cancel Exam"
                 message={<>Are you sure you want to cancel <span className="font-semibold text-textPrimary">{exam.name}</span>? This cannot be undone.</>}
             />
+
+            <RecordingViewerModal attemptId={recordingAttemptId} onClose={() => setRecordingAttemptId(null)} />
         </>
     );
 };

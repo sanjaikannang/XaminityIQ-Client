@@ -10,6 +10,8 @@ import {
     SendChatResponse,
     GetChatHistoryResponse,
     GetFacultyLiveKitTokenResponse,
+    SetStudentMicRequest,
+    SetStudentMicResponse,
 } from "../../../types/proctoring-types";
 
 export const facultyProctoringApiService = apiInstance.injectEndpoints({
@@ -51,6 +53,13 @@ export const facultyProctoringApiService = apiInstance.injectEndpoints({
             }),
             invalidatesTags: ['faculty-exam-room-detail', 'faculty-exam-rooms'],
         }),
+        setStudentMic: build.mutation<SetStudentMicResponse, { roomId: string; assignmentId: string; data: SetStudentMicRequest }>({
+            query: ({ roomId, assignmentId, data }) => ({
+                url: api.facultyProctoring.setStudentMic(roomId, assignmentId),
+                method: "POST",
+                data,
+            }),
+        }),
         sendFacultyChat: build.mutation<SendChatResponse, { roomId: string; data: FacultySendChatRequest }>({
             query: ({ roomId, data }) => ({
                 url: api.facultyProctoring.sendChat(roomId),
@@ -79,6 +88,7 @@ export const {
     useAdmitStudentMutation,
     useRejectStudentMutation,
     useRemoveStudentMutation,
+    useSetStudentMicMutation,
     useSendFacultyChatMutation,
     useGetFacultyChatHistoryQuery,
     useLazyGetFacultyChatHistoryQuery,
