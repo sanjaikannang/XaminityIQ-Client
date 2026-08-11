@@ -132,7 +132,15 @@ const ExamsPage = () => {
         <>
             <PageHeader>Exams</PageHeader>
             <div className="px-6">
-                <div className="flex justify-end">
+                <div className="flex justify-end gap-3">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="md"
+                        onClick={() => navigate('/super-admin/exams/rooms')}
+                    >
+                        Exam Room Allocation
+                    </Button>
                     <Button
                         type="button"
                         variant="primary"

@@ -1,8 +1,9 @@
 import toast from "react-hot-toast";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../../../../common/ui/Button";
 import Select from "../../../../common/ui/Select";
+import AsyncSelect, { type AsyncSelectOption } from "../../../../common/ui/AsyncSelect";
 import RowActions from "../../../../common/ui/RowActions";
 import DeleteConfirmModal from "../../../../common/ui/DeleteConfirmModal";
 import { Container } from "../../../../common/ui/Container";
@@ -11,9 +12,12 @@ import Chip from "../../../../common/ui/Chip";
 import { StudentStatus } from "../../../../utils/enum";
 import { formatEnumLabel, getChipVariant, toEnumOptions } from "../../../../utils/utils";
 import { StudentsData } from "../../../../types/students-types";
+import type { BatchData, CourseData, DepartmentData } from "../../../../types/academics-types";
 import { ColumnDef, Table } from "../../../../common/ui/Table";
 import UserActivityModal from "../../components/UserActivityModal";
-import { useGetBatchesQuery, useGetCoursesQuery, useGetDepartmentsQuery } from "../../../../state/services/endpoints/academics";
+import { useAppDispatch } from "../../../../app/store/hooks";
+import { createPaginatedLoadOptions } from "../../../../utils/asyncSelectHelpers";
+import { academicsApiService } from "../../../../state/services/endpoints/academics";
 import {
     useGetAllStudentsQuery,
     useDeleteStudentMutation,
@@ -32,8 +36,11 @@ const StudentsPage = () => {
 
     // Cascading filter state
     const [batchId, setBatchId] = useState("");
+    const [batchOption, setBatchOption] = useState<AsyncSelectOption | null>(null);
     const [courseId, setCourseId] = useState("");
+    const [courseOption, setCourseOption] = useState<AsyncSelectOption | null>(null);
     const [departmentId, setDepartmentId] = useState("");
+    const [departmentOption, setDepartmentOption] = useState<AsyncSelectOption | null>(null);
     const [sectionId, setSectionId] = useState("");
     const [status, setStatus] = useState("");
 
@@ -58,30 +65,41 @@ const StudentsPage = () => {
         { skip: !activityTarget }
     );
 
-    const { data: batchesData, isFetching: isBatchesLoading } = useGetBatchesQuery({ limit: 100 });
-    const { data: coursesData, isFetching: isCoursesLoading } = useGetCoursesQuery(
-        { batchId, limit: 100 },
-        { skip: !batchId }
-    );
-    const selectedCourse = coursesData?.data?.find((c) => c._id === courseId);
-    const { data: departmentsData, isFetching: isDepartmentsLoading } = useGetDepartmentsQuery(
-        { batchCourseId: selectedCourse?.batchCourseId as string, limit: 100 },
-        { skip: !selectedCourse?.batchCourseId }
-    );
-    const selectedDepartment = departmentsData?.data?.find((d) => d._id === departmentId);
-    const sections = selectedDepartment?.sections || [];
+    const dispatch = useAppDispatch();
 
-    const batchOptions = (batchesData?.data || []).map((b) => ({ value: b._id, label: b.batchName }));
-    const courseOptions = (coursesData?.data || []).map((c) => ({ value: c._id, label: c.courseName }));
-    const departmentOptions = (departmentsData?.data || []).map((d) => ({ value: d._id, label: d.deptName }));
+    const loadBatchOptions = useMemo(() => createPaginatedLoadOptions<BatchData, any>({
+        dispatch,
+        initiate: academicsApiService.endpoints.getBatches.initiate,
+        extraParams: {},
+        mapItem: (b) => ({ value: b._id, label: b.batchName, raw: b }),
+    }), [dispatch]);
+
+    const loadCourseOptions = useMemo(() => createPaginatedLoadOptions<CourseData, any>({
+        dispatch,
+        initiate: academicsApiService.endpoints.getCourses.initiate,
+        extraParams: { batchId },
+        mapItem: (c) => ({ value: c._id, label: c.courseName, raw: c }),
+    }), [dispatch, batchId]);
+
+    const loadDepartmentOptions = useMemo(() => createPaginatedLoadOptions<DepartmentData, any>({
+        dispatch,
+        initiate: academicsApiService.endpoints.getDepartments.initiate,
+        extraParams: { batchCourseId: courseOption?.raw?.batchCourseId },
+        mapItem: (d) => ({ value: d._id, label: d.deptName, raw: d }),
+    }), [dispatch, courseOption?.raw?.batchCourseId]);
+
+    const sections: { _id: string; sectionName: string }[] = departmentOption?.raw?.sections || [];
     const sectionOptions = sections.map((s) => ({ value: s._id, label: s.sectionName }));
 
     const hasActiveFilters = !!(batchId || courseId || departmentId || sectionId || status);
 
     const handleClearFilters = useCallback(() => {
         setBatchId("");
+        setBatchOption(null);
         setCourseId("");
+        setCourseOption(null);
         setDepartmentId("");
+        setDepartmentOption(null);
         setSectionId("");
         setStatus("");
         setPage(1);
@@ -267,51 +285,53 @@ const StudentsPage = () => {
                         hasActiveFilters={hasActiveFilters}
                         filters={
                             <>
-                                <Select
+                                <AsyncSelect
                                     id="filter-batch"
-                                    name="filter-batch"
                                     label="Batch"
                                     placeholder="All Batches"
-                                    options={batchOptions}
-                                    value={batchId}
-                                    loading={isBatchesLoading}
-                                    onChange={(value) => {
-                                        setBatchId(value as string);
+                                    value={batchOption}
+                                    loadOptions={loadBatchOptions}
+                                    onChange={(option) => {
+                                        setBatchOption(option);
+                                        setBatchId(option?.value || "");
+                                        setCourseOption(null);
                                         setCourseId("");
+                                        setDepartmentOption(null);
                                         setDepartmentId("");
                                         setSectionId("");
                                         setPage(1);
                                     }}
                                     className="w-44"
                                 />
-                                <Select
+                                <AsyncSelect
+                                    key={batchId}
                                     id="filter-course"
-                                    name="filter-course"
                                     label="Course"
                                     placeholder="All Courses"
-                                    options={courseOptions}
-                                    value={courseId}
-                                    loading={isCoursesLoading}
+                                    value={courseOption}
+                                    loadOptions={loadCourseOptions}
                                     disabled={!batchId}
-                                    onChange={(value) => {
-                                        setCourseId(value as string);
+                                    onChange={(option) => {
+                                        setCourseOption(option);
+                                        setCourseId(option?.value || "");
+                                        setDepartmentOption(null);
                                         setDepartmentId("");
                                         setSectionId("");
                                         setPage(1);
                                     }}
                                     className="w-44"
                                 />
-                                <Select
+                                <AsyncSelect
+                                    key={courseOption?.raw?.batchCourseId || courseId}
                                     id="filter-department"
-                                    name="filter-department"
                                     label="Department"
                                     placeholder="All Departments"
-                                    options={departmentOptions}
-                                    value={departmentId}
-                                    loading={isDepartmentsLoading}
+                                    value={departmentOption}
+                                    loadOptions={loadDepartmentOptions}
                                     disabled={!courseId}
-                                    onChange={(value) => {
-                                        setDepartmentId(value as string);
+                                    onChange={(option) => {
+                                        setDepartmentOption(option);
+                                        setDepartmentId(option?.value || "");
                                         setSectionId("");
                                         setPage(1);
                                     }}

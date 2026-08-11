@@ -160,7 +160,6 @@ export enum MediaStatus {
 
 export enum RecordingMediaType {
     VIDEO = "video",
-    AUDIO = "audio",
     SCREEN = "screen",
 }
 

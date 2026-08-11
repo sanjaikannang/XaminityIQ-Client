@@ -119,7 +119,20 @@ const EditExamPage = () => {
 
                                 <section className="space-y-4">
                                     <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">Academic Hierarchy</h3>
-                                    <ExamHierarchyFields values={values} errors={errors} touched={touched} setFieldValue={setFieldValue} disabled={isPublished} />
+                                    <ExamHierarchyFields
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        setFieldValue={setFieldValue}
+                                        disabled={isPublished}
+                                        initialNames={{
+                                            batchName: exam.batchName,
+                                            courseName: exam.courseName,
+                                            departmentName: exam.deptName,
+                                            sectionName: exam.sectionName,
+                                            subjectName: exam.subjectName,
+                                        }}
+                                    />
                                 </section>
 
                                 <section className="space-y-4">

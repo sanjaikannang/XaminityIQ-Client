@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { Formik, Form } from 'formik';
 import Button from '../../../../common/ui/Button';
 import InputField from '../../../../common/ui/Input';
 import { DepartmentInfo } from '../../../../types/academics-types';
-import Select, { SelectOption } from '../../../../common/ui/Select';
+import AsyncSelect, { type AsyncSelectOption } from '../../../../common/ui/AsyncSelect';
 import { createDepartmentValidationSchema } from '../formik/create-department.schema';
 
 interface CreateDepartmentFormProps {
@@ -53,11 +53,20 @@ const CreateDepartmentForm: React.FC<CreateDepartmentFormProps> = ({
         }
     };
 
-    // Convert DepartmentInfo[] to SelectOption[]
-    const departmentOptions: SelectOption[] = availableDepartments.map((dept) => ({
+    // The parent already fetched the full (unpaginated) available-departments
+    // list — loadOptions here just filters that in-memory array client-side.
+    const mapOption = (dept: DepartmentInfo): AsyncSelectOption => ({
         value: dept._id,
         label: `${dept.deptCode} - ${dept.deptName}`,
-    }));
+    });
+
+    const loadOptions = useMemo(() => async (search: string) => {
+        const filtered = search
+            ? availableDepartments.filter((dept) => mapOption(dept).label.toLowerCase().includes(search.toLowerCase()))
+            : availableDepartments;
+        return { options: filtered.map(mapOption), hasMore: false };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [availableDepartments]);
 
     return (
         <>
@@ -70,17 +79,20 @@ const CreateDepartmentForm: React.FC<CreateDepartmentFormProps> = ({
                     <Form>
                         <div className="space-y-4">
                             {/* Department Selection Dropdown */}
-                            <Select
+                            <AsyncSelect
                                 id="deptId"
-                                name="deptId"
                                 label="Select Department"
-                                options={departmentOptions}
-                                value={values.deptId}
-                                onChange={(value) => setFieldValue('deptId', value)}
-                                onBlur={() => setFieldTouched('deptId', true)}
+                                value={(() => {
+                                    const dept = availableDepartments.find((d) => d._id === values.deptId);
+                                    return dept ? mapOption(dept) : null;
+                                })()}
+                                loadOptions={loadOptions}
+                                onChange={(option) => {
+                                    setFieldValue('deptId', option?.value || '');
+                                    setFieldTouched('deptId', true);
+                                }}
                                 placeholder={isLoadingDepartments ? 'Loading departments...' : 'Select a department'}
                                 required
-                                loading={isLoadingDepartments}
                                 disabled={isSubmitting || isLoading || isLoadingDepartments}
                                 error={errors.deptId}
                                 touched={touched.deptId}

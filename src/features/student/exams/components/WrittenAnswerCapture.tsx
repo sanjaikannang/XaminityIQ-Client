@@ -1,6 +1,9 @@
 import QRCode from "qrcode";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
+import { CheckCircle2, QrCode, RefreshCw, FileCheck2 } from "lucide-react";
+import Button from "../../../../common/ui/Button";
+import PhoneMockup from "./PhoneMockup";
 import {
     useGenerateWrittenQrMutation,
     useGetWrittenQrStatusQuery,
@@ -11,6 +14,12 @@ interface WrittenAnswerCaptureProps {
     attemptId: string;
     questionId: string;
 }
+
+const STEPS = [
+    "Open your phone's camera and scan the QR code",
+    "Photograph every page of your written answer, one at a time",
+    'Come back here and tap "Finish & Save Answer" once done',
+];
 
 const WrittenAnswerCapture = ({ attemptId, questionId }: WrittenAnswerCaptureProps) => {
     const [generateQr, { isLoading: isGenerating }] = useGenerateWrittenQrMutation();
@@ -35,7 +44,7 @@ const WrittenAnswerCapture = ({ attemptId, questionId }: WrittenAnswerCapturePro
             if (!response.data) return;
             setTokenExpired(false);
             const url = `${window.location.origin}/mobile/written-answer/${response.data.token}`;
-            const dataUrl = await QRCode.toDataURL(url, { width: 240 });
+            const dataUrl = await QRCode.toDataURL(url, { width: 220, margin: 1 });
             setQrDataUrl(dataUrl);
         } catch (error: any) {
             toast.error(error.data?.message || 'Failed to generate QR code');
@@ -75,60 +84,88 @@ const WrittenAnswerCapture = ({ attemptId, questionId }: WrittenAnswerCapturePro
 
     if (status?.isFinalized) {
         return (
-            <div className="rounded-md border border-green-200 bg-green-50 p-6 text-center space-y-1">
-                <p className="text-green-700 font-medium">✓ Answer saved</p>
+            <div className="rounded-lg border border-green-200 bg-green-50 p-6 text-center space-y-1.5">
+                <CheckCircle2 className="w-8 h-8 text-green-600 mx-auto" />
+                <p className="text-green-700 font-semibold">Answer saved</p>
                 <p className="text-sm text-green-600">{status.pageCount} page{status.pageCount === 1 ? '' : 's'} uploaded</p>
             </div>
         );
     }
 
+    const isWaitingForUpload = !!status?.qrScannedAt && status.pageCount === 0;
+
     return (
-        <div className="rounded-md border border-dashed border-borderLight p-6 text-center space-y-4">
-            <p className="text-textPrimary font-medium">Scan this QR code with your phone to photograph and upload your written answer</p>
+        <div className="rounded-lg border border-borderLight overflow-hidden">
+            <div className="flex items-center gap-2 px-4 py-3 bg-bgSecondary border-b border-borderLight">
+                <QrCode className="w-4 h-4 text-primary" />
+                <p className="text-sm font-semibold text-textPrimary">Answer this question from your phone</p>
+            </div>
 
-            {qrDataUrl && !tokenExpired && (
-                <img src={qrDataUrl} alt="Scan to upload written answer" className="mx-auto rounded-md border border-borderLight" />
-            )}
+            <div className="p-4 grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-6 items-start">
+                {/* QR code */}
+                <div className="flex flex-col items-center gap-2 shrink-0">
+                    {qrDataUrl && !tokenExpired ? (
+                        <img src={qrDataUrl} alt="Scan to upload written answer" className="rounded-md border border-borderLight" width={160} height={160} />
+                    ) : (
+                        <div className="w-40 h-40 rounded-md border border-dashed border-borderLight flex items-center justify-center text-textTertiary text-xs text-center p-2">
+                            {tokenExpired ? "QR code expired" : "Generating QR..."}
+                        </div>
+                    )}
+                    <button
+                        type="button"
+                        onClick={handleGenerate}
+                        disabled={isGenerating}
+                        className="text-xs font-medium text-primary hover:underline disabled:opacity-50 flex items-center gap-1 cursor-pointer"
+                    >
+                        <RefreshCw className={`w-3 h-3 ${isGenerating ? 'animate-spin' : ''}`} />
+                        {qrDataUrl && !tokenExpired ? 'Regenerate QR Code' : 'Generate QR Code'}
+                    </button>
+                </div>
 
-            {tokenExpired && (
-                <p className="text-sm text-red-600">This QR code has expired.</p>
-            )}
+                {/* Steps + status */}
+                <div className="space-y-3 min-w-0">
+                    <ol className="space-y-2">
+                        {STEPS.map((step, i) => (
+                            <li key={i} className="flex items-start gap-2.5 text-sm text-textPrimary">
+                                <span className="shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary text-xs font-semibold flex items-center justify-center mt-0.5">
+                                    {i + 1}
+                                </span>
+                                {step}
+                            </li>
+                        ))}
+                    </ol>
 
-            {(tokenExpired || !qrDataUrl) && (
-                <button
-                    type="button"
-                    onClick={handleGenerate}
-                    disabled={isGenerating}
-                    className="text-sm font-medium text-primary underline disabled:opacity-50"
-                >
-                    {isGenerating ? 'Generating...' : 'Generate QR Code'}
-                </button>
-            )}
+                    <div className="flex items-center gap-2 text-sm">
+                        <FileCheck2 className="w-4 h-4 text-textSecondary shrink-0" />
+                        <span className="text-textSecondary">
+                            {status ? `${status.pageCount} page${status.pageCount === 1 ? '' : 's'} uploaded` : 'No pages uploaded yet'}
+                        </span>
+                        {isWaitingForUpload && (
+                            <span className="inline-flex items-center gap-1 text-xs text-yellow-700">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="absolute inline-flex h-full w-full rounded-full bg-yellow-500 opacity-75 animate-ping" />
+                                    <span className="relative inline-flex h-2 w-2 rounded-full bg-yellow-600" />
+                                </span>
+                                scanned, waiting for upload...
+                            </span>
+                        )}
+                    </div>
 
-            {!tokenExpired && qrDataUrl && (
-                <button
-                    type="button"
-                    onClick={handleGenerate}
-                    disabled={isGenerating}
-                    className="text-sm text-textSecondary underline disabled:opacity-50 block mx-auto"
-                >
-                    Regenerate QR Code
-                </button>
-            )}
+                    <Button
+                        variant="primary"
+                        onClick={handleFinalize}
+                        disabled={!status || status.pageCount === 0 || isFinalizing}
+                        loading={isFinalizing}
+                    >
+                        {isFinalizing ? '' : 'Finish & Save Answer'}
+                    </Button>
+                </div>
 
-            <p className="text-sm text-textSecondary">
-                {status ? `${status.pageCount} page${status.pageCount === 1 ? '' : 's'} uploaded` : 'No pages uploaded yet'}
-                {status?.qrScannedAt && status.pageCount === 0 ? ' — QR scanned, waiting for upload...' : ''}
-            </p>
-
-            <button
-                type="button"
-                onClick={handleFinalize}
-                disabled={!status || status.pageCount === 0 || isFinalizing}
-                className="px-4 py-2 rounded-md bg-primary text-whiteColor text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-                {isFinalizing ? 'Saving...' : 'Finish & Save Answer'}
-            </button>
+                {/* Phone mockup preview */}
+                <div className="hidden md:block">
+                    <PhoneMockup />
+                </div>
+            </div>
         </div>
     );
 };

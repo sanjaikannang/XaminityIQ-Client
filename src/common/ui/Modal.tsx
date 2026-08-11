@@ -25,17 +25,10 @@ const Modal: React.FC<ModalProps> = ({
         xl: 'max-w-4xl'
     };
 
-    const handleBackdropClick = (e: React.MouseEvent) => {
-        if (e.target === e.currentTarget) {
-            onClose();
-        }
-    };
-
     return (
         <>
             <div
                 className="fixed inset-0 z-50 overflow-y-auto"
-                onClick={handleBackdropClick}
             >
                 {/* Backdrop */}
                 <div className="fixed inset-0 bg-opacity-25 backdrop-blur-md transition-all" />
@@ -52,6 +45,7 @@ const Modal: React.FC<ModalProps> = ({
                             </h3>
                             <button
                                 onClick={onClose}
+                                aria-label="Close"
                                 className="rounded-md p-2 hover:bg-bgTertiary focus:outline-none cursor-pointer"
                             >
                                 <X className="h-4 w-4 text-textSecondary" />

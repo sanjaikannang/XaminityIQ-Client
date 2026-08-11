@@ -1,6 +1,7 @@
 import toast from "react-hot-toast";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { CheckCircle2, XCircle, Loader2, Circle, Video, Mic, MonitorUp, Maximize, Wifi } from "lucide-react";
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
@@ -17,6 +18,14 @@ interface CheckState {
     status: CheckStatus;
     message?: string;
 }
+
+const CHECK_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+    camera: Video,
+    microphone: Mic,
+    screen: MonitorUp,
+    fullscreen: Maximize,
+    connection: Wifi,
+};
 
 const INITIAL_CHECKS: CheckState[] = [
     { key: 'camera', label: 'Camera (Video)', status: 'PENDING' },
@@ -177,52 +186,72 @@ const PreFlightCheckPage = () => {
         }
     };
 
-    const statusColor = (status: CheckStatus) => {
-        if (status === 'PASSED') return 'text-green-600';
-        if (status === 'FAILED') return 'text-red-600';
-        if (status === 'CHECKING') return 'text-blue-600';
-        return 'text-textSecondary';
+    const passedCount = checks.filter((c) => c.status === 'PASSED').length;
+
+    const statusIcon = (status: CheckStatus) => {
+        if (status === 'PASSED') return <CheckCircle2 className="w-5 h-5 text-green-600" />;
+        if (status === 'FAILED') return <XCircle className="w-5 h-5 text-red-600" />;
+        if (status === 'CHECKING') return <Loader2 className="w-5 h-5 text-primary animate-spin" />;
+        return <Circle className="w-5 h-5 text-textTertiary" />;
     };
 
     return (
         <>
             <PageHeader>Pre-Flight Checks</PageHeader>
             <Container>
-                <div className="py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                        {checks.map((check, index) => (
-                            <div key={check.key} className="rounded-lg border border-borderLight p-4">
-                                <div className="flex items-center justify-between">
-                                    <span className="font-medium text-textPrimary">{check.label}</span>
-                                    <span className={`text-sm font-semibold ${statusColor(check.status)}`}>{check.status}</span>
-                                </div>
-                                {check.status === 'FAILED' && (
-                                    <div className="mt-2 space-y-2">
-                                        <p className="text-sm text-red-600">{check.message}</p>
-                                        <Button variant="outline" size="sm" onClick={() => handleRetry(index)} disabled={isRunning}>
-                                            Retry
-                                        </Button>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-
-                        <Button
-                            variant="primary"
-                            fullWidth
-                            disabled={!allPassed || isStarting}
-                            loading={isStarting}
-                            onClick={handleEnterExam}
-                        >
-                            {isStarting ? '' : 'Enter Exam'}
-                        </Button>
-                        {hasFailed && (
-                            <p className="text-sm text-textSecondary">All checks must pass before you can enter the exam.</p>
-                        )}
+                <div className="py-6 space-y-4">
+                    <div className="bg-whiteColor rounded-xl border border-borderDefault p-4 flex items-center justify-between flex-wrap gap-2">
+                        <p className="text-sm text-textSecondary">
+                            We need to verify your camera, microphone, screen sharing, and connection before you can start.
+                        </p>
+                        <span className="text-sm font-semibold text-textPrimary shrink-0">{passedCount} / {checks.length} passed</span>
                     </div>
 
-                    <div className="rounded-lg border border-borderLight p-4 flex items-center justify-center bg-bgSecondary">
-                        <video ref={videoPreviewRef} autoPlay muted playsInline className="w-full max-w-sm rounded-md" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                            {checks.map((check, index) => {
+                                const Icon = CHECK_ICONS[check.key];
+                                return (
+                                    <div key={check.key} className={`rounded-xl border p-4 bg-whiteColor ${check.status === 'FAILED' ? 'border-red-200' : 'border-borderDefault'}`}>
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div className="flex items-center gap-2.5 min-w-0">
+                                                <Icon className="w-4 h-4 text-textSecondary shrink-0" />
+                                                <span className="font-medium text-textPrimary truncate">{check.label}</span>
+                                            </div>
+                                            {statusIcon(check.status)}
+                                        </div>
+                                        {check.status === 'FAILED' && (
+                                            <div className="mt-3 space-y-2">
+                                                <p className="text-sm text-red-600">{check.message}</p>
+                                                <Button variant="outline" size="sm" onClick={() => handleRetry(index)} disabled={isRunning}>
+                                                    Retry
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+
+                            <Button
+                                variant="primary"
+                                fullWidth
+                                disabled={!allPassed || isStarting}
+                                loading={isStarting}
+                                onClick={handleEnterExam}
+                            >
+                                {isStarting ? '' : 'Enter Exam'}
+                            </Button>
+                            {hasFailed && (
+                                <p className="text-sm text-textSecondary text-center">All checks must pass before you can enter the exam.</p>
+                            )}
+                        </div>
+
+                        <div className="rounded-xl border border-borderDefault p-4 flex items-center justify-center bg-bgSecondary">
+                            <div className="relative w-full max-w-sm">
+                                <video ref={videoPreviewRef} autoPlay muted playsInline className="w-full rounded-lg border border-borderLight bg-black aspect-video object-cover" />
+                                <span className="absolute bottom-2 left-2 text-[10px] px-1.5 py-0.5 rounded bg-black/60 text-whiteColor">Camera Preview</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </Container>

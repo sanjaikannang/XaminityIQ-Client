@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { ViolationType } from "../../../../utils/enum";
 import { SecuritySettings } from "../../../../types/exams-types";
@@ -11,19 +11,34 @@ interface UseIntegrityMonitorParams {
     onTerminated: (response: ReportViolationResponse) => void;
 }
 
+// Every violation is reported to the backend regardless of visible feedback —
+// these are just the toast copy for the ones a student should be warned about
+// as they happen, instead of only finding out via the terminal auto-submit.
+const VIOLATION_MESSAGES: Record<ViolationType, string> = {
+    [ViolationType.TAB_SWITCH]: "Tab switch detected — this has been recorded.",
+    [ViolationType.FULLSCREEN_EXIT]: "You exited full-screen — this has been recorded.",
+    [ViolationType.COPY_ATTEMPT]: "Copy/paste is disabled during this exam.",
+    [ViolationType.RIGHT_CLICK_ATTEMPT]: "Right-click is disabled during this exam.",
+};
+
 // Wires up the browser-event anti-malpractice detection described by an exam's
 // securitySettings — tab-switch, fullscreen-exit, copy/paste, right-click —
-// logging each to the backend and reacting if a threshold breach terminates
-// the attempt. blockBackwardNavigation is NOT handled here — it's a pure
-// in-app navigation gate the room page applies directly (nothing to detect).
+// logging each to the backend, surfacing a brief warning toast per violation,
+// and reacting if a threshold breach terminates the attempt.
+// blockBackwardNavigation is NOT handled here — it's a pure in-app navigation
+// gate the room page applies directly (nothing to detect).
 export function useIntegrityMonitor({ attemptId, securitySettings, onTerminated }: UseIntegrityMonitorParams) {
     const [reportViolation] = useReportViolationMutation();
     const settingsRef = useRef(securitySettings);
     settingsRef.current = securitySettings;
     const terminatedRef = useRef(false);
+    const [violationCount, setViolationCount] = useState(0);
 
-    const report = useCallback((type: ViolationType) => {
+    const report = useCallback((type: ViolationType, silent = false) => {
         if (terminatedRef.current || !attemptId) return;
+        setViolationCount((prev) => prev + 1);
+        if (!silent) toast(VIOLATION_MESSAGES[type], { icon: '⚠️' });
+
         reportViolation({ attemptId, type })
             .unwrap()
             .then((response) => {
@@ -49,7 +64,8 @@ export function useIntegrityMonitor({ attemptId, securitySettings, onTerminated 
     useEffect(() => {
         const handleFullscreenChange = () => {
             if (!document.fullscreenElement) {
-                report(ViolationType.FULLSCREEN_EXIT);
+                // The stronger message below already covers this when required — avoid double-toasting
+                report(ViolationType.FULLSCREEN_EXIT, !!settingsRef.current?.requireFullScreenThroughout);
                 if (settingsRef.current?.requireFullScreenThroughout) {
                     toast.error('Please return to full-screen mode to continue the exam.');
                 }
@@ -84,4 +100,6 @@ export function useIntegrityMonitor({ attemptId, securitySettings, onTerminated 
         document.addEventListener('contextmenu', blockAndReport);
         return () => document.removeEventListener('contextmenu', blockAndReport);
     }, [securitySettings?.disableRightClick, report]);
+
+    return { violationCount };
 }
