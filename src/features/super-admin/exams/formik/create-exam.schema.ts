@@ -1,10 +1,9 @@
 import * as Yup from 'yup';
-import { ExamMode } from '../../../../utils/enum';
 
 export const createExamValidationSchema = Yup.object({
     name: Yup.string().required('Exam name is required').max(150),
     description: Yup.string().max(1000),
-    mode: Yup.string().oneOf(Object.values(ExamMode)).required('Mode is required'),
+    mode: Yup.string().required('Mode is required'),
 
     batchId: Yup.string().required('Batch is required'),
     courseId: Yup.string().required('Course is required'),
@@ -20,14 +19,12 @@ export const createExamValidationSchema = Yup.object({
     startDate: Yup.string().required('Start date is required'),
     endDate: Yup.string().required('End date is required'),
 
-    startTime: Yup.string().when('mode', {
-        is: ExamMode.PROCTORING,
-        then: (schema) => schema.required('Start time is required for PROCTORING exams'),
-        otherwise: (schema) => schema.notRequired(),
-    }),
-    endTime: Yup.string().when('mode', {
-        is: ExamMode.PROCTORING,
-        then: (schema) => schema.required('End time is required for PROCTORING exams'),
-        otherwise: (schema) => schema.notRequired(),
+    // Required for both AUTO and PROCTORING — always IST
+    startTime: Yup.string().required('Start time is required'),
+    endTime: Yup.string().required('End time is required'),
+
+    securitySettings: Yup.object({
+        minTimePerQuestionSeconds: Yup.number().typeError('Must be a number').min(0),
+        minTimePerExamMinutes: Yup.number().typeError('Must be a number').min(0),
     }),
 });

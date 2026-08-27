@@ -12,6 +12,22 @@ export interface SecuritySettings {
     connectionLossGracePeriodMinutes?: number;
     cameraMicLossGracePeriodMinutes?: number;
     faceDetectionEnabled?: boolean;
+    minTimePerQuestionSeconds?: number;
+    minTimePerExamMinutes?: number;
+}
+
+// A named group of questions ("Section A", "Section B", ...) — not to be
+// confused with the academic `sectionId` (class/division) field on ExamData.
+export interface ExamSectionInput {
+    _id?: string;
+    label: string;
+    order: number;
+}
+
+export interface ExamSectionData {
+    _id: string;
+    label: string;
+    order: number;
 }
 
 export interface ExamData {
@@ -52,6 +68,7 @@ export interface QuestionData {
     text: string;
     marks: number;
     order: number;
+    examSectionId?: string;
     options?: QuestionOption[];
     correctOptionIds?: string[];
     createdAt: string;
@@ -60,6 +77,7 @@ export interface QuestionData {
 export interface ExamDetailData extends ExamData {
     evaluatorFacultyIds: string[];
     securitySettings: SecuritySettings;
+    examSections: ExamSectionData[];
     questions: QuestionData[];
     totalQuestionMarks: number;
     matchedStudentCount: number;
@@ -90,8 +108,10 @@ export interface CreateExamRequest {
     passingMarks: number;
     startDate: string;
     endDate: string;
-    startTime?: string;
-    endTime?: string;
+    // Required for both AUTO and PROCTORING — always IST
+    startTime: string;
+    endTime: string;
+    examSections?: ExamSectionInput[];
     securitySettings?: SecuritySettings;
 }
 
@@ -154,6 +174,7 @@ export interface AddQuestionRequest {
     type: QuestionType;
     text: string;
     marks: number;
+    examSectionId?: string;
     options?: QuestionOptionInput[];
 }
 
@@ -163,6 +184,28 @@ export interface AddQuestionResponse {
     success: boolean;
     message: string;
     data?: QuestionData;
+}
+
+// Bulk Upload Questions (CSV)
+export interface QuestionUploadResult {
+    rowNumber: number;
+    questionId?: string;
+    status: 'success' | 'failed';
+    error?: string;
+}
+
+export interface BulkUploadQuestionsSummary {
+    totalRecords: number;
+    successCount: number;
+    failedCount: number;
+    successfulUploads: QuestionUploadResult[];
+    failedUploads: QuestionUploadResult[];
+}
+
+export interface BulkUploadQuestionsResponse {
+    success: boolean;
+    message: string;
+    summary: BulkUploadQuestionsSummary;
 }
 
 export interface EditQuestionResponse {
@@ -251,4 +294,33 @@ export interface GetAttemptRecordingResponse {
     success: boolean;
     message: string;
     data?: AttemptRecordingData;
+}
+
+// Attempt Answers (admin per-attempt review — every question type)
+export interface AttemptAnswerPageData {
+    pageNumber: number;
+    cloudinaryUrl: string;
+    uploadedAt: string;
+}
+
+export interface AttemptQuestionAnswerData {
+    questionId: string;
+    type: QuestionType;
+    text: string;
+    marks: number;
+    order: number;
+    examSectionId?: string;
+    selectedOptionText?: string;
+    selectedOptionTexts?: string[];
+    isCorrect?: boolean;
+    pages?: AttemptAnswerPageData[];
+    answerText?: string;
+    marksAwarded?: number;
+    remarks?: string;
+}
+
+export interface GetAttemptAnswersResponse {
+    success: boolean;
+    message: string;
+    data?: AttemptQuestionAnswerData[];
 }

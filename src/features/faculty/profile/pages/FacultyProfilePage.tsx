@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { User, Mail, MapPin, Briefcase, GraduationCap, Award, BookOpen } from "lucide-react";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
 import Chip from "../../../../common/ui/Chip";
+import ProfileCompletionBar from "../../../../common/ui/ProfileCompletionBar";
 import { formatEnumLabel, getChipVariant } from "../../../../utils/utils";
 import { formatDate } from "../../../../utils/date";
 import { useGetMyFacultyProfileQuery } from "../../../../state/services/endpoints/faculty-profile";
+import CompleteFacultyProfileModal from "../components/CompleteFacultyProfileModal";
 
 const SectionCard = ({
     icon: Icon,
@@ -36,6 +39,7 @@ const Field = ({ label, value }: { label: string; value?: React.ReactNode }) => 
 const FacultyProfilePage = () => {
     const { data, isLoading } = useGetMyFacultyProfileQuery();
     const profile = data?.data;
+    const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
 
     if (isLoading || !profile) {
         return (
@@ -56,6 +60,11 @@ const FacultyProfilePage = () => {
             <PageHeader>My Profile</PageHeader>
             <Container>
                 <div className="space-y-6">
+                    <ProfileCompletionBar
+                        percentage={profile.profileCompletionPercentage}
+                        onCompleteClick={() => setIsCompleteModalOpen(true)}
+                    />
+
                     <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
                         <div className="flex items-center gap-5 flex-wrap">
                             <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-whiteColor font-semibold text-2xl shrink-0">
@@ -84,7 +93,7 @@ const FacultyProfilePage = () => {
                                 <Field label="Last Name" value={profile.personalDetails.lastName} />
                                 <Field label="Gender" value={formatEnumLabel(profile.personalDetails.gender)} />
                                 <Field label="Date of Birth" value={formatDate(profile.personalDetails.dateOfBirth)} />
-                                <Field label="Marital Status" value={formatEnumLabel(profile.personalDetails.maritalStatus)} />
+                                <Field label="Marital Status" value={profile.personalDetails.maritalStatus ? formatEnumLabel(profile.personalDetails.maritalStatus) : undefined} />
                                 <Field label="Nationality" value={formatEnumLabel(profile.personalDetails.nationality)} />
                                 {profile.personalDetails.religion && (
                                     <Field label="Religion" value={profile.personalDetails.religion} />
@@ -102,7 +111,9 @@ const FacultyProfilePage = () => {
                                 )}
                                 <Field
                                     label="Emergency Contact"
-                                    value={`${profile.contactDetails.emergencyContact.name} (${formatEnumLabel(profile.contactDetails.emergencyContact.relation)}) — ${profile.contactDetails.emergencyContact.phoneNumber}`}
+                                    value={profile.contactDetails.emergencyContact
+                                        ? `${profile.contactDetails.emergencyContact.name} (${formatEnumLabel(profile.contactDetails.emergencyContact.relation)}) — ${profile.contactDetails.emergencyContact.phoneNumber}`
+                                        : undefined}
                                 />
                             </div>
                         </SectionCard>
@@ -112,14 +123,18 @@ const FacultyProfilePage = () => {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div>
                                 <span className="text-xs font-semibold text-textSecondary uppercase tracking-wide">Current Address</span>
-                                <p className="text-sm text-textPrimary mt-2">
-                                    {profile.addressDetails.currentAddress.addressLine1}
-                                    {profile.addressDetails.currentAddress.addressLine2 ? `, ${profile.addressDetails.currentAddress.addressLine2}` : ""}
-                                    <br />
-                                    {profile.addressDetails.currentAddress.city}, {profile.addressDetails.currentAddress.state} — {profile.addressDetails.currentAddress.pincode}
-                                    <br />
-                                    {profile.addressDetails.currentAddress.country}
-                                </p>
+                                {profile.addressDetails.currentAddress ? (
+                                    <p className="text-sm text-textPrimary mt-2">
+                                        {profile.addressDetails.currentAddress.addressLine1}
+                                        {profile.addressDetails.currentAddress.addressLine2 ? `, ${profile.addressDetails.currentAddress.addressLine2}` : ""}
+                                        <br />
+                                        {profile.addressDetails.currentAddress.city}, {profile.addressDetails.currentAddress.state} — {profile.addressDetails.currentAddress.pincode}
+                                        <br />
+                                        {profile.addressDetails.currentAddress.country}
+                                    </p>
+                                ) : (
+                                    <p className="text-sm text-textTertiary mt-2 italic">Not provided</p>
+                                )}
                             </div>
                             <div>
                                 <span className="text-xs font-semibold text-textSecondary uppercase tracking-wide">Permanent Address</span>
@@ -147,7 +162,7 @@ const FacultyProfilePage = () => {
                             <Field label="Employment Type" value={formatEnumLabel(profile.employmentDetails.employmentType)} />
                             <Field label="Date of Joining" value={formatDate(profile.employmentDetails.dateOfJoining)} />
                             <Field label="Experience" value={`${profile.employmentDetails.totalExperienceYears} years`} />
-                            <Field label="Highest Qualification" value={formatEnumLabel(profile.employmentDetails.highestQualification)} />
+                            <Field label="Highest Qualification" value={(() => { const hq = profile.employmentDetails.highestQualification; return hq ? formatEnumLabel(hq) : undefined; })()} />
                             <div>
                                 <span className="text-sm text-textSecondary">Status</span>
                                 <p className="mt-0.5">
@@ -233,6 +248,12 @@ const FacultyProfilePage = () => {
                     </SectionCard>
                 </div>
             </Container>
+
+            <CompleteFacultyProfileModal
+                isOpen={isCompleteModalOpen}
+                onClose={() => setIsCompleteModalOpen(false)}
+                profile={profile}
+            />
         </>
     );
 };

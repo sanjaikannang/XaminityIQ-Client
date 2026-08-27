@@ -9,8 +9,15 @@ export interface GenerateWrittenQrResponse {
     data?: GenerateWrittenQrData;
 }
 
+export interface WrittenAnswerPageData {
+    pageNumber: number;
+    cloudinaryUrl: string;
+    uploadedAt: string;
+}
+
 export interface WrittenQrStatusData {
     pageCount: number;
+    pages: WrittenAnswerPageData[];
     qrScannedAt?: string;
     isFinalized: boolean;
     qrTokenExpiresAt?: string;
@@ -23,6 +30,12 @@ export interface GetWrittenQrStatusResponse {
 }
 
 export interface FinalizeWrittenAnswerResponse {
+    success: boolean;
+    message: string;
+    pageCount?: number;
+}
+
+export interface DeleteWrittenAnswerPageResponse {
     success: boolean;
     message: string;
     pageCount?: number;

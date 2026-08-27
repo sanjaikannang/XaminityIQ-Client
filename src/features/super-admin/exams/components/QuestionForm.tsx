@@ -6,6 +6,7 @@ import InputField from '../../../../common/ui/Input';
 import Select from '../../../../common/ui/Select';
 import { QuestionType } from '../../../../utils/enum';
 import { toEnumOptions } from '../../../../utils/utils';
+import { ExamSectionData } from '../../../../types/exams-types';
 import { questionValidationSchema } from '../formik/question.schema';
 
 const questionTypeOptions = toEnumOptions(QuestionType);
@@ -14,30 +15,41 @@ export interface QuestionFormValues {
     type: string;
     text: string;
     marks: number | string;
+    examSectionId?: string;
     options: { text: string; isCorrect: boolean }[];
 }
 
 interface QuestionFormProps {
     initialValues?: Partial<QuestionFormValues>;
+    examSections?: ExamSectionData[];
     onSubmit: (values: QuestionFormValues) => Promise<void> | void;
     isLoading?: boolean;
 }
 
 const emptyOptions = () => Array.from({ length: 4 }, () => ({ text: '', isCorrect: false }));
 
-const QuestionForm: React.FC<QuestionFormProps> = ({ initialValues, onSubmit, isLoading = false }) => {
+const isSubjectiveType = (type: string) => type === QuestionType.WRITTEN || type === QuestionType.TYPING;
+
+const QuestionForm: React.FC<QuestionFormProps> = ({ initialValues, examSections = [], onSubmit, isLoading = false }) => {
     const values: QuestionFormValues = {
         type: initialValues?.type || '',
         text: initialValues?.text || '',
         marks: initialValues?.marks ?? '',
+        examSectionId: initialValues?.examSectionId || '',
         options: initialValues?.options && initialValues.options.length === 4 ? initialValues.options : emptyOptions(),
     };
+
+    const sectionOptions = [
+        { value: '', label: 'No section' },
+        ...[...examSections].sort((a, b) => a.order - b.order).map((s) => ({ value: s._id, label: s.label })),
+    ];
 
     const handleSubmit = async (formValues: QuestionFormValues, { setSubmitting }: any) => {
         try {
             await onSubmit({
                 ...formValues,
                 marks: Number(formValues.marks),
+                examSectionId: formValues.examSectionId || undefined,
             });
         } catch (error: any) {
             toast.error(error?.data?.message || 'Failed to save question');
@@ -54,7 +66,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ initialValues, onSubmit, is
             enableReinitialize
         >
             {({ values, errors, touched, setFieldValue, handleChange, handleBlur, isSubmitting }) => {
-                const isWritten = values.type === QuestionType.WRITTEN;
+                const isWritten = isSubjectiveType(values.type);
                 const isMcq = values.type === QuestionType.MCQ;
 
                 const handleCorrectToggle = (index: number, checked: boolean) => {
@@ -82,6 +94,18 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ initialValues, onSubmit, is
                                 disabled={isSubmitting || isLoading}
                             />
 
+                            {examSections.length > 0 && (
+                                <Select
+                                    id="examSectionId"
+                                    name="examSectionId"
+                                    label="Section (optional)"
+                                    options={sectionOptions}
+                                    value={values.examSectionId || ''}
+                                    onChange={(value) => setFieldValue('examSectionId', value)}
+                                    disabled={isSubmitting || isLoading}
+                                />
+                            )}
+
                             <InputField
                                 id="text"
                                 name="text"
@@ -100,7 +124,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ initialValues, onSubmit, is
                                 id="marks"
                                 name="marks"
                                 type="number"
-                                label={isWritten ? 'Marks (2-20)' : 'Marks'}
+                                label={isWritten ? 'Marks (2-20, hand-graded)' : 'Marks'}
                                 placeholder="e.g., 5"
                                 value={values.marks}
                                 onChange={handleChange}

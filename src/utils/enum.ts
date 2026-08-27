@@ -127,6 +127,7 @@ export enum QuestionType {
     MCQ = "MCQ",
     MSQ = "MSQ",
     WRITTEN = "WRITTEN",
+    TYPING = "TYPING",
 }
 
 export enum AttemptStatus {
@@ -175,6 +176,7 @@ export enum RoomAssignmentStatus {
     IN_PROGRESS = "IN_PROGRESS",
     REJECTED = "REJECTED",
     REMOVED = "REMOVED",
+    DISCONNECTED = "DISCONNECTED",
     COMPLETED = "COMPLETED",
 }
 

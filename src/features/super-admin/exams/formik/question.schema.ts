@@ -6,19 +6,22 @@ const optionSchema = Yup.object({
     isCorrect: Yup.boolean(),
 });
 
+const isSubjectiveType = (type: string) => type === QuestionType.WRITTEN || type === QuestionType.TYPING;
+
 export const questionValidationSchema = Yup.object({
     type: Yup.string().oneOf(Object.values(QuestionType)).required('Question type is required'),
     text: Yup.string().required('Question text is required'),
+    examSectionId: Yup.string(),
     marks: Yup.number()
         .typeError('Must be a number')
         .required('Marks are required')
         .when('type', {
-            is: QuestionType.WRITTEN,
-            then: (schema) => schema.min(2, 'Written questions must be worth at least 2 marks').max(20, 'Written questions must be worth at most 20 marks'),
+            is: isSubjectiveType,
+            then: (schema) => schema.min(2, 'Written/Typing questions must be worth at least 2 marks').max(20, 'Written/Typing questions must be worth at most 20 marks'),
             otherwise: (schema) => schema.min(1, 'Marks must be at least 1'),
         }),
     options: Yup.array().when('type', {
-        is: (type: string) => type !== QuestionType.WRITTEN,
+        is: (type: string) => !isSubjectiveType(type),
         then: (schema) => schema
             .of(optionSchema)
             .length(4, 'Exactly 4 options are required')

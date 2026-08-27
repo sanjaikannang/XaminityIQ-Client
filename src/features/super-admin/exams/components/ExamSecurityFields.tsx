@@ -119,6 +119,26 @@ const ExamSecurityFields = ({ values, setFieldValue, handleChange, handleBlur, d
                     onBlur={handleBlur}
                     disabled={disabled}
                 />
+                <InputField
+                    id="securitySettings.minTimePerQuestionSeconds"
+                    name="securitySettings.minTimePerQuestionSeconds"
+                    type="number"
+                    label="Min. Time Per Question (seconds, 0 = disabled)"
+                    value={settings.minTimePerQuestionSeconds}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    disabled={disabled}
+                />
+                <InputField
+                    id="securitySettings.minTimePerExamMinutes"
+                    name="securitySettings.minTimePerExamMinutes"
+                    type="number"
+                    label="Min. Time For Whole Exam (minutes, 0 = disabled)"
+                    value={settings.minTimePerExamMinutes}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    disabled={disabled}
+                />
             </div>
         </div>
     );

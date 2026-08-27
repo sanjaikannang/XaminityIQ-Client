@@ -61,6 +61,8 @@ const EditExamPage = () => {
             connectionLossGracePeriodMinutes: exam.securitySettings?.connectionLossGracePeriodMinutes ?? 2,
             cameraMicLossGracePeriodMinutes: exam.securitySettings?.cameraMicLossGracePeriodMinutes ?? 2,
             faceDetectionEnabled: exam.securitySettings?.faceDetectionEnabled ?? false,
+            minTimePerQuestionSeconds: exam.securitySettings?.minTimePerQuestionSeconds ?? 0,
+            minTimePerExamMinutes: exam.securitySettings?.minTimePerExamMinutes ?? 0,
         },
     };
 
@@ -74,8 +76,6 @@ const EditExamPage = () => {
                     durationMinutes: Number(values.durationMinutes),
                     totalMarks: Number(values.totalMarks),
                     passingMarks: Number(values.passingMarks),
-                    startTime: values.mode === 'PROCTORING' ? values.startTime : undefined,
-                    endTime: values.mode === 'PROCTORING' ? values.endTime : undefined,
                 };
 
             const response = await updateExam({ id: id as string, data: payload as any }).unwrap();

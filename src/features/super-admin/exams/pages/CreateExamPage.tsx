@@ -29,6 +29,8 @@ const initialValues = {
         connectionLossGracePeriodMinutes: 2,
         cameraMicLossGracePeriodMinutes: 2,
         faceDetectionEnabled: false,
+        minTimePerQuestionSeconds: 0,
+        minTimePerExamMinutes: 0,
     },
 };
 
@@ -44,8 +46,6 @@ const CreateExamPage = () => {
                 durationMinutes: Number(values.durationMinutes),
                 totalMarks: Number(values.totalMarks),
                 passingMarks: Number(values.passingMarks),
-                startTime: values.mode === 'PROCTORING' ? values.startTime : undefined,
-                endTime: values.mode === 'PROCTORING' ? values.endTime : undefined,
             };
 
             const response = await createExam(payload as any).unwrap();

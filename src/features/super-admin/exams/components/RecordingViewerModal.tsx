@@ -65,11 +65,11 @@ const RecordingViewerModal = ({ attemptId, onClose }: RecordingViewerModalProps)
                         <Info className="w-4 h-4 text-textTertiary shrink-0 mt-0.5" />
                         <p className="text-xs text-textSecondary">
                             Recordings are captured in 30-second segments and uploaded directly from the student's
-                            browser — each player below advances through its segments automatically for continuous
-                            playback (use the dots to jump to a specific segment). The Video stream includes the
-                            student's microphone audio. Upload completion is self-reported by the client and isn't
-                            independently re-verified, so a segment can occasionally fail to load if the underlying
-                            file didn't fully land.
+                            browser. The player below streams every segment into one continuous timeline for gapless
+                            playback (falls back to segment-by-segment playback with jump dots on browsers without
+                            WebM/MediaSource support). The Video stream includes the student's microphone audio.
+                            Upload completion is self-reported by the client and isn't independently re-verified, so
+                            a segment can occasionally fail to load if the underlying file didn't fully land.
                         </p>
                     </div>
 

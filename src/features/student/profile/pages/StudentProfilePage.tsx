@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { User, Mail, MapPin, GraduationCap, BookOpen, Users } from "lucide-react";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
 import Chip from "../../../../common/ui/Chip";
+import ProfileCompletionBar from "../../../../common/ui/ProfileCompletionBar";
 import { formatEnumLabel, getChipVariant } from "../../../../utils/utils";
 import { formatDate } from "../../../../utils/date";
 import { useGetMyStudentProfileQuery } from "../../../../state/services/endpoints/student-profile";
+import CompleteStudentProfileModal from "../components/CompleteStudentProfileModal";
 
 const SectionCard = ({
     icon: Icon,
@@ -36,6 +39,7 @@ const Field = ({ label, value }: { label: string; value?: React.ReactNode }) => 
 const StudentProfilePage = () => {
     const { data, isLoading } = useGetMyStudentProfileQuery();
     const profile = data?.data;
+    const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
 
     if (isLoading || !profile) {
         return (
@@ -57,6 +61,11 @@ const StudentProfilePage = () => {
             <PageHeader>My Profile</PageHeader>
             <Container>
                 <div className="space-y-6">
+                    <ProfileCompletionBar
+                        percentage={profile.profileCompletionPercentage}
+                        onCompleteClick={() => setIsCompleteModalOpen(true)}
+                    />
+
                     <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
                         <div className="flex items-center gap-5 flex-wrap">
                             <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-whiteColor font-semibold text-2xl shrink-0">
@@ -102,7 +111,9 @@ const StudentProfilePage = () => {
                                 )}
                                 <Field
                                     label="Emergency Contact"
-                                    value={`${profile.contactDetails.emergencyContact.name} (${formatEnumLabel(profile.contactDetails.emergencyContact.relation)}) — ${profile.contactDetails.emergencyContact.phoneNumber}`}
+                                    value={profile.contactDetails.emergencyContact
+                                        ? `${profile.contactDetails.emergencyContact.name} (${formatEnumLabel(profile.contactDetails.emergencyContact.relation)}) — ${profile.contactDetails.emergencyContact.phoneNumber}`
+                                        : undefined}
                                 />
                             </div>
                         </SectionCard>
@@ -130,14 +141,18 @@ const StudentProfilePage = () => {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div>
                                 <span className="text-xs font-semibold text-textSecondary uppercase tracking-wide">Current Address</span>
-                                <p className="text-sm text-textPrimary mt-2">
-                                    {profile.addressDetails.currentAddress.addressLine1}
-                                    {profile.addressDetails.currentAddress.addressLine2 ? `, ${profile.addressDetails.currentAddress.addressLine2}` : ""}
-                                    <br />
-                                    {profile.addressDetails.currentAddress.city}, {profile.addressDetails.currentAddress.state} — {profile.addressDetails.currentAddress.pincode}
-                                    <br />
-                                    {profile.addressDetails.currentAddress.country}
-                                </p>
+                                {profile.addressDetails.currentAddress ? (
+                                    <p className="text-sm text-textPrimary mt-2">
+                                        {profile.addressDetails.currentAddress.addressLine1}
+                                        {profile.addressDetails.currentAddress.addressLine2 ? `, ${profile.addressDetails.currentAddress.addressLine2}` : ""}
+                                        <br />
+                                        {profile.addressDetails.currentAddress.city}, {profile.addressDetails.currentAddress.state} — {profile.addressDetails.currentAddress.pincode}
+                                        <br />
+                                        {profile.addressDetails.currentAddress.country}
+                                    </p>
+                                ) : (
+                                    <p className="text-sm text-textTertiary mt-2 italic">Not provided</p>
+                                )}
                             </div>
                             <div>
                                 <span className="text-xs font-semibold text-textSecondary uppercase tracking-wide">Permanent Address</span>
@@ -213,6 +228,12 @@ const StudentProfilePage = () => {
                     )}
                 </div>
             </Container>
+
+            <CompleteStudentProfileModal
+                isOpen={isCompleteModalOpen}
+                onClose={() => setIsCompleteModalOpen(false)}
+                profile={profile}
+            />
         </>
     );
 };
