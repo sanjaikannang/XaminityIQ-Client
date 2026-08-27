@@ -1,5 +1,4 @@
 import InputField from "../../../../common/ui/Input";
-import { ExamMode } from "../../../../utils/enum";
 
 interface ExamScheduleFieldsProps {
     values: any;
@@ -11,8 +10,6 @@ interface ExamScheduleFieldsProps {
 }
 
 const ExamScheduleFields = ({ values, errors, touched, handleChange, handleBlur, disabled }: ExamScheduleFieldsProps) => {
-    const isProctoring = values.mode === ExamMode.PROCTORING;
-
     return (
         <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -63,9 +60,8 @@ const ExamScheduleFields = ({ values, errors, touched, handleChange, handleBlur,
                 <InputField
                     id="startDate"
                     name="startDate"
-                    type="text"
+                    type="date"
                     label="Start Date"
-                    placeholder="YYYY-MM-DD"
                     value={values.startDate}
                     onChange={handleChange}
                     onBlur={handleBlur}
@@ -77,9 +73,8 @@ const ExamScheduleFields = ({ values, errors, touched, handleChange, handleBlur,
                 <InputField
                     id="endDate"
                     name="endDate"
-                    type="text"
+                    type="date"
                     label="End Date"
-                    placeholder="YYYY-MM-DD"
                     value={values.endDate}
                     onChange={handleChange}
                     onBlur={handleBlur}
@@ -89,38 +84,34 @@ const ExamScheduleFields = ({ values, errors, touched, handleChange, handleBlur,
                     disabled={disabled}
                 />
             </div>
-            {isProctoring && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InputField
-                        id="startTime"
-                        name="startTime"
-                        type="text"
-                        label="Start Time"
-                        placeholder="HH:MM (e.g., 09:00)"
-                        value={values.startTime}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        error={errors.startTime}
-                        touched={touched.startTime}
-                        required
-                        disabled={disabled}
-                    />
-                    <InputField
-                        id="endTime"
-                        name="endTime"
-                        type="text"
-                        label="End Time"
-                        placeholder="HH:MM (e.g., 11:00)"
-                        value={values.endTime}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        error={errors.endTime}
-                        touched={touched.endTime}
-                        required
-                        disabled={disabled}
-                    />
-                </div>
-            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InputField
+                    id="startTime"
+                    name="startTime"
+                    type="time"
+                    label="Start Time (IST)"
+                    value={values.startTime}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={errors.startTime}
+                    touched={touched.startTime}
+                    required
+                    disabled={disabled}
+                />
+                <InputField
+                    id="endTime"
+                    name="endTime"
+                    type="time"
+                    label="End Time (IST)"
+                    value={values.endTime}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={errors.endTime}
+                    touched={touched.endTime}
+                    required
+                    disabled={disabled}
+                />
+            </div>
         </div>
     );
 };

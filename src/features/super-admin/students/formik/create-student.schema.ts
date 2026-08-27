@@ -1,14 +1,19 @@
 import * as Yup from 'yup';
 import { Gender, AdmissionType, EducationLevel, Qualification, BoardType } from '../../../../utils/enum';
-import { addressSchema, emergencyContactSchema, phoneValidator } from '../../../../common/form-sections/shared.schema';
+import { phoneValidator } from '../../../../common/form-sections/shared.schema';
+
+// Self-serve fields (address, emergency contact, education history,
+// parent/guardian, profile photo — see create-student.request.ts) are all
+// optional here: admin can still fill them in up front, but a blank section
+// must never block submission — the student completes it later instead.
 
 const educationHistorySchema = Yup.object({
-    level: Yup.string().oneOf(Object.values(EducationLevel)).required('Level is required'),
-    qualification: Yup.string().oneOf(Object.values(Qualification)).required('Qualification is required'),
-    boardOrUniversity: Yup.string().oneOf(Object.values(BoardType)).required('Board/University is required'),
-    institutionName: Yup.string().required('Institution name is required').max(100),
-    yearOfPassing: Yup.number().typeError('Must be a number').required('Year of passing is required'),
-    percentageOrCGPA: Yup.number().typeError('Must be a number').required('Percentage/CGPA is required'),
+    level: Yup.string().oneOf(Object.values(EducationLevel)),
+    qualification: Yup.string().oneOf(Object.values(Qualification)),
+    boardOrUniversity: Yup.string().oneOf(Object.values(BoardType)),
+    institutionName: Yup.string().max(100),
+    yearOfPassing: Yup.number().typeError('Must be a number'),
+    percentageOrCGPA: Yup.number().typeError('Must be a number'),
 });
 
 const parentInfoSchema = Yup.object({
@@ -22,26 +27,36 @@ const guardianInfoSchema = parentInfoSchema.shape({
     relation: Yup.string(),
 });
 
+const leniantAddressSchema = Yup.object({
+    addressLine1: Yup.string(),
+    addressLine2: Yup.string(),
+    city: Yup.string(),
+    state: Yup.string(),
+    pincode: Yup.string().matches(/^\d{6}$/, { message: 'Pincode must be a 6-digit number', excludeEmptyString: true }),
+});
+
+const leniantEmergencyContactSchema = Yup.object({
+    name: Yup.string().max(50),
+    relation: Yup.string(),
+    phoneNumber: phoneValidator,
+});
+
 export const createStudentValidationSchema = Yup.object({
     firstName: Yup.string().required('First name is required').max(30),
     lastName: Yup.string().required('Last name is required').max(30),
     gender: Yup.string().oneOf(Object.values(Gender)).required('Gender is required'),
     dateOfBirth: Yup.string().required('Date of birth is required'),
-    profilePhotoUrl: Yup.string().required('Profile photo URL is required'),
+    profilePhotoUrl: Yup.string(),
     religion: Yup.string().max(30),
 
     personalEmail: Yup.string().email('Must be a valid email').required('Personal email is required'),
     phoneNumber: phoneValidator.required('Phone number is required'),
     alternatePhoneNumber: phoneValidator,
-    emergencyContact: emergencyContactSchema,
+    emergencyContact: leniantEmergencyContactSchema,
 
-    currentAddress: addressSchema,
+    currentAddress: leniantAddressSchema,
     sameAsCurrent: Yup.boolean(),
-    permanentAddress: Yup.object().when('sameAsCurrent', {
-        is: false,
-        then: () => addressSchema,
-        otherwise: (schema) => schema.notRequired(),
-    }),
+    permanentAddress: leniantAddressSchema,
 
     batchId: Yup.string().required('Batch is required'),
     courseId: Yup.string().required('Course is required'),
@@ -53,5 +68,5 @@ export const createStudentValidationSchema = Yup.object({
     mother: parentInfoSchema.notRequired(),
     guardian: guardianInfoSchema.notRequired(),
 
-    educationHistory: Yup.array().of(educationHistorySchema).min(1, 'At least one education record is required'),
+    educationHistory: Yup.array().of(educationHistorySchema),
 });

@@ -41,20 +41,30 @@ const CreateStudentPage = () => {
 
     const handleSubmit = async (values: typeof initialValues, { setSubmitting }: any) => {
         try {
+            const hasCurrentAddress = !isBlankGroup(values.currentAddress);
+            const validEducation = values.educationHistory.filter((edu) => edu.institutionName && edu.level && edu.qualification);
+
             const payload = {
                 ...values,
+                profilePhotoUrl: values.profilePhotoUrl || undefined,
                 alternatePhoneNumber: values.alternatePhoneNumber || undefined,
                 currentSemester: Number(values.currentSemester),
-                currentAddress: { ...values.currentAddress, country: Country.INDIA },
-                permanentAddress: values.sameAsCurrent ? undefined : { ...values.permanentAddress, country: Country.INDIA },
+                emergencyContact: isBlankGroup(values.emergencyContact) ? undefined : values.emergencyContact,
+                currentAddress: hasCurrentAddress ? { ...values.currentAddress, country: Country.INDIA } : undefined,
+                sameAsCurrent: hasCurrentAddress ? values.sameAsCurrent : undefined,
+                permanentAddress: (hasCurrentAddress && !values.sameAsCurrent && !isBlankGroup(values.permanentAddress))
+                    ? { ...values.permanentAddress, country: Country.INDIA }
+                    : undefined,
                 father: isBlankGroup(values.father) ? undefined : values.father,
                 mother: isBlankGroup(values.mother) ? undefined : values.mother,
                 guardian: isBlankGroup(values.guardian) ? undefined : values.guardian,
-                educationHistory: values.educationHistory.map((edu) => ({
-                    ...edu,
-                    yearOfPassing: Number(edu.yearOfPassing),
-                    percentageOrCGPA: Number(edu.percentageOrCGPA),
-                })),
+                educationHistory: validEducation.length > 0
+                    ? validEducation.map((edu) => ({
+                        ...edu,
+                        yearOfPassing: Number(edu.yearOfPassing),
+                        percentageOrCGPA: Number(edu.percentageOrCGPA),
+                    }))
+                    : undefined,
             };
 
             const response = await createStudent(payload as any).unwrap();
@@ -90,7 +100,9 @@ const CreateStudentPage = () => {
                                 </section>
 
                                 <section className="space-y-4">
-                                    <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">Address</h3>
+                                    <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">
+                                        Address <span className="text-sm font-normal text-textTertiary">(optional — student can complete this later)</span>
+                                    </h3>
                                     <AddressSection values={values} errors={errors} touched={touched} handleChange={handleChange} handleBlur={handleBlur} setFieldValue={setFieldValue} />
                                 </section>
 
@@ -105,7 +117,9 @@ const CreateStudentPage = () => {
                                 </section>
 
                                 <section className="space-y-4">
-                                    <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">Education History</h3>
+                                    <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">
+                                        Education History <span className="text-sm font-normal text-textTertiary">(optional — student can complete this later)</span>
+                                    </h3>
                                     <StudentEducationHistoryFields values={values} errors={errors} touched={touched} handleChange={handleChange} handleBlur={handleBlur} setFieldValue={setFieldValue} />
                                 </section>
 

@@ -4,7 +4,7 @@ import { Eye, EyeOff } from 'lucide-react';
 interface InputFieldProps {
     id: string;
     name: string;
-    type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
+    type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'date' | 'time';
     label?: string;
     placeholder?: string;
     value?: string | number;

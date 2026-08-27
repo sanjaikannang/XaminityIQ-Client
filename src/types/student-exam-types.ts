@@ -1,5 +1,5 @@
 import { AttemptStatus, ExamMode, ExamStatus, QuestionType, RecordingMediaType, ViolationType } from "../utils/enum";
-import { SecuritySettings } from "./exams-types";
+import { SecuritySettings, ExamSectionData } from "./exams-types";
 
 export interface MyExamData {
     _id: string;
@@ -36,6 +36,7 @@ export interface AttemptQuestionData {
     text: string;
     marks: number;
     order: number;
+    examSectionId?: string;
     options?: AttemptQuestionOption[];
 }
 
@@ -46,6 +47,7 @@ export interface StartAttemptData {
     durationMinutes: number;
     startedAt: string;
     securitySettings: SecuritySettings;
+    examSections: ExamSectionData[];
     questions: AttemptQuestionData[];
 }
 
@@ -59,6 +61,8 @@ export interface AttemptAnswerData {
     questionId: string;
     selectedOptionId?: string;
     selectedOptionIds?: string[];
+    answerText?: string;
+    firstViewedAt?: string;
 }
 
 export interface GetAttemptData {
@@ -70,6 +74,7 @@ export interface GetAttemptData {
     status: AttemptStatus;
     remainingMs: number;
     securitySettings: SecuritySettings;
+    examSections: ExamSectionData[];
     questions: AttemptQuestionData[];
     answers: AttemptAnswerData[];
 }
@@ -83,6 +88,18 @@ export interface GetAttemptResponse {
 export interface SaveAnswerRequest {
     selectedOptionId?: string;
     selectedOptionIds?: string[];
+    answerText?: string;
+}
+
+export interface ViewQuestionData {
+    firstViewedAt?: string;
+    minTimePerQuestionSeconds: number;
+}
+
+export interface ViewQuestionResponse {
+    success: boolean;
+    message: string;
+    data?: ViewQuestionData;
 }
 
 export interface SubmitAttemptResponse {

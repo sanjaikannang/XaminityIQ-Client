@@ -40,6 +40,14 @@ const MyExamsPage = () => {
                 </Button>
             );
         }
+        // Exam window has closed (COMPLETED/RESULTS_PUBLISHED) and the student
+        // never started an attempt — nothing left to do, don't offer a dead-end button.
+        if (
+            (exam.status === ExamStatus.COMPLETED || exam.status === ExamStatus.RESULTS_PUBLISHED) &&
+            !exam.myAttemptId
+        ) {
+            return <span className="text-sm text-textTertiary font-medium">Not Attempted</span>;
+        }
         return (
             <Button
                 variant="primary"

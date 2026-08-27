@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
+import { ExamRoomStatus } from "../../../../utils/enum";
 import { useGetMyExamRoomsQuery } from "../../../../state/services/endpoints/faculty-proctoring";
 import { formatDateTime } from "../../../../utils/date";
 
@@ -35,13 +36,17 @@ const MyExamRoomsPage = () => {
                                     {formatDateTime(room.startDateTime)} - {formatDateTime(room.endDateTime)}
                                 </p>
                             </div>
-                            <Button
-                                variant="primary"
-                                size="sm"
-                                onClick={() => navigate(`/faculty/proctoring/${room.roomId}`)}
-                            >
-                                Open Room
-                            </Button>
+                            {room.status === ExamRoomStatus.CLOSED ? (
+                                <span className="text-sm text-textTertiary font-medium">Closed</span>
+                            ) : (
+                                <Button
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={() => navigate(`/faculty/proctoring/${room.roomId}`)}
+                                >
+                                    {room.status === ExamRoomStatus.ACTIVE ? 'Open Room' : 'View Room (Not Started)'}
+                                </Button>
+                            )}
                         </div>
                     ))}
                 </div>

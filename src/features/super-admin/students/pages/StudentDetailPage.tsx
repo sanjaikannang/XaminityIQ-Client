@@ -254,20 +254,24 @@ const StudentDetailPage = () => {
 
                             <div className="bg-bgSecondary border border-borderDefault rounded-xl p-3 mt-3">
                                 <p className="text-sm font-semibold text-textSecondary mb-3">Emergency Contact</p>
-                                <div className="space-y-2">
-                                    <div className="flex justify-between">
-                                        <span className="text-sm text-textTertiary">Name</span>
-                                        <span className="text-sm font-semibold text-textPrimary">{student.contactDetails.emergencyContact.name}</span>
+                                {student.contactDetails.emergencyContact ? (
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between">
+                                            <span className="text-sm text-textTertiary">Name</span>
+                                            <span className="text-sm font-semibold text-textPrimary">{student.contactDetails.emergencyContact.name}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-sm text-textTertiary">Relation</span>
+                                            <span className="text-sm font-semibold text-textPrimary">{student.contactDetails.emergencyContact.relation}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-sm text-textTertiary">Phone</span>
+                                            <span className="text-sm font-semibold text-textPrimary">{student.contactDetails.emergencyContact.phoneNumber}</span>
+                                        </div>
                                     </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-sm text-textTertiary">Relation</span>
-                                        <span className="text-sm font-semibold text-textPrimary">{student.contactDetails.emergencyContact.relation}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-sm text-textTertiary">Phone</span>
-                                        <span className="text-sm font-semibold text-textPrimary">{student.contactDetails.emergencyContact.phoneNumber}</span>
-                                    </div>
-                                </div>
+                                ) : (
+                                    <p className="text-sm text-textTertiary italic">Not provided yet</p>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -311,16 +315,20 @@ const StudentDetailPage = () => {
                                         <h3 className="text-sm font-semibold text-textPrimary">Current Address</h3>
                                     </div>
                                     <div className="bg-bgSecondary rounded-xl p-4 border border-borderDefault">
-                                        <p className="text-sm text-textSecondary leading-relaxed">
-                                            {student.addressDetails.currentAddress.addressLine1}
-                                            {student.addressDetails.currentAddress.addressLine2 && `, ${student.addressDetails.currentAddress.addressLine2}`}
-                                            <br />
-                                            {student.addressDetails.currentAddress.city},
-                                            <br />
-                                            {student.addressDetails.currentAddress.state} - {student.addressDetails.currentAddress.pincode}
-                                            <br />
-                                            {student.addressDetails.currentAddress.country}
-                                        </p>
+                                        {student.addressDetails.currentAddress ? (
+                                            <p className="text-sm text-textSecondary leading-relaxed">
+                                                {student.addressDetails.currentAddress.addressLine1}
+                                                {student.addressDetails.currentAddress.addressLine2 && `, ${student.addressDetails.currentAddress.addressLine2}`}
+                                                <br />
+                                                {student.addressDetails.currentAddress.city},
+                                                <br />
+                                                {student.addressDetails.currentAddress.state} - {student.addressDetails.currentAddress.pincode}
+                                                <br />
+                                                {student.addressDetails.currentAddress.country}
+                                            </p>
+                                        ) : (
+                                            <p className="text-sm text-textTertiary italic">Not provided yet</p>
+                                        )}
                                     </div>
                                 </div>
 

@@ -1,7 +1,7 @@
 import toast from "react-hot-toast";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { CheckCircle2, XCircle, Loader2, Circle, Video, Mic, MonitorUp, Maximize, Wifi } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2, Circle, Video, Mic, MonitorUp, Maximize, Wifi, Monitor, ShieldCheck } from "lucide-react";
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
@@ -23,6 +23,7 @@ const CHECK_ICONS: Record<string, React.ComponentType<{ className?: string }>> =
     camera: Video,
     microphone: Mic,
     screen: MonitorUp,
+    multiMonitor: Monitor,
     fullscreen: Maximize,
     connection: Wifi,
 };
@@ -31,9 +32,27 @@ const INITIAL_CHECKS: CheckState[] = [
     { key: 'camera', label: 'Camera (Video)', status: 'PENDING' },
     { key: 'microphone', label: 'Microphone', status: 'PENDING' },
     { key: 'screen', label: 'Entire Screen Sharing', status: 'PENDING' },
+    { key: 'multiMonitor', label: 'Single Monitor Only', status: 'PENDING' },
     { key: 'fullscreen', label: 'Full-Screen Mode', status: 'PENDING' },
     { key: 'connection', label: 'Stable Internet Connection', status: 'PENDING' },
 ];
+
+// getScreenDetails() is the Window Management API (Chromium-based browsers,
+// prompts for permission). window.screen.isExtended is a lighter no-prompt
+// signal some browsers expose. Neither is universally supported — on a
+// browser with neither, we can't detect this at all, so we pass rather than
+// block a legitimate single-monitor student on an unsupported browser.
+async function detectMultipleMonitors(): Promise<{ supported: boolean; multiple: boolean }> {
+    const w = window as any;
+    if (typeof w.getScreenDetails === 'function') {
+        const details = await w.getScreenDetails();
+        return { supported: true, multiple: (details.screens?.length ?? 1) > 1 };
+    }
+    if (typeof window.screen !== 'undefined' && 'isExtended' in window.screen) {
+        return { supported: true, multiple: !!(window.screen as any).isExtended };
+    }
+    return { supported: false, multiple: false };
+}
 
 const PreFlightCheckPage = () => {
     const navigate = useNavigate();
@@ -103,6 +122,29 @@ const PreFlightCheckPage = () => {
         }
     };
 
+    const runMultiMonitor = async (): Promise<boolean> => {
+        updateCheck('multiMonitor', { status: 'CHECKING' });
+        try {
+            const { supported, multiple } = await detectMultipleMonitors();
+            if (multiple) {
+                updateCheck('multiMonitor', {
+                    status: 'FAILED',
+                    message: 'Multiple monitors detected. Please disconnect any additional displays and use a single monitor for this exam, then retry.',
+                });
+                return false;
+            }
+            updateCheck('multiMonitor', {
+                status: 'PASSED',
+                message: supported ? undefined : 'Your browser cannot verify this automatically — proceeding on trust.',
+            });
+            return true;
+        } catch {
+            // Permission dismissed/denied — cannot verify, don't hard-block on an inconclusive check.
+            updateCheck('multiMonitor', { status: 'PASSED', message: 'Could not verify — proceeding on trust.' });
+            return true;
+        }
+    };
+
     const runFullscreen = async (): Promise<boolean> => {
         updateCheck('fullscreen', { status: 'CHECKING' });
         try {
@@ -138,6 +180,7 @@ const PreFlightCheckPage = () => {
         camera: runCamera,
         microphone: runMicrophone,
         screen: runScreenShare,
+        multiMonitor: runMultiMonitor,
         fullscreen: runFullscreen,
         connection: runConnection,
     };
@@ -187,6 +230,7 @@ const PreFlightCheckPage = () => {
     };
 
     const passedCount = checks.filter((c) => c.status === 'PASSED').length;
+    const progressPct = Math.round((passedCount / checks.length) * 100);
 
     const statusIcon = (status: CheckStatus) => {
         if (status === 'PASSED') return <CheckCircle2 className="w-5 h-5 text-green-600" />;
@@ -200,11 +244,32 @@ const PreFlightCheckPage = () => {
             <PageHeader>Pre-Flight Checks</PageHeader>
             <Container>
                 <div className="py-6 space-y-4">
-                    <div className="bg-whiteColor rounded-xl border border-borderDefault p-4 flex items-center justify-between flex-wrap gap-2">
-                        <p className="text-sm text-textSecondary">
-                            We need to verify your camera, microphone, screen sharing, and connection before you can start.
-                        </p>
-                        <span className="text-sm font-semibold text-textPrimary shrink-0">{passedCount} / {checks.length} passed</span>
+                    <div className="bg-whiteColor rounded-xl border border-borderDefault p-5 space-y-3">
+                        <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                                    <ShieldCheck className="w-5 h-5 text-primary" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-semibold text-textPrimary">System readiness check</p>
+                                    <p className="text-xs text-textSecondary">
+                                        We need to verify your camera, microphone, screen, and connection before you can start.
+                                    </p>
+                                </div>
+                            </div>
+                            <span className="text-sm font-semibold text-textPrimary shrink-0">{passedCount} / {checks.length}</span>
+                        </div>
+                        <div className="h-2 w-full rounded-full bg-bgSecondary overflow-hidden">
+                            <div
+                                className={`h-full rounded-full transition-all duration-300 ${allPassed ? 'bg-green-600' : 'bg-primary'}`}
+                                style={{ width: `${progressPct}%` }}
+                            />
+                        </div>
+                        {allPassed && (
+                            <p className="text-sm font-medium text-green-700 flex items-center gap-1.5">
+                                <CheckCircle2 className="w-4 h-4" /> All checks passed — you're ready to begin.
+                            </p>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -212,10 +277,17 @@ const PreFlightCheckPage = () => {
                             {checks.map((check, index) => {
                                 const Icon = CHECK_ICONS[check.key];
                                 return (
-                                    <div key={check.key} className={`rounded-xl border p-4 bg-whiteColor ${check.status === 'FAILED' ? 'border-red-200' : 'border-borderDefault'}`}>
+                                    <div
+                                        key={check.key}
+                                        className={`rounded-xl border p-4 bg-whiteColor transition-colors ${check.status === 'FAILED' ? 'border-red-200' : check.status === 'PASSED' ? 'border-green-200' : 'border-borderDefault'
+                                            }`}
+                                    >
                                         <div className="flex items-center justify-between gap-3">
                                             <div className="flex items-center gap-2.5 min-w-0">
-                                                <Icon className="w-4 h-4 text-textSecondary shrink-0" />
+                                                <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${check.status === 'PASSED' ? 'bg-green-100' : check.status === 'FAILED' ? 'bg-red-100' : 'bg-bgSecondary'
+                                                    }`}>
+                                                    <Icon className="w-3.5 h-3.5 text-textSecondary" />
+                                                </div>
                                                 <span className="font-medium text-textPrimary truncate">{check.label}</span>
                                             </div>
                                             {statusIcon(check.status)}
@@ -227,6 +299,9 @@ const PreFlightCheckPage = () => {
                                                     Retry
                                                 </Button>
                                             </div>
+                                        )}
+                                        {check.status === 'PASSED' && check.message && (
+                                            <p className="mt-2 text-xs text-textTertiary">{check.message}</p>
                                         )}
                                     </div>
                                 );

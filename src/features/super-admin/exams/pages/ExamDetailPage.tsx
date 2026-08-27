@@ -1,7 +1,7 @@
 import toast from "react-hot-toast";
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Info, HelpCircle, ShieldAlert, Building2, Users, Award, CheckCircle2, Circle, UserCheck, Clock, ClipboardList, Video } from "lucide-react";
+import { Info, HelpCircle, ShieldAlert, Building2, Users, Award, CheckCircle2, Circle, UserCheck, Clock, ClipboardList, Video, LayoutList, Upload } from "lucide-react";
 import Modal from "../../../../common/ui/Modal";
 import Button from "../../../../common/ui/Button";
 import RowActions from "../../../../common/ui/RowActions";
@@ -16,6 +16,9 @@ import { formatDate, formatDateTime } from "../../../../utils/date";
 import { QuestionData } from "../../../../types/exams-types";
 import QuestionForm, { QuestionFormValues } from "../components/QuestionForm";
 import RecordingViewerModal from "../components/RecordingViewerModal";
+import ExamSectionsManager from "../components/ExamSectionsManager";
+import BulkUploadQuestionsModal from "../components/BulkUploadQuestionsModal";
+import AttemptAnswersModal from "../components/AttemptAnswersModal";
 import { useGetAllFacultyQuery } from "../../../../state/services/endpoints/faculty";
 import {
     useGetExamQuery,
@@ -44,6 +47,9 @@ const ExamDetailPage = () => {
     const [deleteQuestionTarget, setDeleteQuestionTarget] = useState<QuestionData | null>(null);
     const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
     const [recordingAttemptId, setRecordingAttemptId] = useState<string | null>(null);
+    const [answersAttemptId, setAnswersAttemptId] = useState<string | null>(null);
+    const [answersStudentLabel, setAnswersStudentLabel] = useState<string | undefined>(undefined);
+    const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
 
     const [publishExam, { isLoading: isPublishing }] = usePublishExamMutation();
     const [cancelExam, { isLoading: isCancelling }] = useDeleteExamMutation();
@@ -96,11 +102,13 @@ const ExamDetailPage = () => {
 
     const handleQuestionSubmit = async (values: QuestionFormValues) => {
         if (!id) return;
+        const isSubjective = values.type === QuestionType.WRITTEN || values.type === QuestionType.TYPING;
         const payload = {
             type: values.type as any,
             text: values.text,
             marks: Number(values.marks),
-            options: values.type === 'WRITTEN' ? undefined : values.options,
+            examSectionId: values.examSectionId,
+            options: isSubjective ? undefined : values.options,
         };
 
         if (editingQuestion) {
@@ -251,6 +259,27 @@ const ExamDetailPage = () => {
                         </div>
                     </section>
 
+                    {isDraft && (
+                        <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                    <LayoutList className="w-5 h-5 text-primary" />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-bold text-textPrimary">Sections</h2>
+                                    <p className="text-sm text-textSecondary">
+                                        Group questions into named sections (Section A, Section B, ...) — optional.
+                                    </p>
+                                </div>
+                            </div>
+                            <ExamSectionsManager
+                                examId={id as string}
+                                examSections={exam.examSections}
+                                hasSectionedQuestions={exam.questions.some((q) => !!q.examSectionId)}
+                            />
+                        </section>
+                    )}
+
                     <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-3">
@@ -262,22 +291,30 @@ const ExamDetailPage = () => {
                                 </h2>
                             </div>
                             {isDraft && (
-                                <Button variant="primary" size="sm" onClick={handleOpenAddQuestion}>
-                                    Add Question
-                                </Button>
+                                <div className="flex items-center gap-2">
+                                    <Button variant="outline" size="sm" icon={Upload} onClick={() => setIsBulkUploadOpen(true)}>
+                                        Bulk Upload
+                                    </Button>
+                                    <Button variant="primary" size="sm" onClick={handleOpenAddQuestion}>
+                                        Add Question
+                                    </Button>
+                                </div>
                             )}
                         </div>
                         {exam.questions.length === 0 ? (
                             <p className="text-sm text-textSecondary">No questions added yet.</p>
                         ) : (
                             <Accordion>
-                                {exam.questions.map((question) => (
+                                {exam.questions.map((question) => {
+                                    const sectionLabel = exam.examSections.find((s) => s._id === question.examSectionId)?.label;
+                                    return (
                                     <AccordionItem
                                         key={question._id}
                                         header={
                                             <div className="flex items-center gap-3 flex-wrap">
                                                 <span className="text-xs font-semibold text-textSecondary shrink-0">#{question.order}</span>
                                                 <Chip label={formatEnumLabel(question.type)} variant={getChipVariant(question.type)} />
+                                                {sectionLabel && <Chip label={sectionLabel} variant="blue" />}
                                                 <span className="text-sm text-textPrimary truncate flex-1 min-w-[160px]">{question.text}</span>
                                                 <span className="text-xs font-medium text-textSecondary shrink-0">{question.marks} marks</span>
                                             </div>
@@ -297,9 +334,11 @@ const ExamDetailPage = () => {
                                                 <p className="text-sm text-textPrimary mt-1">{question.text}</p>
                                             </div>
 
-                                            {question.type === QuestionType.WRITTEN ? (
+                                            {question.type === QuestionType.WRITTEN || question.type === QuestionType.TYPING ? (
                                                 <p className="text-sm text-textSecondary italic">
-                                                    Written answer — evaluated manually by an assigned faculty member.
+                                                    {question.type === QuestionType.WRITTEN
+                                                        ? 'Written answer (photo upload) — evaluated manually by an assigned faculty member.'
+                                                        : 'Typed answer — evaluated manually by an assigned faculty member.'}
                                                 </p>
                                             ) : (
                                                 <div>
@@ -340,7 +379,8 @@ const ExamDetailPage = () => {
                                             </div>
                                         </div>
                                     </AccordionItem>
-                                ))}
+                                    );
+                                })}
                             </Accordion>
                         )}
                     </section>
@@ -365,6 +405,7 @@ const ExamDetailPage = () => {
                                             <th className="px-3 py-2 text-left font-medium text-textSecondary">Flagged</th>
                                             <th className="px-3 py-2 text-left font-medium text-textSecondary">Violations</th>
                                             <th className="px-3 py-2 text-left font-medium text-textSecondary">Recording</th>
+                                            <th className="px-3 py-2 text-left font-medium text-textSecondary">Answers</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-borderLight">
@@ -402,6 +443,18 @@ const ExamDetailPage = () => {
                                                         className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline cursor-pointer"
                                                     >
                                                         <Video className="w-3.5 h-3.5" /> View
+                                                    </button>
+                                                </td>
+                                                <td className="px-3 py-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setAnswersAttemptId(attempt.attemptId);
+                                                            setAnswersStudentLabel(attempt.studentName || attempt.studentCode);
+                                                        }}
+                                                        className="flex items-center gap-1.5 text-xs font-medium text-primary hover:underline cursor-pointer"
+                                                    >
+                                                        <HelpCircle className="w-3.5 h-3.5" /> View
                                                     </button>
                                                 </td>
                                             </tr>
@@ -684,15 +737,24 @@ const ExamDetailPage = () => {
                         type: editingQuestion.type,
                         text: editingQuestion.text,
                         marks: editingQuestion.marks,
+                        examSectionId: editingQuestion.examSectionId,
                         options: editingQuestion.options?.map((o) => ({
                             text: o.text,
                             isCorrect: !!editingQuestion.correctOptionIds?.includes(o.optionId),
                         })),
                     } : undefined}
+                    examSections={exam.examSections}
                     onSubmit={handleQuestionSubmit}
                     isLoading={isAddingQuestion || isUpdatingQuestion}
                 />
             </Modal>
+
+            <BulkUploadQuestionsModal
+                isOpen={isBulkUploadOpen}
+                onClose={() => setIsBulkUploadOpen(false)}
+                examId={id as string}
+                examSections={exam.examSections}
+            />
 
             <DeleteConfirmModal
                 isOpen={!!deleteQuestionTarget}
@@ -713,6 +775,12 @@ const ExamDetailPage = () => {
             />
 
             <RecordingViewerModal attemptId={recordingAttemptId} onClose={() => setRecordingAttemptId(null)} />
+
+            <AttemptAnswersModal
+                attemptId={answersAttemptId}
+                studentLabel={answersStudentLabel}
+                onClose={() => { setAnswersAttemptId(null); setAnswersStudentLabel(undefined); }}
+            />
         </>
     );
 };

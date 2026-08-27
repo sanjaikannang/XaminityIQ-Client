@@ -1,6 +1,7 @@
 export const faculty = {
-    // Faculty (self) endpoint
+    // Faculty (self) endpoints
     getMyProfile: () => "/faculty/profile",
+    updateMyProfile: () => "/faculty/profile",
 
     // Admin endpoints
     getAllFaculty: () => "/admin/faculty",

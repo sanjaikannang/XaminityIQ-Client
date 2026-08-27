@@ -77,6 +77,9 @@ const ProctoringDashboardPage = () => {
     const assignments = useMemo(() => roomDetail?.data?.assignments || [], [roomDetail]);
     const waiting = assignments.filter((a) => a.status === RoomAssignmentStatus.WAITING);
     const active = assignments.filter((a) => a.status === RoomAssignmentStatus.ADMITTED || a.status === RoomAssignmentStatus.IN_PROGRESS);
+    // Grace-period-exceeded LiveKit dropout (not a faculty removal) — informational
+    // only, the student rejoins on their own via the lobby, landing back in Waiting.
+    const disconnected = assignments.filter((a) => a.status === RoomAssignmentStatus.DISCONNECTED);
     const endDateTime = roomDetail?.data?.endDateTime;
     const remainingMs = endDateTime ? new Date(endDateTime).getTime() - now : null;
 
@@ -206,9 +209,9 @@ const ProctoringDashboardPage = () => {
     };
 
     const handleRemove = async () => {
-        if (!roomId || !removeTarget) return;
+        if (!roomId || !removeTarget || !removeReason.trim()) return;
         try {
-            await removeStudent({ roomId, assignmentId: removeTarget.assignmentId, data: { reason: removeReason.trim() || undefined } }).unwrap();
+            await removeStudent({ roomId, assignmentId: removeTarget.assignmentId, data: { reason: removeReason.trim() } }).unwrap();
             toast.success('Student removed');
         } catch (error: any) {
             toast.error(error.data?.message || 'Failed to remove student');
@@ -363,6 +366,20 @@ const ProctoringDashboardPage = () => {
                             </div>
                         </div>
 
+                        {disconnected.length > 0 && (
+                            <div className="border-b border-borderLight flex flex-col min-h-0 max-h-[25%]">
+                                <p className="text-sm font-semibold text-yellow-700 px-4 pt-3 pb-2 shrink-0">Disconnected ({disconnected.length})</p>
+                                <div className="overflow-y-auto px-4 pb-3 space-y-2">
+                                    {disconnected.map((a) => (
+                                        <div key={a.assignmentId} className="rounded-md border border-yellow-200 bg-yellow-50 p-2.5">
+                                            <p className="text-sm font-medium text-textPrimary truncate">{a.studentName || a.studentCode}</p>
+                                            <p className="text-xs text-yellow-700">Lost connection — waiting for them to rejoin</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         <div className="flex-1 flex flex-col overflow-hidden min-h-0">
                             <div className="p-3 border-b border-borderLight shrink-0">
                                 <p className="text-sm font-semibold text-textPrimary mb-2">Chat</p>
@@ -446,13 +463,13 @@ const ProctoringDashboardPage = () => {
                     <textarea
                         value={removeReason}
                         onChange={(e) => setRemoveReason(e.target.value)}
-                        placeholder="Reason (optional)"
+                        placeholder="Reason (required)"
                         className="w-full border border-borderLight rounded-md p-2 text-sm"
                         rows={3}
                     />
                     <div className="flex justify-end gap-3">
                         <Button variant="outline" onClick={() => setRemoveTarget(null)}>Cancel</Button>
-                        <Button variant="primary" loading={isRemoving} disabled={isRemoving} onClick={handleRemove}>
+                        <Button variant="primary" loading={isRemoving} disabled={isRemoving || !removeReason.trim()} onClick={handleRemove}>
                             {isRemoving ? '' : 'Remove'}
                         </Button>
                     </div>

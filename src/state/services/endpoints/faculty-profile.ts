@@ -1,6 +1,6 @@
 import { api } from "../../../api";
 import { apiInstance } from "../api-instance";
-import { GetMyFacultyProfileResponse } from "../../../types/faculty-types";
+import { GetMyFacultyProfileResponse, UpdateMyFacultyProfileRequest, UpdateMyProfileResponse } from "../../../types/faculty-types";
 
 export const facultyProfileApiService = apiInstance.injectEndpoints({
     endpoints: (build) => ({
@@ -11,9 +11,18 @@ export const facultyProfileApiService = apiInstance.injectEndpoints({
             }),
             providesTags: ['my-faculty-profile'],
         }),
+        updateMyFacultyProfile: build.mutation<UpdateMyProfileResponse, UpdateMyFacultyProfileRequest>({
+            query: (data) => ({
+                url: api.faculty.updateMyProfile(),
+                method: "PATCH",
+                data,
+            }),
+            invalidatesTags: ['my-faculty-profile'],
+        }),
     }),
 });
 
 export const {
     useGetMyFacultyProfileQuery,
+    useUpdateMyFacultyProfileMutation,
 } = facultyProfileApiService;

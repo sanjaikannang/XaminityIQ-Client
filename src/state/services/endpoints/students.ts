@@ -10,6 +10,7 @@ import {
     EditStudentRequest,
     EditStudentResponse,
     DeleteStudentResponse,
+    BulkUploadStudentsResponse,
 } from "../../../types/students-types";
 
 export const studentsApiService = apiInstance.injectEndpoints({
@@ -69,6 +70,14 @@ export const studentsApiService = apiInstance.injectEndpoints({
                 method: "GET",
             }),
         }),
+        bulkUploadStudents: build.mutation<BulkUploadStudentsResponse, { students: CreateStudentRequest[] }>({
+            query: (data) => ({
+                url: api.students.bulkUploadStudents(),
+                method: "POST",
+                data,
+            }),
+            invalidatesTags: ['students'],
+        }),
     }),
 });
 
@@ -81,4 +90,5 @@ export const {
     useUpdateStudentMutation,
     useDeleteStudentMutation,
     useGetStudentActivityQuery,
+    useBulkUploadStudentsMutation,
 } = studentsApiService;

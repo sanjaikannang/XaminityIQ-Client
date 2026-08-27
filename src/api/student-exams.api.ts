@@ -3,6 +3,7 @@ export const studentExams = {
     startAttempt: (examId: string) => `/student/exams/${examId}/start`,
     getAttempt: (attemptId: string) => `/student/exams/attempts/${attemptId}`,
     saveAnswer: (attemptId: string, questionId: string) => `/student/exams/attempts/${attemptId}/answers/${questionId}`,
+    viewQuestion: (attemptId: string, questionId: string) => `/student/exams/attempts/${attemptId}/questions/${questionId}/view`,
     submitAttempt: (attemptId: string) => `/student/exams/attempts/${attemptId}/submit`,
     reportViolation: (attemptId: string) => `/student/exams/attempts/${attemptId}/violations`,
     getRecordingSignature: (attemptId: string) => `/student/exams/attempts/${attemptId}/recordings/signature`,
