@@ -1,4 +1,5 @@
 import InputField from "../../../../common/ui/Input";
+import { ExamMode } from "../../../../utils/enum";
 
 interface ExamScheduleFieldsProps {
     values: any;
@@ -84,34 +85,36 @@ const ExamScheduleFields = ({ values, errors, touched, handleChange, handleBlur,
                     disabled={disabled}
                 />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InputField
-                    id="startTime"
-                    name="startTime"
-                    type="time"
-                    label="Start Time (IST)"
-                    value={values.startTime}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={errors.startTime}
-                    touched={touched.startTime}
-                    required
-                    disabled={disabled}
-                />
-                <InputField
-                    id="endTime"
-                    name="endTime"
-                    type="time"
-                    label="End Time (IST)"
-                    value={values.endTime}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={errors.endTime}
-                    touched={touched.endTime}
-                    required
-                    disabled={disabled}
-                />
-            </div>
+            {values.mode === ExamMode.PROCTORING && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InputField
+                        id="startTime"
+                        name="startTime"
+                        type="time"
+                        label="Start Time (IST)"
+                        value={values.startTime}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={errors.startTime}
+                        touched={touched.startTime}
+                        required
+                        disabled={disabled}
+                    />
+                    <InputField
+                        id="endTime"
+                        name="endTime"
+                        type="time"
+                        label="End Time (IST)"
+                        value={values.endTime}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={errors.endTime}
+                        touched={touched.endTime}
+                        required
+                        disabled={disabled}
+                    />
+                </div>
+            )}
         </div>
     );
 };

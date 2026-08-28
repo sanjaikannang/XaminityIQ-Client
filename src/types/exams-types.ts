@@ -42,9 +42,9 @@ export interface ExamData {
     courseName?: string;
     departmentId: string;
     deptName?: string;
-    sectionId: string;
-    sectionName?: string;
-    semester: number;
+    sectionIds: string[];
+    sectionNames?: string[];
+    semesters: number[];
     subjectId: string;
     subjectName?: string;
     durationMinutes: number;
@@ -100,17 +100,17 @@ export interface CreateExamRequest {
     batchId: string;
     courseId: string;
     departmentId: string;
-    sectionId: string;
-    semester: number;
+    sectionIds: string[];
+    semesters: number[];
     subjectId: string;
     durationMinutes: number;
     totalMarks: number;
     passingMarks: number;
     startDate: string;
     endDate: string;
-    // Required for both AUTO and PROCTORING — always IST
-    startTime: string;
-    endTime: string;
+    // PROCTORING-only — always IST. Omitted/ignored for AUTO exams.
+    startTime?: string;
+    endTime?: string;
     examSections?: ExamSectionInput[];
     securitySettings?: SecuritySettings;
 }
@@ -262,6 +262,23 @@ export interface GetExamAttemptsResponse {
     success: boolean;
     message: string;
     data?: { attempts: ExamAttemptSummaryData[] };
+}
+
+// Assigned Students (admin) Types — every student whose academic placement
+// matches the exam's hierarchy selection, not just those who attempted it
+export interface AssignedStudentData {
+    studentId: string;
+    studentCode: string;
+    studentName: string;
+    studentEmail: string;
+    attemptId: string | null;
+    attemptStatus: string;
+}
+
+export interface GetAssignedStudentsResponse {
+    success: boolean;
+    message: string;
+    data?: { students: AssignedStudentData[] };
 }
 
 // Attempt Recording (admin viewer) Types

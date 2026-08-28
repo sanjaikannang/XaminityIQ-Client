@@ -5,6 +5,7 @@ import { Info, GraduationCap, CalendarClock, ShieldCheck } from 'lucide-react';
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
+import { ExamMode } from "../../../../utils/enum";
 import { createExamValidationSchema } from "../formik/create-exam.schema";
 import { useCreateExamMutation } from "../../../../state/services/endpoints/exams";
 import ExamBasicFields from "../components/ExamBasicFields";
@@ -14,7 +15,7 @@ import ExamSecurityFields from "../components/ExamSecurityFields";
 
 const initialValues = {
     name: '', description: '', mode: '',
-    batchId: '', courseId: '', departmentId: '', sectionId: '', semester: '', subjectId: '',
+    batchId: '', courseId: '', departmentId: '', sectionIds: [] as string[], semesters: [] as number[], subjectId: '',
     durationMinutes: '', totalMarks: '', passingMarks: '',
     startDate: '', endDate: '', startTime: '', endTime: '',
     securitySettings: {
@@ -40,12 +41,15 @@ const CreateExamPage = () => {
 
     const handleSubmit = async (values: typeof initialValues, { setSubmitting }: any) => {
         try {
+            const isProctoring = values.mode === ExamMode.PROCTORING;
             const payload = {
                 ...values,
-                semester: Number(values.semester),
+                semesters: values.semesters.map(Number),
                 durationMinutes: Number(values.durationMinutes),
                 totalMarks: Number(values.totalMarks),
                 passingMarks: Number(values.passingMarks),
+                startTime: isProctoring ? values.startTime : undefined,
+                endTime: isProctoring ? values.endTime : undefined,
             };
 
             const response = await createExam(payload as any).unwrap();

@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
-import { ExamStatus } from "../../../../utils/enum";
+import { ExamMode, ExamStatus } from "../../../../utils/enum";
 import { createExamValidationSchema } from "../formik/create-exam.schema";
 import { useGetExamQuery, useUpdateExamMutation } from "../../../../state/services/endpoints/exams";
 import ExamBasicFields from "../components/ExamBasicFields";
@@ -39,8 +39,8 @@ const EditExamPage = () => {
         batchId: exam.batchId,
         courseId: exam.courseId,
         departmentId: exam.departmentId,
-        sectionId: exam.sectionId,
-        semester: exam.semester,
+        sectionIds: exam.sectionIds,
+        semesters: exam.semesters,
         subjectId: exam.subjectId,
         durationMinutes: exam.durationMinutes,
         totalMarks: exam.totalMarks,
@@ -68,14 +68,17 @@ const EditExamPage = () => {
 
     const handleSubmit = async (values: typeof initialValues, { setSubmitting }: any) => {
         try {
+            const isProctoring = values.mode === ExamMode.PROCTORING;
             const payload = isPublished
                 ? { description: values.description }
                 : {
                     ...values,
-                    semester: Number(values.semester),
+                    semesters: values.semesters.map(Number),
                     durationMinutes: Number(values.durationMinutes),
                     totalMarks: Number(values.totalMarks),
                     passingMarks: Number(values.passingMarks),
+                    startTime: isProctoring ? values.startTime : undefined,
+                    endTime: isProctoring ? values.endTime : undefined,
                 };
 
             const response = await updateExam({ id: id as string, data: payload as any }).unwrap();
@@ -129,7 +132,7 @@ const EditExamPage = () => {
                                             batchName: exam.batchName,
                                             courseName: exam.courseName,
                                             departmentName: exam.deptName,
-                                            sectionName: exam.sectionName,
+                                            sectionNames: exam.sectionNames,
                                             subjectName: exam.subjectName,
                                         }}
                                     />

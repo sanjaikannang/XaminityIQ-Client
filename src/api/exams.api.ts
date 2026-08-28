@@ -15,7 +15,7 @@ export const exams = {
     getEvaluationProgress: (examId: string) => `/admin/exams/${examId}/evaluation-progress`,
     publishResults: (examId: string) => `/admin/exams/${examId}/publish-results`,
     getExamAttempts: (examId: string) => `/admin/exams/${examId}/attempts`,
-    getAllExamRooms: () => "/admin/exam-rooms",
+    getAssignedStudents: (examId: string) => `/admin/exams/${examId}/assigned-students`,
     getAttemptRecording: (attemptId: string) => `/admin/attempts/${attemptId}/recording`,
     getAttemptAnswers: (attemptId: string) => `/admin/attempts/${attemptId}/answers`,
 };
