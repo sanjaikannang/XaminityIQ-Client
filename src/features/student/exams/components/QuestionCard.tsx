@@ -2,6 +2,7 @@ import { Bookmark, ChevronLeft, ChevronRight } from "lucide-react";
 import Button from "../../../../common/ui/Button";
 import { QuestionType } from "../../../../utils/enum";
 import WrittenAnswerCapture from "./WrittenAnswerCapture";
+import TypingAnswerEditor from "./TypingAnswerEditor";
 import type { AttemptQuestionData } from "../../../../types/student-exam-types";
 
 type LocalAnswer = { selectedOptionId?: string; selectedOptionIds?: string[] };
@@ -12,14 +13,17 @@ interface QuestionCardProps {
     total: number;
     attemptId: string;
     answer?: LocalAnswer;
+    answerText?: string;
     onSelectMcq: (optionId: string) => void;
     onToggleMsq: (optionId: string) => void;
+    onChangeText: (text: string) => void;
     isMarked: boolean;
     onToggleMark: () => void;
     onPrev: () => void;
     onNext: () => void;
     canGoPrev: boolean;
     canGoNext: boolean;
+    nextBlockedReason?: string;
 }
 
 const QuestionCard = ({
@@ -28,14 +32,17 @@ const QuestionCard = ({
     total,
     attemptId,
     answer,
+    answerText,
     onSelectMcq,
     onToggleMsq,
+    onChangeText,
     isMarked,
     onToggleMark,
     onPrev,
     onNext,
     canGoPrev,
     canGoNext,
+    nextBlockedReason,
 }: QuestionCardProps) => {
     return (
         <div className="bg-whiteColor rounded-xl border border-borderDefault p-6 space-y-5">
@@ -54,6 +61,10 @@ const QuestionCard = ({
 
             {question.type === QuestionType.WRITTEN && (
                 <WrittenAnswerCapture key={question._id} attemptId={attemptId} questionId={question._id} />
+            )}
+
+            {question.type === QuestionType.TYPING && (
+                <TypingAnswerEditor key={question._id} initialValue={answerText} onChange={onChangeText} />
             )}
 
             {question.type === QuestionType.MCQ && (
@@ -101,16 +112,21 @@ const QuestionCard = ({
                 </div>
             )}
 
-            <div className="flex items-center justify-between pt-4 border-t border-borderLight">
+            <div className="flex items-center justify-between pt-4 border-t border-borderLight gap-2">
                 <Button variant="outline" size="sm" icon={ChevronLeft} disabled={!canGoPrev} onClick={onPrev}>
                     Previous
                 </Button>
                 <Button variant="outline" size="sm" icon={Bookmark} onClick={onToggleMark}>
                     {isMarked ? "Unmark Review" : "Mark for Review"}
                 </Button>
-                <Button variant="outline" size="sm" icon={ChevronRight} iconPosition="right" disabled={!canGoNext} onClick={onNext}>
-                    Next
-                </Button>
+                <div className="flex flex-col items-end gap-1">
+                    <Button variant="outline" size="sm" icon={ChevronRight} iconPosition="right" disabled={!canGoNext} onClick={onNext}>
+                        Next
+                    </Button>
+                    {!canGoNext && nextBlockedReason && (
+                        <span className="text-xs text-textTertiary">{nextBlockedReason}</span>
+                    )}
+                </div>
             </div>
         </div>
     );

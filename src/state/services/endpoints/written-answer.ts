@@ -4,6 +4,7 @@ import {
     GenerateWrittenQrResponse,
     GetWrittenQrStatusResponse,
     FinalizeWrittenAnswerResponse,
+    DeleteWrittenAnswerPageResponse,
 } from "../../../types/written-answer-types";
 
 export const writtenAnswerApiService = apiInstance.injectEndpoints({
@@ -26,6 +27,12 @@ export const writtenAnswerApiService = apiInstance.injectEndpoints({
                 method: "POST",
             }),
         }),
+        deleteWrittenAnswerPage: build.mutation<DeleteWrittenAnswerPageResponse, { attemptId: string; questionId: string; pageNumber: number }>({
+            query: ({ attemptId, questionId, pageNumber }) => ({
+                url: api.writtenAnswer.deletePage(attemptId, questionId, pageNumber),
+                method: "DELETE",
+            }),
+        }),
     }),
 });
 
@@ -33,4 +40,5 @@ export const {
     useGenerateWrittenQrMutation,
     useGetWrittenQrStatusQuery,
     useFinalizeWrittenAnswerMutation,
+    useDeleteWrittenAnswerPageMutation,
 } = writtenAnswerApiService;

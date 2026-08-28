@@ -6,6 +6,7 @@ export const exams = {
     deleteExam: (id: string) => `/admin/exams/${id}`,
     publishExam: (id: string) => `/admin/exams/${id}/publish`,
     addQuestion: (examId: string) => `/admin/exams/${examId}/questions`,
+    bulkUploadQuestions: (examId: string) => `/admin/exams/${examId}/questions/bulk-upload`,
     updateQuestion: (examId: string, questionId: string) => `/admin/exams/${examId}/questions/${questionId}`,
     deleteQuestion: (examId: string, questionId: string) => `/admin/exams/${examId}/questions/${questionId}`,
     formExamRooms: (examId: string) => `/admin/exams/${examId}/rooms`,
@@ -16,4 +17,5 @@ export const exams = {
     getExamAttempts: (examId: string) => `/admin/exams/${examId}/attempts`,
     getAllExamRooms: () => "/admin/exam-rooms",
     getAttemptRecording: (attemptId: string) => `/admin/attempts/${attemptId}/recording`,
+    getAttemptAnswers: (attemptId: string) => `/admin/attempts/${attemptId}/answers`,
 };

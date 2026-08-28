@@ -72,7 +72,7 @@ export interface PersonalDetails {
     lastName: string;
     gender: string;
     dateOfBirth: string;
-    profilePhotoUrl: string;
+    profilePhotoUrl?: string;
     nationality: string;
     religion?: string;
 }
@@ -88,7 +88,7 @@ export interface ContactDetails {
     studentEmail: string;
     phoneNumber: string;
     alternatePhoneNumber?: string;
-    emergencyContact: EmergencyContact;
+    emergencyContact?: EmergencyContact;
 }
 
 export interface Address {
@@ -101,7 +101,7 @@ export interface Address {
 }
 
 export interface AddressDetails {
-    currentAddress: Address;
+    currentAddress?: Address;
     sameAsCurrent: boolean;
     permanentAddress?: Address;
 }
@@ -157,6 +157,7 @@ export interface StudentData {
     academicDetails: AcademicDetails;
     educationHistory: EducationHistory[];
     parentDetails?: ParentDetails;
+    profileCompletionPercentage: number;
 }
 
 export interface GetStudentResponse {
@@ -198,16 +199,17 @@ export interface CreateStudentRequest {
     lastName: string;
     gender: string;
     dateOfBirth: string;
-    profilePhotoUrl: string;
+    // Optional at creation — self-serve profile completion
+    profilePhotoUrl?: string;
     religion?: string;
 
     personalEmail: string;
     phoneNumber: string;
     alternatePhoneNumber?: string;
-    emergencyContact: EmergencyContact;
+    emergencyContact?: EmergencyContact;
 
-    currentAddress: Address;
-    sameAsCurrent: boolean;
+    currentAddress?: Address;
+    sameAsCurrent?: boolean;
     permanentAddress?: Address;
 
     batchId: string;
@@ -220,7 +222,7 @@ export interface CreateStudentRequest {
     mother?: ParentInfoInput;
     guardian?: GuardianInfoInput;
 
-    educationHistory: EducationHistoryInput[];
+    educationHistory?: EducationHistoryInput[];
 }
 
 export interface CreateStudentResponse {
@@ -241,4 +243,39 @@ export interface EditStudentResponse {
 export interface DeleteStudentResponse {
     success: boolean;
     message: string;
+}
+
+// Self-serve profile completion — same self-serve fields as CreateStudentRequest
+export type UpdateMyStudentProfileRequest = Omit<
+    CreateStudentRequest,
+    "firstName" | "lastName" | "gender" | "dateOfBirth" | "personalEmail" | "phoneNumber" |
+    "batchId" | "courseId" | "departmentId" | "currentSemester" | "admissionType"
+>;
+
+export interface UpdateMyProfileResponse {
+    success: boolean;
+    message: string;
+}
+
+// Bulk Upload Students (CSV)
+export interface StudentUploadResult {
+    rowNumber: number;
+    studentId?: string;
+    studentEmail?: string;
+    status: 'success' | 'failed';
+    error?: string;
+}
+
+export interface BulkUploadStudentsSummary {
+    totalRecords: number;
+    successCount: number;
+    failedCount: number;
+    successfulUploads: StudentUploadResult[];
+    failedUploads: StudentUploadResult[];
+}
+
+export interface BulkUploadStudentsResponse {
+    success: boolean;
+    message: string;
+    summary: BulkUploadStudentsSummary;
 }

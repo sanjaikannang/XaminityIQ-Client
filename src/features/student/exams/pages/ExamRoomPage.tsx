@@ -10,15 +10,17 @@ import { useExamRecorder } from "../hooks/useExamRecorder";
 import { useIntegrityMonitor } from "../hooks/useIntegrityMonitor";
 import QuestionCard from "../components/QuestionCard";
 import QuestionPalette, { type PaletteStatus } from "../components/QuestionPalette";
+import SectionTabs from "../components/SectionTabs";
 import SubmitExamModal from "../components/SubmitExamModal";
 import { ReportViolationResponse } from "../../../../types/student-exam-types";
 import {
     useGetAttemptQuery,
     useSaveAnswerMutation,
     useSubmitAttemptMutation,
+    useViewQuestionMutation,
 } from "../../../../state/services/endpoints/student-exams";
 
-type LocalAnswer = { selectedOptionId?: string; selectedOptionIds?: string[] };
+type LocalAnswer = { selectedOptionId?: string; selectedOptionIds?: string[]; answerText?: string };
 
 const ExamRoomPage = () => {
     const navigate = useNavigate();
@@ -26,6 +28,7 @@ const ExamRoomPage = () => {
     const { data, isLoading } = useGetAttemptQuery(attemptId as string, { skip: !attemptId });
     const [saveAnswer] = useSaveAnswerMutation();
     const [submitAttempt, { isLoading: isSubmitting }] = useSubmitAttemptMutation();
+    const [viewQuestion] = useViewQuestionMutation();
 
     const [answers, setAnswers] = useState<Record<string, LocalAnswer>>({});
     const [visited, setVisited] = useState<Set<string>>(new Set());
@@ -33,6 +36,9 @@ const ExamRoomPage = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
     const [remainingMs, setRemainingMs] = useState<number | null>(null);
+    const [startedAtMs, setStartedAtMs] = useState<number | null>(null);
+    const [firstViewedAt, setFirstViewedAt] = useState<Record<string, number>>({});
+    const [nowTick, setNowTick] = useState(Date.now());
     const hasSubmittedRef = useRef(false);
 
     const streams = useMemo(() => examMediaStore.get(), []);
@@ -56,17 +62,24 @@ const ExamRoomPage = () => {
     useEffect(() => {
         if (data?.data) {
             setRemainingMs(data.data.remainingMs);
+            setStartedAtMs(new Date(data.data.startedAt).getTime());
             const initial: Record<string, LocalAnswer> = {};
+            const initialViewed: Record<string, number> = {};
             data.data.answers.forEach((a) => {
-                initial[a.questionId] = { selectedOptionId: a.selectedOptionId, selectedOptionIds: a.selectedOptionIds };
+                initial[a.questionId] = { selectedOptionId: a.selectedOptionId, selectedOptionIds: a.selectedOptionIds, answerText: a.answerText };
+                if (a.firstViewedAt) initialViewed[a.questionId] = new Date(a.firstViewedAt).getTime();
             });
             setAnswers(initial);
+            setFirstViewedAt(initialViewed);
         }
     }, [data]);
 
     const questions = data?.data?.questions || [];
+    const examSections = data?.data?.examSections || [];
     const currentQuestion = questions[currentIndex];
     const securitySettings = data?.data?.securitySettings;
+    const minTimePerQuestionSeconds = securitySettings?.minTimePerQuestionSeconds || 0;
+    const minTimePerExamMinutes = securitySettings?.minTimePerExamMinutes || 0;
 
     // Stops recording, exits fullscreen, and redirects — shared by a normal
     // submit and an integrity-violation auto-submit (the server has already
@@ -141,8 +154,26 @@ const ExamRoomPage = () => {
     useEffect(() => {
         if (currentQuestion) {
             setVisited((prev) => new Set(prev).add(currentQuestion._id));
+
+            if (minTimePerQuestionSeconds > 0 && firstViewedAt[currentQuestion._id] === undefined) {
+                viewQuestion({ attemptId: attemptId as string, questionId: currentQuestion._id })
+                    .unwrap()
+                    .then((response) => {
+                        const viewedAt = response.data?.firstViewedAt ? new Date(response.data.firstViewedAt).getTime() : Date.now();
+                        setFirstViewedAt((prev) => ({ ...prev, [currentQuestion._id]: viewedAt }));
+                    })
+                    .catch(() => { });
+            }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentQuestion]);
+
+    // Ticks once a second so the "wait Xs" min-time-per-question countdown updates live
+    useEffect(() => {
+        if (minTimePerQuestionSeconds <= 0) return;
+        const interval = setInterval(() => setNowTick(Date.now()), 1000);
+        return () => clearInterval(interval);
+    }, [minTimePerQuestionSeconds]);
 
     const handleSelectMcq = (questionId: string, optionId: string) => {
         setAnswers((prev) => ({ ...prev, [questionId]: { selectedOptionId: optionId } }));
@@ -160,10 +191,17 @@ const ExamRoomPage = () => {
             .catch(() => toast.error('Failed to save answer — check your connection'));
     };
 
+    const handleChangeText = (questionId: string, text: string) => {
+        setAnswers((prev) => ({ ...prev, [questionId]: { answerText: text } }));
+        saveAnswer({ attemptId: attemptId as string, questionId, data: { answerText: text } })
+            .unwrap()
+            .catch(() => toast.error('Failed to save answer — check your connection'));
+    };
+
     const paletteStatus = (questionId: string): PaletteStatus => {
         if (markedForReview.has(questionId)) return 'marked';
         const answer = answers[questionId];
-        const isAnswered = !!(answer?.selectedOptionId || (answer?.selectedOptionIds && answer.selectedOptionIds.length > 0));
+        const isAnswered = !!(answer?.selectedOptionId || (answer?.selectedOptionIds && answer.selectedOptionIds.length > 0) || (answer?.answerText && answer.answerText.trim().length > 0));
         if (isAnswered) return 'answered';
         if (visited.has(questionId)) return 'not-answered';
         return 'not-visited';
@@ -171,8 +209,31 @@ const ExamRoomPage = () => {
 
     const answeredCount = questions.filter((q) => {
         const a = answers[q._id];
-        return !!(a?.selectedOptionId || (a?.selectedOptionIds && a.selectedOptionIds.length > 0));
+        return !!(a?.selectedOptionId || (a?.selectedOptionIds && a.selectedOptionIds.length > 0) || (a?.answerText && a.answerText.trim().length > 0));
     }).length;
+
+    // Per-question min-time gate — how much longer until "Next" unblocks
+    const questionMinTimeRemainingMs = (() => {
+        if (minTimePerQuestionSeconds <= 0 || !currentQuestion) return 0;
+        const viewedAt = firstViewedAt[currentQuestion._id];
+        if (viewedAt === undefined) return minTimePerQuestionSeconds * 1000; // ping hasn't resolved yet
+        return Math.max(0, minTimePerQuestionSeconds * 1000 - (nowTick - viewedAt));
+    })();
+
+    // Per-exam min-time gate — how much longer until Submit unblocks
+    const examMinTimeRemainingMs = (() => {
+        if (minTimePerExamMinutes <= 0 || startedAtMs === null) return 0;
+        return Math.max(0, minTimePerExamMinutes * 60000 - (nowTick - startedAtMs));
+    })();
+
+    // examMinTimeRemainingMs depends on nowTick, which only ticks when a
+    // per-question minimum is configured — also tick every second whenever a
+    // per-exam minimum is active on its own.
+    useEffect(() => {
+        if (minTimePerExamMinutes <= 0 || minTimePerQuestionSeconds > 0) return;
+        const interval = setInterval(() => setNowTick(Date.now()), 1000);
+        return () => clearInterval(interval);
+    }, [minTimePerExamMinutes, minTimePerQuestionSeconds]);
 
     if (isLoading || !data?.data) {
         return <div className="h-screen flex items-center justify-center text-textSecondary">Loading exam...</div>;
@@ -193,7 +254,17 @@ const ExamRoomPage = () => {
             </header>
 
             <div className="flex-1 flex overflow-hidden">
-                <main className="flex-1 overflow-y-auto p-4 md:p-6">
+                <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+                    {examSections.length > 0 && (
+                        <div className="max-w-3xl mx-auto">
+                            <SectionTabs
+                                examSections={examSections}
+                                questions={questions}
+                                currentQuestionId={currentQuestion?._id}
+                                onSelectSection={setCurrentIndex}
+                            />
+                        </div>
+                    )}
                     {currentQuestion && (
                         <div className="max-w-3xl mx-auto">
                             <QuestionCard
@@ -202,8 +273,10 @@ const ExamRoomPage = () => {
                                 total={questions.length}
                                 attemptId={attemptId as string}
                                 answer={answers[currentQuestion._id]}
+                                answerText={answers[currentQuestion._id]?.answerText}
                                 onSelectMcq={(optionId) => handleSelectMcq(currentQuestion._id, optionId)}
                                 onToggleMsq={(optionId) => handleToggleMsq(currentQuestion._id, optionId)}
+                                onChangeText={(text) => handleChangeText(currentQuestion._id, text)}
                                 isMarked={markedForReview.has(currentQuestion._id)}
                                 onToggleMark={() => setMarkedForReview((prev) => {
                                     const next = new Set(prev);
@@ -214,7 +287,8 @@ const ExamRoomPage = () => {
                                 onPrev={() => setCurrentIndex((i) => Math.max(0, i - 1))}
                                 onNext={() => setCurrentIndex((i) => Math.min(questions.length - 1, i + 1))}
                                 canGoPrev={currentIndex > 0 && !securitySettings?.blockBackwardNavigation}
-                                canGoNext={currentIndex < questions.length - 1}
+                                canGoNext={currentIndex < questions.length - 1 && questionMinTimeRemainingMs <= 0}
+                                nextBlockedReason={questionMinTimeRemainingMs > 0 ? `You can proceed in ${Math.ceil(questionMinTimeRemainingMs / 1000)}s` : undefined}
                             />
                         </div>
                     )}
@@ -234,9 +308,21 @@ const ExamRoomPage = () => {
                         onNavigate={setCurrentIndex}
                     />
 
-                    <Button variant="primary" fullWidth onClick={() => setIsSubmitModalOpen(true)} disabled={isSubmitting}>
-                        Submit Exam
-                    </Button>
+                    <div className="space-y-1">
+                        <Button
+                            variant="primary"
+                            fullWidth
+                            onClick={() => setIsSubmitModalOpen(true)}
+                            disabled={isSubmitting || examMinTimeRemainingMs > 0}
+                        >
+                            Submit Exam
+                        </Button>
+                        {examMinTimeRemainingMs > 0 && (
+                            <p className="text-xs text-textTertiary text-center">
+                                You can submit in {Math.ceil(examMinTimeRemainingMs / 1000)}s
+                            </p>
+                        )}
+                    </div>
                 </aside>
             </div>
 

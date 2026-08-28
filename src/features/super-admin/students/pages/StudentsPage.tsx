@@ -15,6 +15,7 @@ import { StudentsData } from "../../../../types/students-types";
 import type { BatchData, CourseData, DepartmentData } from "../../../../types/academics-types";
 import { ColumnDef, Table } from "../../../../common/ui/Table";
 import UserActivityModal from "../../components/UserActivityModal";
+import BulkUploadStudentsModal from "../components/BulkUploadStudentsModal";
 import { useAppDispatch } from "../../../../app/store/hooks";
 import { createPaginatedLoadOptions } from "../../../../utils/asyncSelectHelpers";
 import { academicsApiService } from "../../../../state/services/endpoints/academics";
@@ -46,6 +47,7 @@ const StudentsPage = () => {
 
     const [deleteTarget, setDeleteTarget] = useState<StudentsData | null>(null);
     const [activityTarget, setActivityTarget] = useState<StudentsData | null>(null);
+    const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
 
     const { data, isLoading, isFetching } = useGetAllStudentsQuery({
         page,
@@ -252,7 +254,15 @@ const StudentsPage = () => {
         <>
             <PageHeader>Students</PageHeader>
             <div className="px-6">
-                <div className="flex justify-end">
+                <div className="flex justify-end gap-2">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="md"
+                        onClick={() => setIsBulkUploadOpen(true)}
+                    >
+                        Bulk Upload
+                    </Button>
                     <Button
                         type="button"
                         variant="primary"
@@ -398,6 +408,11 @@ const StudentsPage = () => {
                 isLoading={isActivityLoading}
                 records={activityData?.data || []}
                 title={activityTarget ? `Activity - ${activityTarget.personalDetails.firstName} ${activityTarget.personalDetails.lastName}` : "Activity"}
+            />
+
+            <BulkUploadStudentsModal
+                isOpen={isBulkUploadOpen}
+                onClose={() => setIsBulkUploadOpen(false)}
             />
         </>
     );

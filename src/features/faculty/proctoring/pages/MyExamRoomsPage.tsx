@@ -29,19 +29,23 @@ const MyExamRoomsPage = () => {
                                     {room.exams.map((e) => e.examName).join(', ')}
                                 </p>
                                 <p className="text-sm text-textSecondary">
-                                    {room.studentCount} student{room.studentCount === 1 ? '' : 's'} • {room.status}
+                                    {room.studentCount} student{room.studentCount === 1 ? '' : 's'} • {room.effectiveStatus.replace('_', ' ')}
                                 </p>
                                 <p className="text-xs text-textSecondary">
                                     {formatDateTime(room.startDateTime)} - {formatDateTime(room.endDateTime)}
                                 </p>
                             </div>
-                            <Button
-                                variant="primary"
-                                size="sm"
-                                onClick={() => navigate(`/faculty/proctoring/${room.roomId}`)}
-                            >
-                                Open Room
-                            </Button>
+                            {room.effectiveStatus === 'COMPLETED' ? (
+                                <span className="text-sm text-textTertiary font-medium">Completed</span>
+                            ) : (
+                                <Button
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={() => navigate(`/faculty/proctoring/${room.roomId}`)}
+                                >
+                                    {room.effectiveStatus === 'IN_PROGRESS' ? 'Open Room' : 'View Room (Not Started)'}
+                                </Button>
+                            )}
                         </div>
                     ))}
                 </div>

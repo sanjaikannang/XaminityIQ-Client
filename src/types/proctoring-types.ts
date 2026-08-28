@@ -209,7 +209,10 @@ export interface MyExamRoomData {
     exams: RoomExamRef[];
     startDateTime: string;
     endDateTime: string;
+    // Persisted room status (in practice always SCHEDULED) alongside the
+    // time-derived one the page actually renders and gates the button on
     status: ExamRoomStatus;
+    effectiveStatus: EffectiveRoomStatus;
     studentCount: number;
 }
 

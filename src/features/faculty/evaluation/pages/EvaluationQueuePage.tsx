@@ -4,8 +4,9 @@ import { useParams } from "react-router-dom";
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
-import { ExamStatus } from "../../../../utils/enum";
+import { ExamStatus, QuestionType } from "../../../../utils/enum";
 import { formatDateTime } from "../../../../utils/date";
+import { sanitizeAnswerHtml } from "../../../../utils/sanitizeHtml";
 import {
     useGetMyEvaluationExamsQuery,
     useGetExamAnswersForEvaluationQuery,
@@ -75,20 +76,33 @@ const EvaluationQueuePage = () => {
                             </div>
                             <p className="text-textPrimary">{answer.questionText}</p>
 
-                            <div className="flex gap-2 flex-wrap">
-                                {answer.pages.map((page) => (
-                                    <a key={page.pageNumber} href={page.cloudinaryUrl} target="_blank" rel="noopener noreferrer">
-                                        <img
-                                            src={page.cloudinaryUrl}
-                                            alt={`Page ${page.pageNumber}`}
-                                            className="h-32 w-24 object-cover rounded-md border border-borderLight"
-                                        />
-                                    </a>
-                                ))}
-                                {answer.pages.length === 0 && (
-                                    <p className="text-sm text-textSecondary">No pages uploaded.</p>
-                                )}
-                            </div>
+                            {answer.type === QuestionType.TYPING ? (
+                                answer.answerText ? (
+                                    <div
+                                        className="prose prose-sm max-w-none rounded-md border border-borderLight p-3 bg-bgSecondary"
+                                        dangerouslySetInnerHTML={{ __html: sanitizeAnswerHtml(answer.answerText) }}
+                                    />
+                                ) : (
+                                    <p className="text-sm text-textSecondary">No answer typed.</p>
+                                )
+                            ) : (
+                                <div className="flex gap-2 flex-wrap">
+                                    {answer.pages.map((page) => (
+                                        <a key={page.pageNumber} href={page.cloudinaryUrl} target="_blank" rel="noopener noreferrer">
+                                            <img
+                                                src={page.cloudinaryUrl}
+                                                alt={`Page ${page.pageNumber}`}
+                                                loading="lazy"
+                                                decoding="async"
+                                                className="h-32 w-24 object-cover rounded-md border border-borderLight"
+                                            />
+                                        </a>
+                                    ))}
+                                    {answer.pages.length === 0 && (
+                                        <p className="text-sm text-textSecondary">No pages uploaded.</p>
+                                    )}
+                                </div>
+                            )}
 
                             <div className="flex gap-3 items-start flex-wrap">
                                 <div>

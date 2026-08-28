@@ -10,11 +10,15 @@ interface StudentPersonalFieldsProps {
     handleChange: (e: React.ChangeEvent<any>) => void;
     handleBlur: (e: React.FocusEvent<any>) => void;
     setFieldValue: (field: string, value: any) => void;
+    // 'create' hides profilePhotoUrl — the student uploads it themselves
+    // later from their Dashboard Profile page. Defaults to 'edit' so the
+    // admin edit form keeps showing every field.
+    mode?: 'create' | 'edit';
 }
 
 const genderOptions = toEnumOptions(Gender);
 
-const StudentPersonalFields = ({ values, errors, touched, handleChange, handleBlur, setFieldValue }: StudentPersonalFieldsProps) => {
+const StudentPersonalFields = ({ values, errors, touched, handleChange, handleBlur, setFieldValue, mode = 'edit' }: StudentPersonalFieldsProps) => {
     return (
         <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -80,18 +84,19 @@ const StudentPersonalFields = ({ values, errors, touched, handleChange, handleBl
                     touched={touched.religion}
                 />
             </div>
-            <InputField
-                id="profilePhotoUrl"
-                name="profilePhotoUrl"
-                label="Profile Photo URL"
-                placeholder="https://..."
-                value={values.profilePhotoUrl}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={errors.profilePhotoUrl}
-                touched={touched.profilePhotoUrl}
-                required
-            />
+            {mode === 'edit' && (
+                <InputField
+                    id="profilePhotoUrl"
+                    name="profilePhotoUrl"
+                    label="Profile Photo URL"
+                    placeholder="https://..."
+                    value={values.profilePhotoUrl}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={errors.profilePhotoUrl}
+                    touched={touched.profilePhotoUrl}
+                />
+            )}
         </div>
     );
 };

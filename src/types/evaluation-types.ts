@@ -1,4 +1,4 @@
-import { ExamStatus } from "../utils/enum";
+import { ExamStatus, QuestionType } from "../utils/enum";
 
 export interface MyEvaluationExamData {
     examId: string;
@@ -23,9 +23,11 @@ export interface EvaluationAnswerData {
     answerId: string;
     attemptId: string;
     studentCode: string;
+    type: QuestionType;
     questionText: string;
     maxMarks: number;
     pages: AnswerPageData[];
+    answerText?: string;
     marksAwarded?: number;
     remarks?: string;
     evaluatedAt?: string;

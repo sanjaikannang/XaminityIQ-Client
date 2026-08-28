@@ -1,29 +1,25 @@
 import toast from "react-hot-toast";
 import { Formik, Form } from 'formik';
+import { Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
-import { Country } from "../../../../utils/enum";
-import AddressSection from "../../../../common/form-sections/AddressSection";
 import { createFacultyValidationSchema } from "../formik/create-faculty.schema";
 import { useCreateFacultyMutation } from "../../../../state/services/endpoints/faculty";
 import FacultyPersonalFields from "../components/FacultyPersonalFields";
 import FacultyContactFields from "../components/FacultyContactFields";
 import FacultyEmploymentFields from "../components/FacultyEmploymentFields";
-import FacultyEducationHistoryFields from "../components/FacultyEducationHistoryFields";
-import FacultyWorkExperienceFields from "../components/FacultyWorkExperienceFields";
 
+// Only identity + academic placement are collected here — everything else
+// (marital status, profile photo, address, emergency contact, total
+// experience, highest qualification, education history, work experience) is
+// filled in by the faculty member themselves from their Dashboard Profile
+// page after their first login.
 const initialValues = {
-    firstName: '', lastName: '', gender: '', dateOfBirth: '', maritalStatus: '', profilePhotoUrl: '', religion: '',
+    firstName: '', lastName: '', dateOfBirth: '', gender: '', religion: '',
     personalEmail: '', phoneNumber: '', alternatePhoneNumber: '',
-    emergencyContact: { name: '', relation: '', phoneNumber: '' },
-    currentAddress: { addressLine1: '', addressLine2: '', city: '', state: '', pincode: '' },
-    sameAsCurrent: true,
-    permanentAddress: { addressLine1: '', addressLine2: '', city: '', state: '', pincode: '' },
-    employeeId: '', designation: '', departmentId: '', employmentType: '', totalExperienceYears: '', highestQualification: '', remarks: '',
-    educationHistory: [{ level: '', qualification: '', boardOrUniversity: '', institutionName: '', yearOfPassing: '', percentageOrCGPA: '', specialization: '' }],
-    workExperience: [] as any[],
+    employeeId: '', designation: '', departmentId: '', employmentType: '',
 };
 
 const CreateFacultyPage = () => {
@@ -35,18 +31,6 @@ const CreateFacultyPage = () => {
             const payload = {
                 ...values,
                 alternatePhoneNumber: values.alternatePhoneNumber || undefined,
-                totalExperienceYears: Number(values.totalExperienceYears),
-                currentAddress: { ...values.currentAddress, country: Country.INDIA },
-                permanentAddress: values.sameAsCurrent ? undefined : { ...values.permanentAddress, country: Country.INDIA },
-                educationHistory: values.educationHistory.map((edu) => ({
-                    ...edu,
-                    yearOfPassing: Number(edu.yearOfPassing),
-                    percentageOrCGPA: Number(edu.percentageOrCGPA),
-                })),
-                workExperience: values.workExperience.map((work) => ({
-                    ...work,
-                    experienceYears: Number(work.experienceYears),
-                })),
             };
 
             const response = await createFaculty(payload as any).unwrap();
@@ -64,6 +48,16 @@ const CreateFacultyPage = () => {
             <PageHeader>Add Faculty</PageHeader>
             <Container>
                 <div className="py-6">
+                    <div className="flex items-start gap-2 rounded-md bg-bgSecondary border border-borderLight p-3 mb-6">
+                        <Info className="w-4 h-4 text-textTertiary shrink-0 mt-0.5" />
+                        <p className="text-xs text-textSecondary">
+                            Only the details below are needed to create the account. Marital status, profile photo,
+                            address, emergency contact, experience, qualification, education history, and work
+                            experience are completed by the faculty member themselves from their Dashboard Profile
+                            page after they log in.
+                        </p>
+                    </div>
+
                     <Formik
                         initialValues={initialValues}
                         validationSchema={createFacultyValidationSchema}
@@ -73,32 +67,17 @@ const CreateFacultyPage = () => {
                             <Form className="space-y-10">
                                 <section className="space-y-4">
                                     <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">Personal Details</h3>
-                                    <FacultyPersonalFields values={values} errors={errors} touched={touched} handleChange={handleChange} handleBlur={handleBlur} setFieldValue={setFieldValue} />
+                                    <FacultyPersonalFields values={values} errors={errors} touched={touched} handleChange={handleChange} handleBlur={handleBlur} setFieldValue={setFieldValue} mode="create" />
                                 </section>
 
                                 <section className="space-y-4">
                                     <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">Contact Information</h3>
-                                    <FacultyContactFields values={values} errors={errors} touched={touched} handleChange={handleChange} handleBlur={handleBlur} setFieldValue={setFieldValue} />
-                                </section>
-
-                                <section className="space-y-4">
-                                    <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">Address</h3>
-                                    <AddressSection values={values} errors={errors} touched={touched} handleChange={handleChange} handleBlur={handleBlur} setFieldValue={setFieldValue} />
+                                    <FacultyContactFields values={values} errors={errors} touched={touched} handleChange={handleChange} handleBlur={handleBlur} setFieldValue={setFieldValue} mode="create" />
                                 </section>
 
                                 <section className="space-y-4">
                                     <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">Employment Details</h3>
-                                    <FacultyEmploymentFields values={values} errors={errors} touched={touched} handleChange={handleChange} handleBlur={handleBlur} setFieldValue={setFieldValue} />
-                                </section>
-
-                                <section className="space-y-4">
-                                    <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">Education History</h3>
-                                    <FacultyEducationHistoryFields values={values} errors={errors} touched={touched} handleChange={handleChange} handleBlur={handleBlur} setFieldValue={setFieldValue} />
-                                </section>
-
-                                <section className="space-y-4">
-                                    <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">Work Experience</h3>
-                                    <FacultyWorkExperienceFields values={values} errors={errors} touched={touched} handleChange={handleChange} handleBlur={handleBlur} setFieldValue={setFieldValue} />
+                                    <FacultyEmploymentFields values={values} errors={errors} touched={touched} handleChange={handleChange} handleBlur={handleBlur} setFieldValue={setFieldValue} mode="create" />
                                 </section>
 
                                 <div className="flex justify-end gap-3 pt-4 border-t border-borderLight">

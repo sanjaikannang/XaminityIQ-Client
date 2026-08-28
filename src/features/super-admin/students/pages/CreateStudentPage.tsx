@@ -1,39 +1,25 @@
 import toast from "react-hot-toast";
 import { Formik, Form } from 'formik';
+import { Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
-import { Country } from "../../../../utils/enum";
-import AddressSection from "../../../../common/form-sections/AddressSection";
 import { createStudentValidationSchema } from "../formik/create-student.schema";
 import { useCreateStudentMutation } from "../../../../state/services/endpoints/students";
 import StudentPersonalFields from "../components/StudentPersonalFields";
 import StudentContactFields from "../components/StudentContactFields";
 import StudentAcademicFields from "../components/StudentAcademicFields";
-import StudentParentGuardianFields from "../components/StudentParentGuardianFields";
-import StudentEducationHistoryFields from "../components/StudentEducationHistoryFields";
 
-const emptyParent = { name: '', phoneNumber: '', email: '', occupation: '' };
-const emptyGuardian = { ...emptyParent, relation: '' };
-
+// Only identity + academic placement are collected here — everything else
+// (address, emergency contact, education history, parent/guardian, profile
+// photo) is filled in by the student themselves from their Dashboard Profile
+// page after their first login.
 const initialValues = {
-    firstName: '', lastName: '', gender: '', dateOfBirth: '', profilePhotoUrl: '', religion: '',
+    firstName: '', lastName: '', gender: '', dateOfBirth: '', religion: '',
     personalEmail: '', phoneNumber: '', alternatePhoneNumber: '',
-    emergencyContact: { name: '', relation: '', phoneNumber: '' },
-    currentAddress: { addressLine1: '', addressLine2: '', city: '', state: '', pincode: '' },
-    sameAsCurrent: true,
-    permanentAddress: { addressLine1: '', addressLine2: '', city: '', state: '', pincode: '' },
     batchId: '', courseId: '', departmentId: '', currentSemester: '', admissionType: '',
-    father: { ...emptyParent },
-    mother: { ...emptyParent },
-    guardian: { ...emptyGuardian },
-    educationHistory: [{ level: '', qualification: '', boardOrUniversity: '', institutionName: '', yearOfPassing: '', percentageOrCGPA: '' }],
 };
-
-function isBlankGroup(group: Record<string, any>) {
-    return Object.values(group).every((value) => !value);
-}
 
 const CreateStudentPage = () => {
     const navigate = useNavigate();
@@ -45,16 +31,6 @@ const CreateStudentPage = () => {
                 ...values,
                 alternatePhoneNumber: values.alternatePhoneNumber || undefined,
                 currentSemester: Number(values.currentSemester),
-                currentAddress: { ...values.currentAddress, country: Country.INDIA },
-                permanentAddress: values.sameAsCurrent ? undefined : { ...values.permanentAddress, country: Country.INDIA },
-                father: isBlankGroup(values.father) ? undefined : values.father,
-                mother: isBlankGroup(values.mother) ? undefined : values.mother,
-                guardian: isBlankGroup(values.guardian) ? undefined : values.guardian,
-                educationHistory: values.educationHistory.map((edu) => ({
-                    ...edu,
-                    yearOfPassing: Number(edu.yearOfPassing),
-                    percentageOrCGPA: Number(edu.percentageOrCGPA),
-                })),
             };
 
             const response = await createStudent(payload as any).unwrap();
@@ -72,6 +48,15 @@ const CreateStudentPage = () => {
             <PageHeader>Add Student</PageHeader>
             <Container>
                 <div className="py-6">
+                    <div className="flex items-start gap-2 rounded-md bg-bgSecondary border border-borderLight p-3 mb-6">
+                        <Info className="w-4 h-4 text-textTertiary shrink-0 mt-0.5" />
+                        <p className="text-xs text-textSecondary">
+                            Only the details below are needed to create the account. Address, emergency contact,
+                            education history, parent/guardian details, and a profile photo are completed by the
+                            student themselves from their Dashboard Profile page after they log in.
+                        </p>
+                    </div>
+
                     <Formik
                         initialValues={initialValues}
                         validationSchema={createStudentValidationSchema}
@@ -81,32 +66,17 @@ const CreateStudentPage = () => {
                             <Form className="space-y-10">
                                 <section className="space-y-4">
                                     <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">Personal Details</h3>
-                                    <StudentPersonalFields values={values} errors={errors} touched={touched} handleChange={handleChange} handleBlur={handleBlur} setFieldValue={setFieldValue} />
+                                    <StudentPersonalFields values={values} errors={errors} touched={touched} handleChange={handleChange} handleBlur={handleBlur} setFieldValue={setFieldValue} mode="create" />
                                 </section>
 
                                 <section className="space-y-4">
                                     <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">Contact Information</h3>
-                                    <StudentContactFields values={values} errors={errors} touched={touched} handleChange={handleChange} handleBlur={handleBlur} setFieldValue={setFieldValue} />
-                                </section>
-
-                                <section className="space-y-4">
-                                    <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">Address</h3>
-                                    <AddressSection values={values} errors={errors} touched={touched} handleChange={handleChange} handleBlur={handleBlur} setFieldValue={setFieldValue} />
+                                    <StudentContactFields values={values} errors={errors} touched={touched} handleChange={handleChange} handleBlur={handleBlur} setFieldValue={setFieldValue} mode="create" />
                                 </section>
 
                                 <section className="space-y-4">
                                     <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">Academic Placement</h3>
                                     <StudentAcademicFields values={values} errors={errors} touched={touched} handleChange={handleChange} handleBlur={handleBlur} setFieldValue={setFieldValue} />
-                                </section>
-
-                                <section className="space-y-4">
-                                    <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">Parent / Guardian Details</h3>
-                                    <StudentParentGuardianFields values={values} errors={errors} touched={touched} handleChange={handleChange} handleBlur={handleBlur} />
-                                </section>
-
-                                <section className="space-y-4">
-                                    <h3 className="text-lg font-semibold text-textPrimary border-b border-borderLight pb-2">Education History</h3>
-                                    <StudentEducationHistoryFields values={values} errors={errors} touched={touched} handleChange={handleChange} handleBlur={handleBlur} setFieldValue={setFieldValue} />
                                 </section>
 
                                 <div className="flex justify-end gap-3 pt-4 border-t border-borderLight">

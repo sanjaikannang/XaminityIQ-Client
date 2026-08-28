@@ -11,6 +11,7 @@ import {
     FinalizeRecordingResponse,
     GetMyResultResponse,
     ReportViolationResponse,
+    ViewQuestionResponse,
 } from "../../../types/student-exam-types";
 import { RecordingMediaType, SubmissionTrigger, ViolationType } from "../../../utils/enum";
 
@@ -41,6 +42,12 @@ export const studentExamsApiService = apiInstance.injectEndpoints({
                 url: api.studentExams.saveAnswer(attemptId, questionId),
                 method: "PATCH",
                 data,
+            }),
+        }),
+        viewQuestion: build.mutation<ViewQuestionResponse, { attemptId: string; questionId: string }>({
+            query: ({ attemptId, questionId }) => ({
+                url: api.studentExams.viewQuestion(attemptId, questionId),
+                method: "POST",
             }),
         }),
         submitAttempt: build.mutation<SubmitAttemptResponse, { attemptId: string; trigger: SubmissionTrigger }>({
@@ -93,6 +100,7 @@ export const {
     useStartExamMutation,
     useGetAttemptQuery,
     useSaveAnswerMutation,
+    useViewQuestionMutation,
     useSubmitAttemptMutation,
     useGetRecordingSignatureMutation,
     useRecordChunkMutation,

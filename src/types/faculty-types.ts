@@ -73,8 +73,8 @@ export interface PersonalDetails {
     lastName: string;
     gender: string;
     dateOfBirth: string;
-    maritalStatus: string;
-    profilePhotoUrl: string;
+    maritalStatus?: string;
+    profilePhotoUrl?: string;
     nationality: string;
     religion?: string;
 }
@@ -90,7 +90,7 @@ export interface ContactDetails {
     facultyEmail: string;
     phoneNumber: string;
     alternatePhoneNumber?: string;
-    emergencyContact: EmergencyContact;
+    emergencyContact?: EmergencyContact;
 }
 
 export interface Address {
@@ -103,7 +103,7 @@ export interface Address {
 }
 
 export interface AddressDetails {
-    currentAddress: Address;
+    currentAddress?: Address;
     sameAsCurrent: boolean;
     permanentAddress?: Address;
 }
@@ -116,7 +116,7 @@ export interface EmploymentDetails {
     dateOfJoining: Date;
     dateOfLeaving?: Date;
     totalExperienceYears: number;
-    highestQualification: string;
+    highestQualification?: string;
     status: string;
     basicSalary?: number;
     remarks?: string;
@@ -154,6 +154,7 @@ export interface FacultyDetailData {
     educationHistory: EducationHistory[];
     workExperience: WorkExperience[];
     isActive: boolean;
+    profileCompletionPercentage: number;
 }
 
 export interface GetFacultyResponse {
@@ -203,28 +204,29 @@ export interface CreateFacultyRequest {
     lastName: string;
     gender: string;
     dateOfBirth: string;
-    maritalStatus: string;
-    profilePhotoUrl: string;
+    // Optional at creation — self-serve profile completion
+    maritalStatus?: string;
+    profilePhotoUrl?: string;
     religion?: string;
 
     personalEmail: string;
     phoneNumber: string;
     alternatePhoneNumber?: string;
-    emergencyContact: EmergencyContact;
+    emergencyContact?: EmergencyContact;
 
-    currentAddress: Address;
-    sameAsCurrent: boolean;
+    currentAddress?: Address;
+    sameAsCurrent?: boolean;
     permanentAddress?: Address;
 
     employeeId: string;
     designation: string;
     departmentId: string;
     employmentType: string;
-    totalExperienceYears: number;
-    highestQualification: string;
+    totalExperienceYears?: number;
+    highestQualification?: string;
     remarks?: string;
 
-    educationHistory: FacultyEducationHistoryInput[];
+    educationHistory?: FacultyEducationHistoryInput[];
     workExperience?: FacultyWorkExperienceInput[];
 }
 
@@ -244,6 +246,18 @@ export interface EditFacultyResponse {
 }
 
 export interface DeleteFacultyResponse {
+    success: boolean;
+    message: string;
+}
+
+// Self-serve profile completion — same self-serve fields as CreateFacultyRequest
+export type UpdateMyFacultyProfileRequest = Omit<
+    CreateFacultyRequest,
+    "firstName" | "lastName" | "gender" | "dateOfBirth" | "personalEmail" | "phoneNumber" |
+    "employeeId" | "designation" | "departmentId" | "employmentType"
+>;
+
+export interface UpdateMyProfileResponse {
     success: boolean;
     message: string;
 }

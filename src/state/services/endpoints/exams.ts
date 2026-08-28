@@ -15,12 +15,14 @@ import {
     EditQuestionRequest,
     EditQuestionResponse,
     DeleteQuestionResponse,
+    BulkUploadQuestionsResponse,
     AssignEvaluatorsRequest,
     AssignEvaluatorsResponse,
     GetEvaluationProgressResponse,
     PublishResultsResponse,
     GetExamAttemptsResponse,
     GetAttemptRecordingResponse,
+    GetAttemptAnswersResponse,
 } from "../../../types/exams-types";
 import { FormExamRoomsResponse, GetExamRoomsResponse, GetAllExamRoomsParams, GetAllExamRoomsResponse } from "../../../types/proctoring-types";
 
@@ -104,6 +106,14 @@ export const examsApiService = apiInstance.injectEndpoints({
             }),
             invalidatesTags: ['exam-detail'],
         }),
+        bulkUploadQuestions: build.mutation<BulkUploadQuestionsResponse, { examId: string; data: { questions: AddQuestionRequest[] } }>({
+            query: ({ examId, data }) => ({
+                url: api.exams.bulkUploadQuestions(examId),
+                method: "POST",
+                data,
+            }),
+            invalidatesTags: ['exam-detail'],
+        }),
         formExamRooms: build.mutation<FormExamRoomsResponse, string>({
             query: (examId) => ({
                 url: api.exams.formExamRooms(examId),
@@ -165,6 +175,12 @@ export const examsApiService = apiInstance.injectEndpoints({
                 method: "GET",
             }),
         }),
+        getAttemptAnswers: build.query<GetAttemptAnswersResponse, string>({
+            query: (attemptId) => ({
+                url: api.exams.getAttemptAnswers(attemptId),
+                method: "GET",
+            }),
+        }),
     }),
 });
 
@@ -178,6 +194,7 @@ export const {
     useAddQuestionMutation,
     useUpdateQuestionMutation,
     useDeleteQuestionMutation,
+    useBulkUploadQuestionsMutation,
     useFormExamRoomsMutation,
     useGetExamRoomsQuery,
     useAssignEvaluatorsMutation,
@@ -186,4 +203,5 @@ export const {
     useGetExamAttemptsQuery,
     useGetAllExamRoomsQuery,
     useGetAttemptRecordingQuery,
+    useGetAttemptAnswersQuery,
 } = examsApiService;
