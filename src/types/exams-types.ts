@@ -264,6 +264,23 @@ export interface GetExamAttemptsResponse {
     data?: { attempts: ExamAttemptSummaryData[] };
 }
 
+// Assigned Students (admin) Types — every student whose academic placement
+// matches the exam's hierarchy selection, not just those who attempted it
+export interface AssignedStudentData {
+    studentId: string;
+    studentCode: string;
+    studentName: string;
+    studentEmail: string;
+    attemptId: string | null;
+    attemptStatus: string;
+}
+
+export interface GetAssignedStudentsResponse {
+    success: boolean;
+    message: string;
+    data?: { students: AssignedStudentData[] };
+}
+
 // Attempt Recording (admin viewer) Types
 export interface RecordingChunkData {
     sequence: number;
