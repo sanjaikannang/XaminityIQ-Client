@@ -100,7 +100,7 @@ const ExamsPage = () => {
             width: "500px",
             cell: ({ row }: { row: { original: ExamData } }) => {
                 const e = row.original;
-                return `${e.batchName || ''} / ${e.courseName || ''} / ${e.deptName || ''} / ${e.sectionName || ''}`;
+                return `${e.batchName || ''} / ${e.courseName || ''} / ${e.deptName || ''} / ${(e.sectionNames || []).join(', ')}`;
             },
         },
         {

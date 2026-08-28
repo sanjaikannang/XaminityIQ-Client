@@ -277,8 +277,8 @@ const ExamDetailPage = () => {
                             <div><span className="text-sm text-textSecondary">Status</span><p className="font-medium">{exam.status}</p></div>
                             <div><span className="text-sm text-textSecondary">Duration</span><p className="font-medium">{exam.durationMinutes} minutes</p></div>
                             <div><span className="text-sm text-textSecondary">Batch / Course</span><p className="font-medium">{exam.batchName} / {exam.courseName}</p></div>
-                            <div><span className="text-sm text-textSecondary">Department / Section</span><p className="font-medium">{exam.deptName} / {exam.sectionName}</p></div>
-                            <div><span className="text-sm text-textSecondary">Semester / Subject</span><p className="font-medium">Semester {exam.semester} - {exam.subjectName}</p></div>
+                            <div><span className="text-sm text-textSecondary">Department / Sections</span><p className="font-medium">{exam.deptName} / {(exam.sectionNames || []).join(', ') || '—'}</p></div>
+                            <div><span className="text-sm text-textSecondary">Semesters / Subject</span><p className="font-medium">Semester {(exam.semesters || []).join(', ')} - {exam.subjectName}</p></div>
                             <div><span className="text-sm text-textSecondary">Schedule</span><p className="font-medium">{formatDate(exam.startDate)} {exam.startTime || ''} - {formatDate(exam.endDate)} {exam.endTime || ''}</p></div>
                             <div><span className="text-sm text-textSecondary">Total / Passing Marks</span><p className="font-medium">{exam.totalMarks} / {exam.passingMarks}</p></div>
                             <div><span className="text-sm text-textSecondary">Matched Students</span><p className="font-medium">{exam.matchedStudentCount}</p></div>
