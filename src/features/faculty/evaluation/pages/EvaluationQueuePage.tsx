@@ -92,6 +92,8 @@ const EvaluationQueuePage = () => {
                                             <img
                                                 src={page.cloudinaryUrl}
                                                 alt={`Page ${page.pageNumber}`}
+                                                loading="lazy"
+                                                decoding="async"
                                                 className="h-32 w-24 object-cover rounded-md border border-borderLight"
                                             />
                                         </a>

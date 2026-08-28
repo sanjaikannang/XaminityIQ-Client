@@ -1,9 +1,11 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { UserRole } from "../../utils/enum";
 import { useLogout } from "../../features/auth/logout/useLogout";
 import { getItemFromStorage } from "../../utils/storage";
 import { Outlet, useLocation, Link } from "react-router-dom";
-import { LogOut, Home, type LucideIcon, GraduationCap, Users, UserCog, ClipboardCheck, BookOpen, Video, ClipboardList, User } from "lucide-react";
+import { LogOut, Home, type LucideIcon, GraduationCap, Users, UserCog, ClipboardCheck, BookOpen, Video, ClipboardList, User, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+
+const SIDEBAR_COLLAPSED_STORAGE_KEY = "sidebarCollapsed";
 
 interface NavigationItem {
     id: string;
@@ -128,6 +130,25 @@ export interface RootLayoutContext {
 export function RootLayout() {
     const location = useLocation();
     const { logout } = useLogout();
+    const [isCollapsed, setIsCollapsed] = useState(() => {
+        try {
+            return localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY) === "true";
+        } catch {
+            return false;
+        }
+    });
+
+    const toggleSidebar = () => {
+        setIsCollapsed((prev) => {
+            const next = !prev;
+            try {
+                localStorage.setItem(SIDEBAR_COLLAPSED_STORAGE_KEY, String(next));
+            } catch {
+                // ignore
+            }
+            return next;
+        });
+    };
 
     const isActiveRoute = (item: NavigationItem): boolean => {
         // If matchPattern is defined, check if current path starts with it
@@ -154,11 +175,20 @@ export function RootLayout() {
         <>
             <div className="flex h-screen bg-bgSecondary">
                 {/* Sidebar */}
-                <aside className="w-56 bg-whiteColor border-r border-borderLight flex flex-col shadow-xl">
-                    <div className="h-16 flex items-center justify-center px-4 border-b border-borderLight flex-shrink-0">
-                        <h1 className="font-bold text-xl text-center text-textPrimary">
-                            XaminityIQ
-                        </h1>
+                <aside className={`${isCollapsed ? "w-16" : "w-56"} bg-whiteColor border-r border-borderLight flex flex-col shadow-xl transition-all duration-200 flex-shrink-0`}>
+                    <div className={`h-16 flex items-center border-b border-borderLight flex-shrink-0 ${isCollapsed ? "justify-center px-2" : "justify-between px-4"}`}>
+                        {!isCollapsed && (
+                            <h1 className="font-bold text-xl text-textPrimary truncate">
+                                XaminityIQ
+                            </h1>
+                        )}
+                        <button
+                            onClick={toggleSidebar}
+                            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                            className="flex items-center justify-center w-8 h-8 rounded-lg text-textSecondary hover:bg-bgTertiary transition-colors flex-shrink-0 cursor-pointer"
+                        >
+                            {isCollapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
+                        </button>
                     </div>
 
                     {/* Navigation Items - Scrollable */}
@@ -171,13 +201,14 @@ export function RootLayout() {
                                 <Link
                                     key={item.id}
                                     to={item.path}
-                                    className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${isActive
+                                    title={isCollapsed ? item.label : undefined}
+                                    className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${isCollapsed ? "justify-center px-0" : ""} ${isActive
                                         ? "bg-primaryLighter text-primary"
                                         : "text-textSecondary hover:bg-bgTertiary"
                                         }`}
                                 >
-                                    <Icon className="w-5 h-5" />
-                                    <span>{item.label}</span>
+                                    <Icon className="w-5 h-5 flex-shrink-0" />
+                                    {!isCollapsed && <span>{item.label}</span>}
                                 </Link>
                             );
                         })}
@@ -187,9 +218,10 @@ export function RootLayout() {
                     <div className="py-2 border-t border-borderLight flex-shrink-0">
                         <button
                             onClick={handleLogout}
+                            title={isCollapsed ? "Logout" : undefined}
                             className="flex items-center justify-center gap-3 px-4 py-3 w-full text-textSecondary cursor-pointer transition-colors">
-                            <LogOut className="w-5 h-5" />
-                            <span>Logout</span>
+                            <LogOut className="w-5 h-5 flex-shrink-0" />
+                            {!isCollapsed && <span>Logout</span>}
                         </button>
                     </div>
                 </aside>

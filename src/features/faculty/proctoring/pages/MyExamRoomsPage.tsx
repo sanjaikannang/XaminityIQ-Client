@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
-import { ExamRoomStatus } from "../../../../utils/enum";
 import { useGetMyExamRoomsQuery } from "../../../../state/services/endpoints/faculty-proctoring";
 import { formatDateTime } from "../../../../utils/date";
 
@@ -30,21 +29,21 @@ const MyExamRoomsPage = () => {
                                     {room.exams.map((e) => e.examName).join(', ')}
                                 </p>
                                 <p className="text-sm text-textSecondary">
-                                    {room.studentCount} student{room.studentCount === 1 ? '' : 's'} • {room.status}
+                                    {room.studentCount} student{room.studentCount === 1 ? '' : 's'} • {room.effectiveStatus.replace('_', ' ')}
                                 </p>
                                 <p className="text-xs text-textSecondary">
                                     {formatDateTime(room.startDateTime)} - {formatDateTime(room.endDateTime)}
                                 </p>
                             </div>
-                            {room.status === ExamRoomStatus.CLOSED ? (
-                                <span className="text-sm text-textTertiary font-medium">Closed</span>
+                            {room.effectiveStatus === 'COMPLETED' ? (
+                                <span className="text-sm text-textTertiary font-medium">Completed</span>
                             ) : (
                                 <Button
                                     variant="primary"
                                     size="sm"
                                     onClick={() => navigate(`/faculty/proctoring/${room.roomId}`)}
                                 >
-                                    {room.status === ExamRoomStatus.ACTIVE ? 'Open Room' : 'View Room (Not Started)'}
+                                    {room.effectiveStatus === 'IN_PROGRESS' ? 'Open Room' : 'View Room (Not Started)'}
                                 </Button>
                             )}
                         </div>

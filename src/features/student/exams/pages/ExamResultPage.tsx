@@ -65,6 +65,8 @@ const ExamResultPage = () => {
                                                     <img
                                                         src={page.cloudinaryUrl}
                                                         alt={`Page ${page.pageNumber}`}
+                                                        loading="lazy"
+                                                        decoding="async"
                                                         className="h-28 w-20 object-cover rounded-md border border-borderLight"
                                                     />
                                                 </a>

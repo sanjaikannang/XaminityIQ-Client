@@ -20,13 +20,17 @@ interface FacultyEmploymentFieldsProps {
     // edit mode, since this component otherwise has no way to know it until
     // the (unpaginated) department list has loaded
     initialDepartmentName?: string;
+    // 'create' hides totalExperienceYears and highestQualification — the
+    // faculty member fills these in themselves later from their Dashboard
+    // Profile page.
+    mode?: 'create' | 'edit';
 }
 
 const designationOptions = toEnumOptions(FacultyDesignation);
 const employmentTypeOptions = toEnumOptions(EmploymentType);
 const highestQualificationOptions = toEnumOptions(HighestQualification);
 
-const FacultyEmploymentFields = ({ values, errors, touched, handleChange, handleBlur, setFieldValue, initialDepartmentName }: FacultyEmploymentFieldsProps) => {
+const FacultyEmploymentFields = ({ values, errors, touched, handleChange, handleBlur, setFieldValue, initialDepartmentName, mode = 'edit' }: FacultyEmploymentFieldsProps) => {
     const dispatch = useAppDispatch();
 
     const [departmentOption, setDepartmentOption] = useState<AsyncSelectOption | null>(
@@ -68,7 +72,7 @@ const FacultyEmploymentFields = ({ values, errors, touched, handleChange, handle
                     required
                 />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className={`grid grid-cols-1 gap-4 ${mode === 'edit' ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
                 <Select
                     id="designation"
                     name="designation"
@@ -91,43 +95,45 @@ const FacultyEmploymentFields = ({ values, errors, touched, handleChange, handle
                     touched={touched.employmentType}
                     required
                 />
-                <InputField
-                    id="totalExperienceYears"
-                    name="totalExperienceYears"
-                    type="number"
-                    label="Total Experience (years)"
-                    value={values.totalExperienceYears}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={errors.totalExperienceYears}
-                    touched={touched.totalExperienceYears}
-                    required
-                />
+                {mode === 'edit' && (
+                    <InputField
+                        id="totalExperienceYears"
+                        name="totalExperienceYears"
+                        type="number"
+                        label="Total Experience (years)"
+                        value={values.totalExperienceYears}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={errors.totalExperienceYears}
+                        touched={touched.totalExperienceYears}
+                    />
+                )}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Select
-                    id="highestQualification"
-                    name="highestQualification"
-                    label="Highest Qualification"
-                    options={highestQualificationOptions}
-                    value={values.highestQualification}
-                    onChange={(value) => setFieldValue("highestQualification", value)}
-                    error={errors.highestQualification}
-                    touched={touched.highestQualification}
-                    required
-                />
-                <InputField
-                    id="remarks"
-                    name="remarks"
-                    label="Remarks"
-                    placeholder="Optional"
-                    value={values.remarks}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={errors.remarks}
-                    touched={touched.remarks}
-                />
-            </div>
+            {mode === 'edit' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Select
+                        id="highestQualification"
+                        name="highestQualification"
+                        label="Highest Qualification"
+                        options={highestQualificationOptions}
+                        value={values.highestQualification}
+                        onChange={(value) => setFieldValue("highestQualification", value)}
+                        error={errors.highestQualification}
+                        touched={touched.highestQualification}
+                    />
+                    <InputField
+                        id="remarks"
+                        name="remarks"
+                        label="Remarks"
+                        placeholder="Optional"
+                        value={values.remarks}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={errors.remarks}
+                        touched={touched.remarks}
+                    />
+                </div>
+            )}
         </div>
     );
 };
