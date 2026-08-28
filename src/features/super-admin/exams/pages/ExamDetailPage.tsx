@@ -33,14 +33,26 @@ import {
     useFormExamRoomsMutation,
     useGetExamRoomsQuery,
     useGetExamAttemptsQuery,
+    useGetAssignedStudentsQuery,
 } from "../../../../state/services/endpoints/exams";
 
 const ExamDetailPage = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
 
-    const { data, isLoading } = useGetExamQuery(id as string, { skip: !id });
+    // Poll while PUBLISHED so the status badge (and the Form Exam Rooms gate
+    // below) don't go stale relative to the lifecycle sweeper, which can flip
+    // PUBLISHED -> ONGOING at any moment once the exam's window opens.
+    const [pollForStatusChange, setPollForStatusChange] = useState(false);
+    const { data, isLoading } = useGetExamQuery(id as string, {
+        skip: !id,
+        pollingInterval: pollForStatusChange ? 5000 : 0,
+    });
     const exam = data?.data;
+
+    useEffect(() => {
+        setPollForStatusChange(exam?.status === ExamStatus.PUBLISHED);
+    }, [exam?.status]);
     // Older exams (created before exam sections existed) never got this field
     // backfilled — Mongoose schema defaults only apply to newly-created
     // documents, not existing ones — so it can genuinely be absent.
@@ -75,13 +87,23 @@ const ExamDetailPage = () => {
     const [publishResults, { isLoading: isPublishingResults }] = usePublishResultsMutation();
 
     const isProctoring = exam?.mode === ExamMode.PROCTORING;
-    const canFormRooms = isProctoring && exam?.status && exam.status !== ExamStatus.DRAFT;
+    // Rooms can only be formed while the exam is PUBLISHED (server-enforced —
+    // see formExamRoomsAPI). Once the scheduler sweeps it to ONGOING/COMPLETED
+    // the button must disappear too, not just fail on click.
+    const canFormRooms = isProctoring && exam?.status === ExamStatus.PUBLISHED;
+    // Once rooms exist, keep showing the Exam Rooms section even if the exam
+    // has since moved past PUBLISHED — this only gates the ability to form
+    // NEW rooms, not visibility of ones already formed.
+    const showRoomsSection = isProctoring && exam?.status && exam.status !== ExamStatus.DRAFT;
     const [formExamRooms, { isLoading: isFormingRooms }] = useFormExamRoomsMutation();
-    const { data: examRoomsData, isFetching: isLoadingRooms } = useGetExamRoomsQuery(id as string, { skip: !id || !canFormRooms });
+    const { data: examRoomsData, isFetching: isLoadingRooms } = useGetExamRoomsQuery(id as string, { skip: !id || !showRoomsSection });
     const rooms = examRoomsData?.data?.rooms || [];
 
     const { data: examAttemptsData, isFetching: isLoadingAttempts } = useGetExamAttemptsQuery(id as string, { skip: !id });
     const attempts = examAttemptsData?.data?.attempts || [];
+
+    const { data: assignedStudentsData, isFetching: isLoadingAssignedStudents } = useGetAssignedStudentsQuery(id as string, { skip: !id });
+    const assignedStudents = assignedStudentsData?.data?.students || [];
 
     useEffect(() => {
         if (exam) {
@@ -255,8 +277,8 @@ const ExamDetailPage = () => {
                             <div><span className="text-sm text-textSecondary">Status</span><p className="font-medium">{exam.status}</p></div>
                             <div><span className="text-sm text-textSecondary">Duration</span><p className="font-medium">{exam.durationMinutes} minutes</p></div>
                             <div><span className="text-sm text-textSecondary">Batch / Course</span><p className="font-medium">{exam.batchName} / {exam.courseName}</p></div>
-                            <div><span className="text-sm text-textSecondary">Department / Section</span><p className="font-medium">{exam.deptName} / {exam.sectionName}</p></div>
-                            <div><span className="text-sm text-textSecondary">Semester / Subject</span><p className="font-medium">Semester {exam.semester} - {exam.subjectName}</p></div>
+                            <div><span className="text-sm text-textSecondary">Department / Sections</span><p className="font-medium">{exam.deptName} / {(exam.sectionNames || []).join(', ') || '—'}</p></div>
+                            <div><span className="text-sm text-textSecondary">Semesters / Subject</span><p className="font-medium">Semester {(exam.semesters || []).join(', ')} - {exam.subjectName}</p></div>
                             <div><span className="text-sm text-textSecondary">Schedule</span><p className="font-medium">{formatDate(exam.startDate)} {exam.startTime || ''} - {formatDate(exam.endDate)} {exam.endTime || ''}</p></div>
                             <div><span className="text-sm text-textSecondary">Total / Passing Marks</span><p className="font-medium">{exam.totalMarks} / {exam.passingMarks}</p></div>
                             <div><span className="text-sm text-textSecondary">Matched Students</span><p className="font-medium">{exam.matchedStudentCount}</p></div>
@@ -389,6 +411,53 @@ const ExamDetailPage = () => {
                         )}
                     </section>
 
+                <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Users className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-bold text-textPrimary">Assigned Students</h2>
+                            <p className="text-sm text-textSecondary">
+                                Every student whose batch/course/department/section/semester matches this exam.
+                            </p>
+                        </div>
+                    </div>
+                    {isLoadingAssignedStudents && <p className="text-sm text-textSecondary">Loading students...</p>}
+                    {!isLoadingAssignedStudents && assignedStudents.length === 0 && (
+                        <p className="text-sm text-textSecondary">No students match this exam's batch/course/department/section/semester selection.</p>
+                    )}
+                    {!isLoadingAssignedStudents && assignedStudents.length > 0 && (
+                        <div className="overflow-x-auto rounded-md border border-borderLight">
+                            <table className="w-full text-sm">
+                                <thead className="bg-bgSecondary">
+                                    <tr>
+                                        <th className="px-3 py-2 text-left font-medium text-textSecondary">Student</th>
+                                        <th className="px-3 py-2 text-left font-medium text-textSecondary">Attempt Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-borderLight">
+                                    {assignedStudents.map((student) => (
+                                        <tr key={student.studentId}>
+                                            <td className="px-3 py-2">
+                                                <div className="font-medium text-textPrimary">{student.studentName || '—'}</div>
+                                                <div className="text-xs text-textSecondary">{student.studentEmail}</div>
+                                                <div className="text-xs text-textTertiary">{student.studentCode}</div>
+                                            </td>
+                                            <td className="px-3 py-2">
+                                                <Chip label={formatEnumLabel(student.attemptStatus)} variant={getChipVariant(student.attemptStatus)} />
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                    <p className="text-xs text-textTertiary mt-3">
+                        {assignedStudents.length} student{assignedStudents.length === 1 ? '' : 's'} assigned
+                    </p>
+                </section>
+
                 {(isLoadingAttempts || attempts.length > 0) && (
                     <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
                         <div className="flex items-center gap-3 mb-6">
@@ -470,7 +539,7 @@ const ExamDetailPage = () => {
                     </section>
                 )}
 
-                {canFormRooms && (
+                {showRoomsSection && (
                     <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-3">
@@ -479,7 +548,7 @@ const ExamDetailPage = () => {
                                 </div>
                                 <h2 className="text-lg font-bold text-textPrimary">Exam Rooms</h2>
                             </div>
-                            {rooms.length === 0 && (
+                            {rooms.length === 0 && canFormRooms && (
                                 <Button
                                     variant="primary"
                                     size="sm"
@@ -493,7 +562,9 @@ const ExamDetailPage = () => {
                         </div>
                         {isLoadingRooms && <p className="text-sm text-textSecondary">Loading rooms...</p>}
                         {!isLoadingRooms && rooms.length === 0 && (
-                            <p className="text-sm text-textSecondary">No rooms formed yet.</p>
+                            <p className="text-sm text-textSecondary">
+                                {canFormRooms ? 'No rooms formed yet.' : 'No rooms were formed for this exam — it moved past PUBLISHED before rooms were created.'}
+                            </p>
                         )}
                         {rooms.length > 0 && (
                             <div className="overflow-x-auto rounded-md border border-borderLight">
@@ -530,7 +601,7 @@ const ExamDetailPage = () => {
                     </section>
                 )}
 
-                {canFormRooms && rooms.length > 0 && (
+                {showRoomsSection && rooms.length > 0 && (
                     <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">

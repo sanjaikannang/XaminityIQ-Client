@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import Select from "../../../../common/ui/Select";
+import MultiSelect from "../../../../common/ui/MultiSelect";
 import AsyncSelect, { type AsyncSelectOption } from "../../../../common/ui/AsyncSelect";
 import { useAppDispatch } from "../../../../app/store/hooks";
 import { createPaginatedLoadOptions } from "../../../../utils/asyncSelectHelpers";
@@ -21,7 +21,7 @@ interface ExamHierarchyFieldsProps {
         batchName?: string;
         courseName?: string;
         departmentName?: string;
-        sectionName?: string;
+        sectionNames?: string[];
         subjectName?: string;
     };
 }
@@ -66,30 +66,38 @@ const ExamHierarchyFields = ({ values, errors, touched, setFieldValue, disabled,
         mapItem: (d) => ({ value: d._id, label: d.deptName, raw: d }),
     }), [dispatch, courseOption?.raw?.batchCourseId]);
 
+    // Subjects belong to exactly one semester, but an exam can now target
+    // several — filtering the list down to one semester no longer makes
+    // sense, so this only scopes by department. The chosen subject's own
+    // semester must still be one of the exam's selected semesters — enforced
+    // server-side (validateHierarchyAndSchedule) and surfaced as a submit error.
     const loadSubjectOptions = useMemo(() => createPaginatedLoadOptions<SubjectData, any>({
         dispatch,
         initiate: subjectsApiService.endpoints.getAllSubjectsAdmin.initiate,
-        extraParams: { departmentId: values.departmentId, semester: Number(values.semester) },
-        mapItem: (s) => ({ value: s._id, label: `${s.subjectCode} - ${s.subjectName}`, raw: s }),
+        extraParams: { departmentId: values.departmentId },
+        mapItem: (s) => ({ value: s._id, label: `${s.subjectCode} - ${s.subjectName} (Sem ${s.semester})`, raw: s }),
         supportsSearch: false,
-    }), [dispatch, values.departmentId, values.semester]);
+    }), [dispatch, values.departmentId]);
 
     // Sections come nested in the selected department's own record, not a
-    // separate paginated endpoint — a plain Select, but with the currently
-    // selected section injected synthetically so it still displays correctly
-    // in edit mode before the department has been actively re-selected.
+    // separate paginated endpoint — a plain MultiSelect, but with any
+    // currently-selected sections injected synthetically so they still
+    // display correctly in edit mode before the department has been
+    // actively re-selected.
     const sectionsFromDept: { _id: string; sectionName: string }[] = departmentOption?.raw?.sections || [];
-    const sectionOptions = (
-        !values.sectionId || sectionsFromDept.some((s) => s._id === values.sectionId)
-            ? sectionsFromDept
-            : [{ _id: values.sectionId, sectionName: initialNames?.sectionName || "Current Section" }, ...sectionsFromDept]
-    ).map((s) => ({ value: s._id, label: s.sectionName }));
+    const selectedSectionIds: string[] = values.sectionIds || [];
+    const missingSelectedSections = selectedSectionIds
+        .filter((id) => !sectionsFromDept.some((s) => s._id === id))
+        .map((id, i) => ({ _id: id, sectionName: initialNames?.sectionNames?.[i] || "Current Section" }));
+    const sectionOptions = [...sectionsFromDept, ...missingSelectedSections].map((s) => ({ value: s._id, label: s.sectionName }));
 
     const courseSemesters: number = courseOption?.raw?.semesters || 0;
     const semesterOptions = Array.from({ length: courseSemesters }, (_, i) => ({ value: i + 1, label: `Semester ${i + 1}` }));
-    const semesterValue = Number(values.semester);
-    if (semesterValue && !semesterOptions.some((o) => o.value === semesterValue)) {
-        semesterOptions.unshift({ value: semesterValue, label: `Semester ${semesterValue}` });
+    const selectedSemesters: number[] = (values.semesters || []).map(Number);
+    for (const sem of selectedSemesters) {
+        if (sem && !semesterOptions.some((o) => o.value === sem)) {
+            semesterOptions.unshift({ value: sem, label: `Semester ${sem}` });
+        }
     }
 
     return (
@@ -108,8 +116,8 @@ const ExamHierarchyFields = ({ values, errors, touched, setFieldValue, disabled,
                         setDepartmentOption(null);
                         setFieldValue("courseId", "");
                         setFieldValue("departmentId", "");
-                        setFieldValue("sectionId", "");
-                        setFieldValue("semester", "");
+                        setFieldValue("sectionIds", []);
+                        setFieldValue("semesters", []);
                         setFieldValue("subjectId", "");
                     }}
                     error={errors.batchId}
@@ -128,8 +136,8 @@ const ExamHierarchyFields = ({ values, errors, touched, setFieldValue, disabled,
                         setFieldValue("courseId", option?.value || "");
                         setDepartmentOption(null);
                         setFieldValue("departmentId", "");
-                        setFieldValue("sectionId", "");
-                        setFieldValue("semester", "");
+                        setFieldValue("sectionIds", []);
+                        setFieldValue("semesters", []);
                         setFieldValue("subjectId", "");
                     }}
                     error={errors.courseId}
@@ -148,49 +156,47 @@ const ExamHierarchyFields = ({ values, errors, touched, setFieldValue, disabled,
                     onChange={(option) => {
                         setDepartmentOption(option);
                         setFieldValue("departmentId", option?.value || "");
-                        setFieldValue("sectionId", "");
+                        setFieldValue("sectionIds", []);
                         setFieldValue("subjectId", "");
                     }}
                     error={errors.departmentId}
                     touched={touched.departmentId}
                     required
                 />
-                <Select
-                    id="sectionId"
-                    name="sectionId"
-                    label="Section"
+                <MultiSelect
+                    id="sectionIds"
+                    label="Sections"
                     options={sectionOptions}
-                    value={values.sectionId}
+                    value={values.sectionIds || []}
                     disabled={disabled || !values.departmentId}
-                    onChange={(value) => setFieldValue("sectionId", value)}
-                    error={errors.sectionId}
-                    touched={touched.sectionId}
+                    onChange={(values) => setFieldValue("sectionIds", values)}
+                    error={typeof errors.sectionIds === 'string' ? errors.sectionIds : undefined}
+                    touched={touched.sectionIds}
                     required
                 />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Select
-                    id="semester"
-                    name="semester"
-                    label="Semester"
+                <MultiSelect
+                    id="semesters"
+                    label="Semesters"
                     options={semesterOptions}
-                    value={values.semester}
+                    value={values.semesters || []}
                     disabled={disabled || !values.courseId}
-                    onChange={(value) => {
-                        setFieldValue("semester", value);
+                    onChange={(values) => {
+                        setFieldValue("semesters", values);
                         setFieldValue("subjectId", "");
                     }}
-                    error={errors.semester}
-                    touched={touched.semester}
+                    error={typeof errors.semesters === 'string' ? errors.semesters : undefined}
+                    touched={touched.semesters}
                     required
                 />
                 <AsyncSelect
-                    key={`${values.departmentId}-${values.semester}`}
+                    key={values.departmentId}
                     id="subjectId"
                     label="Subject"
                     value={subjectOption}
                     loadOptions={loadSubjectOptions}
-                    disabled={disabled || !values.departmentId || !values.semester}
+                    disabled={disabled || !values.departmentId || !(values.semesters || []).length}
                     onChange={(option) => {
                         setSubjectOption(option);
                         setFieldValue("subjectId", option?.value || "");
