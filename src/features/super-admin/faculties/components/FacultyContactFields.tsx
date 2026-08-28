@@ -9,9 +9,12 @@ interface FacultyContactFieldsProps {
     handleBlur: (e: React.FocusEvent<any>) => void;
     setFieldValue: (field: string, value: any) => void;
     facultyEmail?: string;
+    // 'create' hides the emergency contact section — the faculty member
+    // fills it in themselves later from their Dashboard Profile page.
+    mode?: 'create' | 'edit';
 }
 
-const FacultyContactFields = ({ values, errors, touched, handleChange, handleBlur, setFieldValue, facultyEmail }: FacultyContactFieldsProps) => {
+const FacultyContactFields = ({ values, errors, touched, handleChange, handleBlur, setFieldValue, facultyEmail, mode = 'edit' }: FacultyContactFieldsProps) => {
     return (
         <div className="space-y-4">
             {facultyEmail && (
@@ -61,14 +64,16 @@ const FacultyContactFields = ({ values, errors, touched, handleChange, handleBlu
                 error={errors.alternatePhoneNumber}
                 touched={touched.alternatePhoneNumber}
             />
-            <EmergencyContactFields
-                values={values}
-                errors={errors}
-                touched={touched}
-                handleChange={handleChange}
-                handleBlur={handleBlur}
-                setFieldValue={setFieldValue}
-            />
+            {mode === 'edit' && (
+                <EmergencyContactFields
+                    values={values}
+                    errors={errors}
+                    touched={touched}
+                    handleChange={handleChange}
+                    handleBlur={handleBlur}
+                    setFieldValue={setFieldValue}
+                />
+            )}
         </div>
     );
 };

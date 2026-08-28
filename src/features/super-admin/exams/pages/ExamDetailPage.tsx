@@ -41,6 +41,10 @@ const ExamDetailPage = () => {
 
     const { data, isLoading } = useGetExamQuery(id as string, { skip: !id });
     const exam = data?.data;
+    // Older exams (created before exam sections existed) never got this field
+    // backfilled — Mongoose schema defaults only apply to newly-created
+    // documents, not existing ones — so it can genuinely be absent.
+    const examSections = exam?.examSections || [];
 
     const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false);
     const [editingQuestion, setEditingQuestion] = useState<QuestionData | null>(null);
@@ -274,7 +278,7 @@ const ExamDetailPage = () => {
                             </div>
                             <ExamSectionsManager
                                 examId={id as string}
-                                examSections={exam.examSections}
+                                examSections={examSections}
                                 hasSectionedQuestions={exam.questions.some((q) => !!q.examSectionId)}
                             />
                         </section>
@@ -306,7 +310,7 @@ const ExamDetailPage = () => {
                         ) : (
                             <Accordion>
                                 {exam.questions.map((question) => {
-                                    const sectionLabel = exam.examSections.find((s) => s._id === question.examSectionId)?.label;
+                                    const sectionLabel = examSections.find((s) => s._id === question.examSectionId)?.label;
                                     return (
                                     <AccordionItem
                                         key={question._id}
@@ -743,7 +747,7 @@ const ExamDetailPage = () => {
                             isCorrect: !!editingQuestion.correctOptionIds?.includes(o.optionId),
                         })),
                     } : undefined}
-                    examSections={exam.examSections}
+                    examSections={examSections}
                     onSubmit={handleQuestionSubmit}
                     isLoading={isAddingQuestion || isUpdatingQuestion}
                 />
@@ -753,7 +757,7 @@ const ExamDetailPage = () => {
                 isOpen={isBulkUploadOpen}
                 onClose={() => setIsBulkUploadOpen(false)}
                 examId={id as string}
-                examSections={exam.examSections}
+                examSections={examSections}
             />
 
             <DeleteConfirmModal

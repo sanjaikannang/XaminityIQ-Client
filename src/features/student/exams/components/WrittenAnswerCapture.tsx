@@ -115,6 +115,8 @@ const WrittenAnswerCapture = ({ attemptId, questionId }: WrittenAnswerCapturePro
                                 key={page.pageNumber}
                                 src={page.cloudinaryUrl}
                                 alt={`Page ${page.pageNumber}`}
+                                loading="lazy"
+                                decoding="async"
                                 className="w-full aspect-[3/4] object-cover rounded-md border border-green-200"
                             />
                         ))}
@@ -201,6 +203,8 @@ const WrittenAnswerCapture = ({ attemptId, questionId }: WrittenAnswerCapturePro
                                     <img
                                         src={page.cloudinaryUrl}
                                         alt={`Page ${page.pageNumber}`}
+                                        loading="lazy"
+                                        decoding="async"
                                         className="w-full aspect-[3/4] object-cover rounded-md border border-borderLight"
                                     />
                                     <span className="absolute top-1 left-1 text-[10px] px-1.5 py-0.5 rounded bg-black/60 text-whiteColor">

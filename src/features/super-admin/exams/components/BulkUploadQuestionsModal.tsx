@@ -1,7 +1,7 @@
 import Papa from "papaparse";
 import toast from "react-hot-toast";
 import { useRef, useState } from "react";
-import { Download, Upload, CheckCircle2, XCircle } from "lucide-react";
+import { Download, Upload, CheckCircle2, XCircle, FileText } from "lucide-react";
 import Modal from "../../../../common/ui/Modal";
 import Button from "../../../../common/ui/Button";
 import { QuestionType } from "../../../../utils/enum";
@@ -96,12 +96,15 @@ const BulkUploadQuestionsModal = ({ isOpen, onClose, examId, examSections }: Bul
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [parsedRows, setParsedRows] = useState<ParsedRow[]>([]);
     const [fileName, setFileName] = useState('');
+    const [isDragging, setIsDragging] = useState(false);
     const [resultSummary, setResultSummary] = useState<{ successCount: number; failedCount: number; errors: { rowNumber: number; error?: string }[] } | null>(null);
     const [bulkUploadQuestions, { isLoading }] = useBulkUploadQuestionsMutation();
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+    const processFile = (file: File) => {
+        if (!file.name.toLowerCase().endsWith('.csv')) {
+            toast.error('Please select a .csv file');
+            return;
+        }
         setFileName(file.name);
         setResultSummary(null);
 
@@ -114,6 +117,30 @@ const BulkUploadQuestionsModal = ({ isOpen, onClose, examId, examSections }: Bul
             },
             error: () => toast.error('Failed to parse CSV file'),
         });
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        processFile(file);
+    };
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const file = e.dataTransfer.files?.[0];
+        if (!file) return;
+        processFile(file);
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setIsDragging(false);
     };
 
     const validRows = parsedRows.filter((r) => r.question);
@@ -161,15 +188,37 @@ const BulkUploadQuestionsModal = ({ isOpen, onClose, examId, examSections }: Bul
                     </Button>
                 </div>
 
-                <div>
+                <div
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-6 text-center cursor-pointer transition-colors ${
+                        isDragging ? 'border-primary bg-primary/5' : 'border-borderLight bg-bgSecondary hover:border-primary/50'
+                    }`}
+                >
                     <input
                         ref={fileInputRef}
                         type="file"
                         accept=".csv"
                         onChange={handleFileChange}
-                        className="block w-full text-sm text-textSecondary file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-whiteColor file:cursor-pointer cursor-pointer"
+                        className="hidden"
                     />
-                    {fileName && <p className="text-xs text-textTertiary mt-1">Selected: {fileName}</p>}
+                    {fileName ? (
+                        <>
+                            <FileText className="w-8 h-8 text-primary" />
+                            <p className="text-sm font-medium text-textPrimary">{fileName}</p>
+                            <p className="text-xs text-textTertiary">Click or drop another file to replace</p>
+                        </>
+                    ) : (
+                        <>
+                            <Upload className="w-8 h-8 text-textTertiary" />
+                            <p className="text-sm text-textSecondary">
+                                <span className="font-medium text-primary">Click to upload</span> or drag and drop a CSV file
+                            </p>
+                            <p className="text-xs text-textTertiary">.csv files only</p>
+                        </>
+                    )}
                 </div>
 
                 {parsedRows.length > 0 && !resultSummary && (

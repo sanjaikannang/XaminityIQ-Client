@@ -10,12 +10,15 @@ interface FacultyPersonalFieldsProps {
     handleChange: (e: React.ChangeEvent<any>) => void;
     handleBlur: (e: React.FocusEvent<any>) => void;
     setFieldValue: (field: string, value: any) => void;
+    // 'create' hides maritalStatus and profilePhotoUrl — the faculty member
+    // fills these in themselves later from their Dashboard Profile page.
+    mode?: 'create' | 'edit';
 }
 
 const genderOptions = toEnumOptions(Gender);
 const maritalStatusOptions = toEnumOptions(MaritalStatus);
 
-const FacultyPersonalFields = ({ values, errors, touched, handleChange, handleBlur, setFieldValue }: FacultyPersonalFieldsProps) => {
+const FacultyPersonalFields = ({ values, errors, touched, handleChange, handleBlur, setFieldValue, mode = 'edit' }: FacultyPersonalFieldsProps) => {
     return (
         <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -44,7 +47,7 @@ const FacultyPersonalFields = ({ values, errors, touched, handleChange, handleBl
                     required
                 />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className={`grid grid-cols-1 gap-4 ${mode === 'edit' ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
                 <Select
                     id="gender"
                     name="gender"
@@ -69,17 +72,18 @@ const FacultyPersonalFields = ({ values, errors, touched, handleChange, handleBl
                     touched={touched.dateOfBirth}
                     required
                 />
-                <Select
-                    id="maritalStatus"
-                    name="maritalStatus"
-                    label="Marital Status"
-                    options={maritalStatusOptions}
-                    value={values.maritalStatus}
-                    onChange={(value) => setFieldValue("maritalStatus", value)}
-                    error={errors.maritalStatus}
-                    touched={touched.maritalStatus}
-                    required
-                />
+                {mode === 'edit' && (
+                    <Select
+                        id="maritalStatus"
+                        name="maritalStatus"
+                        label="Marital Status"
+                        options={maritalStatusOptions}
+                        value={values.maritalStatus}
+                        onChange={(value) => setFieldValue("maritalStatus", value)}
+                        error={errors.maritalStatus}
+                        touched={touched.maritalStatus}
+                    />
+                )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField
@@ -93,18 +97,19 @@ const FacultyPersonalFields = ({ values, errors, touched, handleChange, handleBl
                     error={errors.religion}
                     touched={touched.religion}
                 />
-                <InputField
-                    id="profilePhotoUrl"
-                    name="profilePhotoUrl"
-                    label="Profile Photo URL"
-                    placeholder="https://..."
-                    value={values.profilePhotoUrl}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={errors.profilePhotoUrl}
-                    touched={touched.profilePhotoUrl}
-                    required
-                />
+                {mode === 'edit' && (
+                    <InputField
+                        id="profilePhotoUrl"
+                        name="profilePhotoUrl"
+                        label="Profile Photo URL"
+                        placeholder="https://..."
+                        value={values.profilePhotoUrl}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={errors.profilePhotoUrl}
+                        touched={touched.profilePhotoUrl}
+                    />
+                )}
             </div>
         </div>
     );

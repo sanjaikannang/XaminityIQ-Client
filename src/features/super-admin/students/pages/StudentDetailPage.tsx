@@ -104,6 +104,8 @@ const StudentDetailPage = () => {
                                 <img
                                     src={student.personalDetails.profilePhotoUrl}
                                     alt={fullName}
+                                    loading="lazy"
+                                    decoding="async"
                                     className="w-40 h-40 rounded-xl object-contain border-4 border-primaryLighter"
                                     onError={(e) => {
                                         e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&size=128&background=029de3`;
