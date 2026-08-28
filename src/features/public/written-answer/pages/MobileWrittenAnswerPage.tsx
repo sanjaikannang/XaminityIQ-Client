@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { Camera, CheckCircle2, AlertCircle, FileText, Loader2 } from "lucide-react";
 import { verifyQrToken, getUploadSignature, recordPage } from "../api/publicWrittenAnswerApi";
 import { uploadPageToCloudinary } from "../utils/cloudinaryPageUpload";
@@ -8,6 +8,11 @@ type PageState = 'LOADING' | 'READY' | 'INVALID' | 'UPLOADING';
 
 const MobileWrittenAnswerPage = () => {
     const { token } = useParams<{ token: string }>();
+    // Display-only context carried from the exam screen — not part of the
+    // signed QR token, just so the student can confirm which question this is.
+    const [searchParams] = useSearchParams();
+    const questionNumber = searchParams.get('qNo');
+    const sectionLabel = searchParams.get('section');
     const [state, setState] = useState<PageState>('LOADING');
     const [errorMessage, setErrorMessage] = useState('');
     const [questionText, setQuestionText] = useState('');
@@ -81,14 +86,18 @@ const MobileWrittenAnswerPage = () => {
     return (
         <div className="min-h-screen bg-bgSecondary px-4 py-6 flex flex-col items-center gap-4">
             <div className="w-full max-w-sm text-center">
-                <p className="text-xs font-semibold text-primary uppercase tracking-wide">XaminityIQ</p>
+                <p className="text-base font-bold text-primary tracking-tight">XaminityIQ</p>
                 <h1 className="text-lg font-bold text-textPrimary mt-0.5">Written Answer Capture</h1>
             </div>
 
             <div className="w-full max-w-sm bg-whiteColor rounded-xl border border-borderLight p-4 space-y-1.5">
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 flex-wrap">
                     <FileText className="w-3.5 h-3.5 text-textSecondary" />
-                    <p className="text-xs font-semibold text-textSecondary uppercase tracking-wide">Question · {marks} marks</p>
+                    <p className="text-xs font-semibold text-textSecondary uppercase tracking-wide">
+                        {questionNumber ? `Question ${questionNumber}` : 'Question'}
+                        {sectionLabel && ` · ${sectionLabel}`}
+                        {' · '}{marks} marks
+                    </p>
                 </div>
                 <p className="text-textPrimary text-sm leading-relaxed">{questionText}</p>
             </div>
