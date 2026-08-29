@@ -16,7 +16,7 @@ export interface FormedRoomData {
 export interface FormExamRoomsResponse {
     success: boolean;
     message: string;
-    data?: { rooms: FormedRoomData[] };
+    data?: { rooms: FormedRoomData[]; warning?: string };
 }
 
 export interface AdminRoomAssignmentData {
