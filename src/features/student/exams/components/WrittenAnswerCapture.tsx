@@ -13,6 +13,11 @@ import {
 interface WrittenAnswerCaptureProps {
     attemptId: string;
     questionId: string;
+    // Display-only context (not security-relevant) so the phone screen can
+    // show "Question N · Section" — carried as URL query params, not part
+    // of the signed QR token itself.
+    questionNumber?: number;
+    sectionLabel?: string;
 }
 
 const STEPS = [
@@ -21,7 +26,7 @@ const STEPS = [
     'Tap "Sync" here to pull in your uploaded pages, then "Finish & Save Answer" once done',
 ];
 
-const WrittenAnswerCapture = ({ attemptId, questionId }: WrittenAnswerCaptureProps) => {
+const WrittenAnswerCapture = ({ attemptId, questionId, questionNumber, sectionLabel }: WrittenAnswerCaptureProps) => {
     const [generateQr, { isLoading: isGenerating }] = useGenerateWrittenQrMutation();
     const [finalizeAnswer, { isLoading: isFinalizing }] = useFinalizeWrittenAnswerMutation();
     const [deletePage, { isLoading: isDeleting }] = useDeleteWrittenAnswerPageMutation();
@@ -45,7 +50,11 @@ const WrittenAnswerCapture = ({ attemptId, questionId }: WrittenAnswerCapturePro
             const response = await generateQr({ attemptId, questionId }).unwrap();
             if (!response.data) return;
             setTokenExpired(false);
-            const url = `${window.location.origin}/mobile/written-answer/${response.data.token}`;
+            const params = new URLSearchParams();
+            if (questionNumber !== undefined) params.set('qNo', String(questionNumber));
+            if (sectionLabel) params.set('section', sectionLabel);
+            const query = params.toString();
+            const url = `${window.location.origin}/mobile/written-answer/${response.data.token}${query ? `?${query}` : ''}`;
             const dataUrl = await QRCode.toDataURL(url, { width: 220, margin: 1 });
             setQrDataUrl(dataUrl);
         } catch (error: any) {

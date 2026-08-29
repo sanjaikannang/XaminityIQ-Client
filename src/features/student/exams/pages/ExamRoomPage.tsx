@@ -2,15 +2,17 @@ import toast from "react-hot-toast";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AlertTriangle } from "lucide-react";
-import Button from "../../../../common/ui/Button";
 import { CountdownTimer } from "../../../../common/ui/CountdownTimer";
 import { SubmissionTrigger } from "../../../../utils/enum";
 import { examMediaStore } from "../utils/examMediaStore";
 import { useExamRecorder } from "../hooks/useExamRecorder";
 import { useIntegrityMonitor } from "../hooks/useIntegrityMonitor";
-import QuestionCard from "../components/QuestionCard";
-import QuestionPalette, { type PaletteStatus } from "../components/QuestionPalette";
-import SectionTabs from "../components/SectionTabs";
+import ExamBrandHeader from "../components/ExamBrandHeader";
+import ExamStudentInfoBar from "../components/ExamStudentInfoBar";
+import QuestionTextPanel from "../components/QuestionTextPanel";
+import QuestionAnswerPanel from "../components/QuestionAnswerPanel";
+import SectionedQuestionNav, { type QuestionNavStatus } from "../components/SectionedQuestionNav";
+import ExamRoomFooter from "../components/ExamRoomFooter";
 import SubmitExamModal from "../components/SubmitExamModal";
 import { ReportViolationResponse } from "../../../../types/student-exam-types";
 import {
@@ -32,7 +34,6 @@ const ExamRoomPage = () => {
 
     const [answers, setAnswers] = useState<Record<string, LocalAnswer>>({});
     const [visited, setVisited] = useState<Set<string>>(new Set());
-    const [markedForReview, setMarkedForReview] = useState<Set<string>>(new Set());
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
     const [remainingMs, setRemainingMs] = useState<number | null>(null);
@@ -77,6 +78,7 @@ const ExamRoomPage = () => {
     const questions = data?.data?.questions || [];
     const examSections = data?.data?.examSections || [];
     const currentQuestion = questions[currentIndex];
+    const currentSectionLabel = examSections.find((s) => s._id === currentQuestion?.examSectionId)?.label;
     const securitySettings = data?.data?.securitySettings;
     const minTimePerQuestionSeconds = securitySettings?.minTimePerQuestionSeconds || 0;
     const minTimePerExamMinutes = securitySettings?.minTimePerExamMinutes || 0;
@@ -198,8 +200,7 @@ const ExamRoomPage = () => {
             .catch(() => toast.error('Failed to save answer — check your connection'));
     };
 
-    const paletteStatus = (questionId: string): PaletteStatus => {
-        if (markedForReview.has(questionId)) return 'marked';
+    const paletteStatus = (questionId: string): QuestionNavStatus => {
         const answer = answers[questionId];
         const isAnswered = !!(answer?.selectedOptionId || (answer?.selectedOptionIds && answer.selectedOptionIds.length > 0) || (answer?.answerText && answer.answerText.trim().length > 0));
         if (isAnswered) return 'answered';
@@ -239,10 +240,17 @@ const ExamRoomPage = () => {
         return <div className="h-screen flex items-center justify-center text-textSecondary">Loading exam...</div>;
     }
 
+    const canGoPrev = currentIndex > 0 && !securitySettings?.blockBackwardNavigation;
+    const canGoNext = currentIndex < questions.length - 1 && questionMinTimeRemainingMs <= 0;
+    const nextBlockedReason = questionMinTimeRemainingMs > 0 ? `You can proceed in ${Math.ceil(questionMinTimeRemainingMs / 1000)}s` : undefined;
+
     return (
         <div className="h-screen flex flex-col bg-bgSecondary">
             <header className="h-16 bg-whiteColor border-b border-borderLight flex items-center justify-between px-4 sm:px-6 shadow-sm flex-shrink-0 gap-3">
-                <h1 className="font-semibold text-textPrimary truncate">{data.data.examName}</h1>
+                <div className="flex items-center gap-4 min-w-0">
+                    <ExamBrandHeader />
+                    <h1 className="font-semibold text-textPrimary truncate hidden sm:block">{data.data.examName}</h1>
+                </div>
                 <div className="flex items-center gap-3 shrink-0">
                     {violationCount > 0 && (
                         <span className="hidden sm:inline-flex items-center gap-1 text-xs font-medium text-yellow-800 bg-yellow-50 border border-yellow-200 px-2 py-1 rounded-full">
@@ -253,78 +261,57 @@ const ExamRoomPage = () => {
                 </div>
             </header>
 
-            <div className="flex-1 flex overflow-hidden">
-                <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
-                    {examSections.length > 0 && (
-                        <div className="max-w-3xl mx-auto">
-                            <SectionTabs
-                                examSections={examSections}
-                                questions={questions}
-                                currentQuestionId={currentQuestion?._id}
-                                onSelectSection={setCurrentIndex}
-                            />
+            <ExamStudentInfoBar />
+
+            <div className="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-[1fr_1.2fr_300px]">
+                {currentQuestion && (
+                    <>
+                        <div className="overflow-y-auto p-4 border-b md:border-b-0 md:border-r border-borderLight">
+                            <QuestionTextPanel question={currentQuestion} index={currentIndex} total={questions.length} />
                         </div>
-                    )}
-                    {currentQuestion && (
-                        <div className="max-w-3xl mx-auto">
-                            <QuestionCard
+                        <div className="overflow-y-auto p-4 border-b md:border-b-0 md:border-r border-borderLight">
+                            <QuestionAnswerPanel
                                 question={currentQuestion}
-                                index={currentIndex}
-                                total={questions.length}
+                                questionNumber={currentIndex + 1}
+                                sectionLabel={currentSectionLabel}
                                 attemptId={attemptId as string}
                                 answer={answers[currentQuestion._id]}
                                 answerText={answers[currentQuestion._id]?.answerText}
                                 onSelectMcq={(optionId) => handleSelectMcq(currentQuestion._id, optionId)}
                                 onToggleMsq={(optionId) => handleToggleMsq(currentQuestion._id, optionId)}
                                 onChangeText={(text) => handleChangeText(currentQuestion._id, text)}
-                                isMarked={markedForReview.has(currentQuestion._id)}
-                                onToggleMark={() => setMarkedForReview((prev) => {
-                                    const next = new Set(prev);
-                                    if (next.has(currentQuestion._id)) next.delete(currentQuestion._id);
-                                    else next.add(currentQuestion._id);
-                                    return next;
-                                })}
-                                onPrev={() => setCurrentIndex((i) => Math.max(0, i - 1))}
-                                onNext={() => setCurrentIndex((i) => Math.min(questions.length - 1, i + 1))}
-                                canGoPrev={currentIndex > 0 && !securitySettings?.blockBackwardNavigation}
-                                canGoNext={currentIndex < questions.length - 1 && questionMinTimeRemainingMs <= 0}
-                                nextBlockedReason={questionMinTimeRemainingMs > 0 ? `You can proceed in ${Math.ceil(questionMinTimeRemainingMs / 1000)}s` : undefined}
                             />
                         </div>
-                    )}
-                </main>
+                    </>
+                )}
 
-                <aside className="w-72 bg-whiteColor border-l border-borderLight p-4 flex-shrink-0 overflow-y-auto space-y-5">
-                    <div className="relative rounded-lg border border-borderLight overflow-hidden bg-black aspect-video">
-                        <video ref={videoPreviewCallbackRef} autoPlay muted playsInline className="w-full h-full object-cover" />
-                        <span className="absolute bottom-1.5 left-1.5 text-[10px] px-1.5 py-0.5 rounded bg-black/60 text-whiteColor">You</span>
-                    </div>
-
-                    <QuestionPalette
-                        questionIds={questions.map((q) => q._id)}
+                <div className="bg-whiteColor p-4 flex-shrink-0 overflow-y-auto space-y-5">
+                    <SectionedQuestionNav
+                        examSections={examSections}
+                        questions={questions}
                         currentIndex={currentIndex}
                         statusFor={paletteStatus}
                         blockBackwardNavigation={securitySettings?.blockBackwardNavigation}
                         onNavigate={setCurrentIndex}
                     />
 
-                    <div className="space-y-1">
-                        <Button
-                            variant="primary"
-                            fullWidth
-                            onClick={() => setIsSubmitModalOpen(true)}
-                            disabled={isSubmitting || examMinTimeRemainingMs > 0}
-                        >
-                            Submit Exam
-                        </Button>
-                        {examMinTimeRemainingMs > 0 && (
-                            <p className="text-xs text-textTertiary text-center">
-                                You can submit in {Math.ceil(examMinTimeRemainingMs / 1000)}s
-                            </p>
-                        )}
+                    <div className="relative rounded-lg border border-borderLight overflow-hidden bg-black aspect-video">
+                        <video ref={videoPreviewCallbackRef} autoPlay muted playsInline className="w-full h-full object-cover" />
+                        <span className="absolute bottom-1.5 left-1.5 text-[10px] px-1.5 py-0.5 rounded bg-black/60 text-whiteColor">You</span>
                     </div>
-                </aside>
+                </div>
             </div>
+
+            <ExamRoomFooter
+                onPrev={() => setCurrentIndex((i) => Math.max(0, i - 1))}
+                onNext={() => setCurrentIndex((i) => Math.min(questions.length - 1, i + 1))}
+                canGoPrev={canGoPrev}
+                canGoNext={canGoNext}
+                nextBlockedReason={nextBlockedReason}
+                onSubmitClick={() => setIsSubmitModalOpen(true)}
+                isSubmitting={isSubmitting}
+                examMinTimeRemainingMs={examMinTimeRemainingMs}
+            />
 
             <SubmitExamModal
                 isOpen={isSubmitModalOpen}

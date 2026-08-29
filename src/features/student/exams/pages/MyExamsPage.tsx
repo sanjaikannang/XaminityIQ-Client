@@ -48,6 +48,19 @@ const MyExamsPage = () => {
         ) {
             return <span className="text-sm text-textTertiary font-medium">Not Attempted</span>;
         }
+        // PUBLISHED means the exam's actual start time hasn't arrived yet — the
+        // lifecycle sweeper flips it to ONGOING the moment it does (checked every
+        // 5s server-side), so gating on status alone is enough, no local clock needed.
+        if (exam.status === ExamStatus.PUBLISHED) {
+            return (
+                <div className="text-right">
+                    <Button variant="primary" size="sm" disabled>
+                        {exam.mode === ExamMode.PROCTORING ? 'Join Lobby' : 'Take Exam'}
+                    </Button>
+                    <p className="text-xs text-textTertiary mt-1">Starts {formatDate(exam.startDate)}</p>
+                </div>
+            );
+        }
         return (
             <Button
                 variant="primary"
