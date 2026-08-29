@@ -5,6 +5,7 @@ import { CheckCircle2, XCircle, Loader2, Circle, Video, Mic, MonitorUp, Maximize
 import Button from "../../../../common/ui/Button";
 import { Container } from "../../../../common/ui/Container";
 import { PageHeader } from "../../../../common/ui/PageHeader";
+import ExamBrandHeader from "../components/ExamBrandHeader";
 import { ExamMode } from "../../../../utils/enum";
 import { examMediaStore } from "../utils/examMediaStore";
 import { runNetworkProbe, MIN_REQUIRED_MBPS } from "../utils/networkProbe";
@@ -241,7 +242,13 @@ const PreFlightCheckPage = () => {
 
     return (
         <>
-            <PageHeader>Pre-Flight Checks</PageHeader>
+            <PageHeader>
+                <div className="flex items-center gap-4">
+                    <ExamBrandHeader />
+                    <span className="text-textTertiary">|</span>
+                    <span>Pre-Flight Checks</span>
+                </div>
+            </PageHeader>
             <Container>
                 <div className="py-6 space-y-4">
                     <div className="bg-whiteColor rounded-xl border border-borderDefault p-5 space-y-3">

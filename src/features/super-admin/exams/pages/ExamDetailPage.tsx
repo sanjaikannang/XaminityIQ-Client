@@ -1,7 +1,7 @@
 import toast from "react-hot-toast";
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Info, HelpCircle, ShieldAlert, Building2, Users, Award, CheckCircle2, Circle, UserCheck, Clock, ClipboardList, Video, LayoutList, Upload } from "lucide-react";
+import { Info, HelpCircle, ShieldAlert, Building2, Users, Award, CheckCircle2, Circle, UserCheck, Clock, ClipboardList, Video, LayoutList, Upload, ChevronUp, ChevronDown } from "lucide-react";
 import Modal from "../../../../common/ui/Modal";
 import Button from "../../../../common/ui/Button";
 import RowActions from "../../../../common/ui/RowActions";
@@ -44,6 +44,7 @@ const ExamDetailPage = () => {
     // below) don't go stale relative to the lifecycle sweeper, which can flip
     // PUBLISHED -> ONGOING at any moment once the exam's window opens.
     const [pollForStatusChange, setPollForStatusChange] = useState(false);
+    const [isAssignedStudentsOpen, setIsAssignedStudentsOpen] = useState(true);
     const { data, isLoading } = useGetExamQuery(id as string, {
         skip: !id,
         pollingInterval: pollForStatusChange ? 5000 : 0,
@@ -208,6 +209,9 @@ const ExamDetailPage = () => {
                     ? `${rooms.length} room(s) formed — pooled with: ${[...pooledNames].join(', ')}`
                     : response.message || `${rooms.length} room(s) formed successfully`,
             );
+            if (response.data?.warning) {
+                toast.error(response.data.warning, { duration: 6000 });
+            }
         } catch (error: any) {
             toast.error(error.data?.message || 'Failed to form exam rooms');
         }
@@ -412,50 +416,62 @@ const ExamDetailPage = () => {
                     </section>
 
                 <section className="bg-whiteColor rounded-xl border border-borderDefault p-6">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                            <Users className="w-5 h-5 text-primary" />
+                    <button
+                        type="button"
+                        onClick={() => setIsAssignedStudentsOpen((v) => !v)}
+                        className="w-full flex items-center justify-between gap-3 cursor-pointer"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <Users className="w-5 h-5 text-primary" />
+                            </div>
+                            <div className="text-left">
+                                <h2 className="text-lg font-bold text-textPrimary">Assigned Students ({assignedStudents.length})</h2>
+                                <p className="text-sm text-textSecondary">
+                                    Every student whose batch/course/department/section/semester matches this exam.
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <h2 className="text-lg font-bold text-textPrimary">Assigned Students</h2>
-                            <p className="text-sm text-textSecondary">
-                                Every student whose batch/course/department/section/semester matches this exam.
-                            </p>
+                        {isAssignedStudentsOpen ? (
+                            <ChevronUp className="w-5 h-5 text-textSecondary shrink-0" />
+                        ) : (
+                            <ChevronDown className="w-5 h-5 text-textSecondary shrink-0" />
+                        )}
+                    </button>
+                    {isAssignedStudentsOpen && (
+                        <div className="mt-6">
+                            {isLoadingAssignedStudents && <p className="text-sm text-textSecondary">Loading students...</p>}
+                            {!isLoadingAssignedStudents && assignedStudents.length === 0 && (
+                                <p className="text-sm text-textSecondary">No students match this exam's batch/course/department/section/semester selection.</p>
+                            )}
+                            {!isLoadingAssignedStudents && assignedStudents.length > 0 && (
+                                <div className="overflow-x-auto rounded-md border border-borderLight">
+                                    <table className="w-full text-sm">
+                                        <thead className="bg-bgSecondary">
+                                            <tr>
+                                                <th className="px-3 py-2 text-left font-medium text-textSecondary">Student Name</th>
+                                                <th className="px-3 py-2 text-left font-medium text-textSecondary">Email</th>
+                                                <th className="px-3 py-2 text-left font-medium text-textSecondary">Roll Number</th>
+                                                <th className="px-3 py-2 text-left font-medium text-textSecondary">Attempt Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-borderLight">
+                                            {assignedStudents.map((student) => (
+                                                <tr key={student.studentId}>
+                                                    <td className="px-3 py-2 font-medium text-textPrimary">{student.studentName || '—'}</td>
+                                                    <td className="px-3 py-2 text-textSecondary">{student.studentEmail}</td>
+                                                    <td className="px-3 py-2 text-textSecondary">{student.studentCode}</td>
+                                                    <td className="px-3 py-2">
+                                                        <Chip label={formatEnumLabel(student.attemptStatus)} variant={getChipVariant(student.attemptStatus)} />
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
                         </div>
-                    </div>
-                    {isLoadingAssignedStudents && <p className="text-sm text-textSecondary">Loading students...</p>}
-                    {!isLoadingAssignedStudents && assignedStudents.length === 0 && (
-                        <p className="text-sm text-textSecondary">No students match this exam's batch/course/department/section/semester selection.</p>
                     )}
-                    {!isLoadingAssignedStudents && assignedStudents.length > 0 && (
-                        <div className="overflow-x-auto rounded-md border border-borderLight">
-                            <table className="w-full text-sm">
-                                <thead className="bg-bgSecondary">
-                                    <tr>
-                                        <th className="px-3 py-2 text-left font-medium text-textSecondary">Student</th>
-                                        <th className="px-3 py-2 text-left font-medium text-textSecondary">Attempt Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-borderLight">
-                                    {assignedStudents.map((student) => (
-                                        <tr key={student.studentId}>
-                                            <td className="px-3 py-2">
-                                                <div className="font-medium text-textPrimary">{student.studentName || '—'}</div>
-                                                <div className="text-xs text-textSecondary">{student.studentEmail}</div>
-                                                <div className="text-xs text-textTertiary">{student.studentCode}</div>
-                                            </td>
-                                            <td className="px-3 py-2">
-                                                <Chip label={formatEnumLabel(student.attemptStatus)} variant={getChipVariant(student.attemptStatus)} />
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                    <p className="text-xs text-textTertiary mt-3">
-                        {assignedStudents.length} student{assignedStudents.length === 1 ? '' : 's'} assigned
-                    </p>
                 </section>
 
                 {(isLoadingAttempts || attempts.length > 0) && (

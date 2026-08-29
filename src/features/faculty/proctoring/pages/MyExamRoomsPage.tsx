@@ -38,13 +38,19 @@ const MyExamRoomsPage = () => {
                             {room.effectiveStatus === 'COMPLETED' ? (
                                 <span className="text-sm text-textTertiary font-medium">Completed</span>
                             ) : (
-                                <Button
-                                    variant="primary"
-                                    size="sm"
-                                    onClick={() => navigate(`/faculty/proctoring/${room.roomId}`)}
-                                >
-                                    {room.effectiveStatus === 'IN_PROGRESS' ? 'Open Room' : 'View Room (Not Started)'}
-                                </Button>
+                                <div className="text-right">
+                                    <Button
+                                        variant="primary"
+                                        size="sm"
+                                        disabled={room.effectiveStatus === 'UPCOMING'}
+                                        onClick={() => navigate(`/faculty/proctoring/${room.roomId}`)}
+                                    >
+                                        {room.effectiveStatus === 'IN_PROGRESS' ? 'Open Room' : 'Not Started Yet'}
+                                    </Button>
+                                    {room.effectiveStatus === 'UPCOMING' && (
+                                        <p className="text-xs text-textTertiary mt-1">Opens at {formatDateTime(room.startDateTime)}</p>
+                                    )}
+                                </div>
                             )}
                         </div>
                     ))}

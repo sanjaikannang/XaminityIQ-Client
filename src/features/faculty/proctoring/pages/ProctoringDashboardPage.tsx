@@ -26,7 +26,8 @@ const ProctoringDashboardPage = () => {
     const { roomId } = useParams<{ roomId: string }>();
     const { data: roomDetail } = useGetExamRoomDetailQuery(roomId as string, { skip: !roomId, pollingInterval: 3000 });
     const [getLiveKitToken] = useGetFacultyLiveKitTokenMutation();
-    const [admitStudent, { isLoading: isAdmitting }] = useAdmitStudentMutation();
+    const [admitStudent] = useAdmitStudentMutation();
+    const [admittingId, setAdmittingId] = useState<string | null>(null);
     const [rejectStudent, { isLoading: isRejecting }] = useRejectStudentMutation();
     const [removeStudent, { isLoading: isRemoving }] = useRemoveStudentMutation();
     const [setStudentMic] = useSetStudentMicMutation();
@@ -75,7 +76,12 @@ const ProctoringDashboardPage = () => {
     }, []);
 
     const assignments = useMemo(() => roomDetail?.data?.assignments || [], [roomDetail]);
-    const waiting = assignments.filter((a) => a.status === RoomAssignmentStatus.WAITING);
+    // A WAITING assignment exists from the moment rooms are formed — long before
+    // the student ever opens the lobby. Only show it once they've actually
+    // joined (enteredWaitingRoomAt set), so the queue starts empty and fills in
+    // near-real-time (3s poll) as students show up, instead of listing everyone
+    // assigned to the exam from minute one.
+    const waiting = assignments.filter((a) => a.status === RoomAssignmentStatus.WAITING && !!a.enteredWaitingRoomAt);
     const active = assignments.filter((a) => a.status === RoomAssignmentStatus.ADMITTED || a.status === RoomAssignmentStatus.IN_PROGRESS);
     // Grace-period-exceeded LiveKit dropout (not a faculty removal) — informational
     // only, the student rejoins on their own via the lobby, landing back in Waiting.
@@ -187,11 +193,14 @@ const ProctoringDashboardPage = () => {
 
     const handleAdmit = async (assignment: RoomAssignmentData) => {
         if (!roomId) return;
+        setAdmittingId(assignment.assignmentId);
         try {
             await admitStudent({ roomId, assignmentId: assignment.assignmentId }).unwrap();
             toast.success('Student admitted');
         } catch (error: any) {
             toast.error(error.data?.message || 'Failed to admit student');
+        } finally {
+            setAdmittingId(null);
         }
     };
 
@@ -288,6 +297,11 @@ const ProctoringDashboardPage = () => {
     }
 
     const room = roomDetail.data;
+    // Nobody has actually opened the lobby for this room yet — every assignment
+    // is still an un-joined WAITING row from room formation. Keep the busy
+    // monitoring UI (queue, video grid, chat) hidden until there's something
+    // real to show, rather than presenting an empty-but-fully-built dashboard.
+    const hasAnyoneJoined = waiting.length > 0 || active.length > 0 || disconnected.length > 0;
 
     return (
         <div className="h-screen flex flex-col bg-bgSecondary">
@@ -314,6 +328,16 @@ const ProctoringDashboardPage = () => {
                 </div>
             </header>
 
+            {!hasAnyoneJoined ? (
+                <div className="flex-1 flex items-center justify-center p-6">
+                    <div className="text-center space-y-2 max-w-sm">
+                        <p className="text-lg font-semibold text-textPrimary">No student has joined yet</p>
+                        <p className="text-sm text-textSecondary">
+                            This screen will fill in as soon as a student opens their lobby for this room — no action needed from you until then.
+                        </p>
+                    </div>
+                </div>
+            ) : (
             <div className="flex-1 flex overflow-hidden">
                 <main className="flex-1 overflow-y-auto p-4 md:p-6">
                     <p className="text-sm font-semibold text-textPrimary mb-3">Admitted Students ({active.length})</p>
@@ -357,8 +381,17 @@ const ProctoringDashboardPage = () => {
                                             <p className="text-[10px] text-textTertiary truncate mt-0.5" title={a.examName}>{a.examName}</p>
                                         )}
                                         <div className="flex gap-2 mt-2">
-                                            <Button variant="primary" size="sm" className="flex-1" loading={isAdmitting} onClick={() => handleAdmit(a)}>Admit</Button>
-                                            <Button variant="outline" size="sm" className="flex-1" onClick={() => setRejectTarget(a)}>Reject</Button>
+                                            <Button
+                                                variant="primary"
+                                                size="sm"
+                                                className="flex-1"
+                                                loading={admittingId === a.assignmentId}
+                                                disabled={admittingId !== null && admittingId !== a.assignmentId}
+                                                onClick={() => handleAdmit(a)}
+                                            >
+                                                {admittingId === a.assignmentId ? '' : 'Admit'}
+                                            </Button>
+                                            <Button variant="outline" size="sm" className="flex-1" disabled={admittingId !== null} onClick={() => setRejectTarget(a)}>Reject</Button>
                                         </div>
                                     </div>
                                 ))}
@@ -438,6 +471,7 @@ const ProctoringDashboardPage = () => {
                     </aside>
                 )}
             </div>
+            )}
 
             <Modal isOpen={!!rejectTarget} onClose={() => setRejectTarget(null)} title="Reject Student" size="sm">
                 <div className="space-y-4">

@@ -1,5 +1,3 @@
-import { Bookmark, ChevronLeft, ChevronRight } from "lucide-react";
-import Button from "../../../../common/ui/Button";
 import { QuestionType } from "../../../../utils/enum";
 import WrittenAnswerCapture from "./WrittenAnswerCapture";
 import TypingAnswerEditor from "./TypingAnswerEditor";
@@ -7,60 +5,44 @@ import type { AttemptQuestionData } from "../../../../types/student-exam-types";
 
 type LocalAnswer = { selectedOptionId?: string; selectedOptionIds?: string[] };
 
-interface QuestionCardProps {
+interface QuestionAnswerPanelProps {
     question: AttemptQuestionData;
-    index: number;
-    total: number;
+    questionNumber: number;
+    sectionLabel?: string;
     attemptId: string;
     answer?: LocalAnswer;
     answerText?: string;
     onSelectMcq: (optionId: string) => void;
     onToggleMsq: (optionId: string) => void;
     onChangeText: (text: string) => void;
-    isMarked: boolean;
-    onToggleMark: () => void;
-    onPrev: () => void;
-    onNext: () => void;
-    canGoPrev: boolean;
-    canGoNext: boolean;
-    nextBlockedReason?: string;
 }
 
-const QuestionCard = ({
+// Column 2 of the exam-room layout — the interactive answer area, whose
+// content depends entirely on the question type: MCQ/MSQ options, the QR
+// written-answer capture flow, or the Typing rich-text editor.
+const QuestionAnswerPanel = ({
     question,
-    index,
-    total,
+    questionNumber,
+    sectionLabel,
     attemptId,
     answer,
     answerText,
     onSelectMcq,
     onToggleMsq,
     onChangeText,
-    isMarked,
-    onToggleMark,
-    onPrev,
-    onNext,
-    canGoPrev,
-    canGoNext,
-    nextBlockedReason,
-}: QuestionCardProps) => {
+}: QuestionAnswerPanelProps) => {
     return (
-        <div className="bg-whiteColor rounded-xl border border-borderDefault p-6 space-y-5">
-            <div className="flex items-center justify-between flex-wrap gap-2">
-                <p className="text-sm font-medium text-textSecondary">
-                    Question {index + 1} of {total} <span className="text-textTertiary">•</span> {question.marks} mark{question.marks !== 1 ? "s" : ""}
-                </p>
-                {isMarked && (
-                    <span className="inline-flex items-center gap-1 text-xs font-medium text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
-                        <Bookmark className="w-3 h-3" /> Marked for review
-                    </span>
-                )}
-            </div>
-
-            <p className="text-lg text-textPrimary leading-relaxed" style={{ textWrap: "balance" as any }}>{question.text}</p>
+        <div className="bg-whiteColor rounded-xl border border-borderDefault p-6 space-y-4 h-full">
+            <p className="text-sm font-semibold text-textPrimary">Your Answer</p>
 
             {question.type === QuestionType.WRITTEN && (
-                <WrittenAnswerCapture key={question._id} attemptId={attemptId} questionId={question._id} />
+                <WrittenAnswerCapture
+                    key={question._id}
+                    attemptId={attemptId}
+                    questionId={question._id}
+                    questionNumber={questionNumber}
+                    sectionLabel={sectionLabel}
+                />
             )}
 
             {question.type === QuestionType.TYPING && (
@@ -111,25 +93,8 @@ const QuestionCard = ({
                     })}
                 </div>
             )}
-
-            <div className="flex items-center justify-between pt-4 border-t border-borderLight gap-2">
-                <Button variant="outline" size="sm" icon={ChevronLeft} disabled={!canGoPrev} onClick={onPrev}>
-                    Previous
-                </Button>
-                <Button variant="outline" size="sm" icon={Bookmark} onClick={onToggleMark}>
-                    {isMarked ? "Unmark Review" : "Mark for Review"}
-                </Button>
-                <div className="flex flex-col items-end gap-1">
-                    <Button variant="outline" size="sm" icon={ChevronRight} iconPosition="right" disabled={!canGoNext} onClick={onNext}>
-                        Next
-                    </Button>
-                    {!canGoNext && nextBlockedReason && (
-                        <span className="text-xs text-textTertiary">{nextBlockedReason}</span>
-                    )}
-                </div>
-            </div>
         </div>
     );
 };
 
-export default QuestionCard;
+export default QuestionAnswerPanel;
