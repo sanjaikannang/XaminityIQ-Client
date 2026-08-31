@@ -1,19 +1,31 @@
 # 📘 XaminityIQ – Online Examination Platform
 
-XaminityIQ is a secure and scalable online examination system designed for universities and colleges. It provides role-based access for **Super Admin**, **Faculty**, and **Students**, enabling efficient management of batches, courses, departments, and sections.
+XaminityIQ is a secure, proctored online examination system for universities and colleges. This repository is the
+frontend — a React + TypeScript single-page app that provides role-based experiences for **Super Admin**,
+**Faculty**, and **Students**: academic setup, exam authoring, live proctored exam-taking (via LiveKit), answer
+evaluation, and results.
+
+The companion backend lives at [XaminityIQ-Server](https://github.com/sanjaikannang/XaminityIQ-Server), which also
+includes a complete technical architecture document (system design, full API reference, database schema,
+diagrams, security model) at `docs/XaminityIQ-Technical-Documentation.pdf` in that repository.
 
 ---
 
 ## 🚀 Tech Stack
 
-### **Frontend**
-- React.js (Vite)
-- Redux Toolkit (RTK + RTK Query)
-- Tailwind CSS
-- React Router v6
-- Formik
-- Axios
-- TypeScript
+| Category | Technology |
+|---|---|
+| Framework | React 19 + Vite 6, TypeScript |
+| Routing | React Router v7 |
+| State / data-fetching | Redux Toolkit — used almost entirely as the host for RTK Query's cache; app state itself lives mostly in local component state / `localStorage` |
+| Styling | Tailwind CSS v4 |
+| Forms &amp; validation | Formik + Yup |
+| HTTP | Axios |
+| Real-time proctoring | `livekit-client` (WebRTC — camera/mic/screen-share, data-channel chat) |
+| Rich text | Tiptap (`@tiptap/react`, `starter-kit`) — used for Typing-question answers |
+| Data viz | ECharts (`echarts`) — admin dashboards |
+| Bulk data | PapaParse (CSV import/export) |
+| Misc UI | `lucide-react` (icons), `react-select` + `react-select-async-paginate`, `react-hot-toast`, `qrcode`, DOMPurify |
 
 ---
 
@@ -22,6 +34,7 @@ XaminityIQ is a secure and scalable online examination system designed for unive
 ### 1. Clone the project
 ```bash
 git clone https://github.com/sanjaikannang/XaminityIQ-Client.git
+cd XaminityIQ-Client
 ```
 
 ### 2. Install dependencies
@@ -30,152 +43,76 @@ npm install
 ```
 
 ### 3. Configure environment variables
-Create a `.env` file in the root directory and add the following variables:
+Create a `.env` file in the root directory:
 ```env
-VITE_API_BASE_URL=""
-VITE_BACKEND_URL=""
+VITE_BACKEND_BASE_URL=""
 ```
+
+This is the **only** environment variable the app reads (see `src/config/env.ts`) — it should point at the
+running XaminityIQ-Server instance, e.g. `http://localhost:8004` for local development.
 
 ### 4. Run the development server
 ```bash
 npm run dev
 ```
 
+### Other scripts
+```bash
+npm run build      # production build
+npm run lint        # ESLint
+npm run preview     # preview a production build locally
+```
+
 ---
 
 ## 🔐 User Roles
 
-- **Super Admin** - Complete system management and configuration
-- **Faculty** - Manage courses, exams, and student assessments
-- **Students** - Take exams and view results
+- **Super Admin** — Academic setup (batches/courses/departments/sections/subjects), user onboarding, exam
+  authoring &amp; publishing, room formation, result publication
+- **Faculty** — Subject ownership, live proctoring &amp; invigilation, answer evaluation
+- **Students** — Profile completion, exam taking (self-paced or proctored), viewing results
 
 ---
 
 ## 📁 Project Folder Structure
 
-```bash
+```
 src/
-├── app/
-│     ├── store/
-│     │      ├── rootReducer.ts
-│     │      └── store.ts
-│     │
-│     ├── routes/
-│     │      ├── AppRoutes.tsx
-│     │      ├── ProtectedRoute.tsx
-│     │      ├── RoleGuard.tsx
-│     │      └── route-types.ts
-│     │
-│     └── providers/
-│            ├── AppProvider.tsx
-│ 
-├── api/
-│     ├── auth.api.ts
-│     ├── user.api.ts
-│     ├── course.api.ts
-│     └── index.ts
-│
-├── state/
-│     ├── reducers/
-│     │      ├── auth.slice.ts
-│     │      └── user.slice.ts
-│     │
-│     └── services/
-│            ├── axios-instance.ts
-│            ├── base-query.ts
-│            ├── api-instance.ts
-│            └── endpoints/
-│                   ├── auth.ts
-│                   ├── user.ts
-│                   ├── course.ts
-│                   └── dashboard.ts
-│
-├── layouts/
-│     ├── super-admin/
-│     │      ├── SuperAdminLayout.tsx
-│     │      └── index.ts
-│     │
-│     ├── faculty/
-│     │      ├── FacultyLayout.tsx
-│     │      └── index.ts
-│     │
-│     ├── student/
-│     │      ├── StudentLayout.tsx
-│     │      └── index.ts
-│     │
-│     └── auth/
-│            └── AuthLayout.tsx
-│
-├── features/
-│     ├── super-admin/
-│     │      ├── dashboard/
-│     │      │      ├── pages/
-│     │      │      │      └── Dashboard.page.tsx
-│     │      │      ├── components/
-│     │      │      │      ├── StatsCard.tsx
-│     │      │      │      └── AnalyticsPanel.tsx
-│     │      │      ├── hooks/
-│     │      │      ├── utils/
-│     │      │      ├── types/
-│     │      │      ├── validation/
-│     │      │      └── index.ts
-│     │      │
-│     │      ├── users/
-│     │      │      ├── pages/
-│     │      │      │      └── ManageUsers.page.tsx
-│     │      │      ├── components/
-│     │      │      │      ├── UserTable.tsx
-│     │      │      │      └── UserForm.tsx
-│     │      │      ├── hooks/
-│     │      │      ├── utils/
-│     │      │      ├── types/
-│     │      │      ├── validation/
-│     │      │      └── index.ts
-│     │      │
-│     │      └── routes/
-│     │             └── admin.routes.tsx
-│     │
-│     ├── faculty/
-│     │      ├── dashboard/
-│     │      └── routes/
-│     │             └── faculty.routes.tsx
-│     │
-│     └── student/
-│            ├── dashboard/
-│            └── routes/
-│                   └── student.routes.tsx
-│
-├── common/
-│     ├── ui/
-│     │      ├── Button.tsx
-│     │      ├── Modal.tsx
-│     │      ├── Input.tsx
-│     │      └── Select.tsx
-│     │
-│     ├── loaders/
-│     └── Spinner.tsx
-│
-├── hooks/
-│     ├── useAuth.ts
-│     ├── useRole.ts
-│     └── useDebounce.ts
-│
-├── utils/
-│     ├── date.ts
-│     ├── storage.ts
-│     ├── permissions.ts
-│     └── constants.ts
-│
-├── types/
-│     ├── api.types.ts
-│     ├── auth.types.ts
-│     └── user.types.ts
-│
-├── assets/
-│     ├── images/
-│     ├── icons/
-│     └── fonts/
-│
-├── global.tsx
-├── app.tsx
-└── root.tsx
+├── api/                    # RTK Query endpoint definitions (one file per domain — auth, admin, faculty,
+│                            #  student, academic, exam, evaluation, proctoring, dashboard, etc.)
+├── app/                     # Root app shell / route composition
+├── assets/                  # Static images, icons
+├── common/                  # Shared UI primitives and components reused across roles
+├── config/                  # env.ts — the single environment-variable access point
+├── features/                # Feature-first, role-partitioned application code
+│   ├── auth/                 # Login, forgot/reset password
+│   ├── common/                # Shared cross-role feature code
+│   ├── faculty/                # Subjects, exam proctoring dashboard, evaluation queue, profile
+│   ├── public/                 # Unauthenticated QR-based mobile written-answer capture flow
+│   ├── student/                 # My exams, exam room / live-proctoring UI, results, profile
+│   └── super-admin/              # Academic hierarchy, user management, exam authoring, room formation, dashboard
+├── hoc/                      # withAuthGuard / withGuestGuard / withScreenGuard higher-order components
+├── layouts/                   # Per-role page shells (sidebar/topbar) and the public landing page layout
+├── state/                      # Redux store setup (RTK Query cache host; no meaningful app-state slices)
+├── types/                       # Shared TypeScript types
+├── utils/                        # Formatting, storage, and misc helpers
+├── main.tsx                       # Entry point
+└── App.tsx                         # Root component — route tree, providers
+```
+
+Auth state is not kept in Redux — the app decodes/stores the JWT in `localStorage` and gates routes via the
+`hoc/` guards and a `RoleGuard` component rather than a global auth slice.
+
+---
+
+## 📚 Full Documentation
+
+For system architecture, the complete API reference, database schema, diagrams, and security model, see
+[`docs/XaminityIQ-Technical-Documentation.pdf`](https://github.com/sanjaikannang/XaminityIQ-Server/blob/main/docs/XaminityIQ-Technical-Documentation.pdf)
+in the server repository.
+
+---
+
+## 🔗 Related Repository
+
+- Backend: [XaminityIQ-Server](https://github.com/sanjaikannang/XaminityIQ-Server)
