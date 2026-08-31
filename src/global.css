@@ -56,3 +56,34 @@
     scrollbar-width: none;
     /* Firefox */
 }
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* Scroll-reveal utility (used by the landing page's <Reveal> wrapper) —
+   starts faded/offset, animates in once the IntersectionObserver flags it
+   visible by adding .reveal-visible. */
+.reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.reveal-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    html {
+        scroll-behavior: auto;
+    }
+
+    .reveal {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+}
